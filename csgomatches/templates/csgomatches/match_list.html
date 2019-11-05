@@ -100,6 +100,7 @@
             text-align: center;
             line-height: 1;
             margin-left: 5px;
+            letter-spacing: -0.1em;
         }
 
         .team_b_score {
@@ -110,10 +111,11 @@
             text-align: center;
             line-height: 1;
             margin-right: 12px;
+            letter-spacing: -0.1em;
         }
 
         .map_win {
-            color: darkgreen;
+            color: #049804;
         }
 
         .map_loss {
@@ -122,12 +124,14 @@
 
         .map_live {
             color: #ffc000;
+            font-size: x-small;
             font-weight: 500;
             border-top: 2px solid  #ffc000;
         }
 
         .map_countdown {
             font-size: x-small;
+            border-top: 2px solid  #585858;
         }
 
         a:link {color: #1887d1;}
@@ -189,7 +193,11 @@
                             <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
                         {% endif %}
                         {% endcomment %}
-                        <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                        {% if mm.has_ended %}
+                            <div class="map_countdown">Map beendet</div>
+                        {% else %}
+                            <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                        {% endif %}
                     {% endif %}
                     <strong title="{{ mm.cs_name|default_if_none:"Mapveto steht aus" }}">{{ mm.played_map|default_if_none:"-" }}</strong><br />
                     <!-- {{ mm.starting_at|date:'H:i (e)' }} -->

@@ -93,19 +93,28 @@ class MatchMap(models.Model):
     rounds_won_team_b = models.IntegerField(default=0)
     starting_at = models.DateTimeField()
     delay_minutes = models.IntegerField(default=0)
+    #defwin_reason = models.CharField(max_length=255, null=True, blank=True)
+    #defwin = models.BooleanField(default=False)
+    #cancelled = models.BooleanField(default=False)
+
+    def has_ended(self):
+        return (self.rounds_won_team_a >= 16 or self.rounds_won_team_b >= 16) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2
 
     def is_live(self):
-        calc_end = self.starting_at + timezone.timedelta(hours=1)
+        has_ended = self.has_ended()
+        if has_ended:
+            return False
+        calc_end = self.starting_at + timezone.timedelta(minutes=100)
         return self.starting_at < timezone.now() < calc_end
 
     def team_a_won(self):
-        return self.rounds_won_team_a > self.rounds_won_team_b
+        return (self.rounds_won_team_a > self.rounds_won_team_b) and (self.rounds_won_team_a >= 16 or self.rounds_won_team_b >= 16)
 
     def is_draw(self):
         return self.rounds_won_team_a == self.rounds_won_team_b
 
     def team_b_won(self):
-        return self.rounds_won_team_a < self.rounds_won_team_b
+        return (self.rounds_won_team_a < self.rounds_won_team_b) and (self.rounds_won_team_a >= 16 or self.rounds_won_team_b >= 16)
 
     def __str__(self):
         return '{} - {}'.format(self.match, self.starting_at)
