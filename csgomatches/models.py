@@ -1,6 +1,7 @@
 from django.db import models
 
 # Create your models here.
+from django.utils import timezone
 
 
 class Team(models.Model):
@@ -92,6 +93,10 @@ class MatchMap(models.Model):
     rounds_won_team_b = models.IntegerField(default=0)
     starting_at = models.DateTimeField()
     delay_minutes = models.IntegerField(default=0)
+
+    def is_live(self):
+        calc_end = self.starting_at + timezone.timedelta(hours=1)
+        return self.starting_at < timezone.now() < calc_end
 
     def team_a_won(self):
         return self.rounds_won_team_a > self.rounds_won_team_b
