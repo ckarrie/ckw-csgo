@@ -37,7 +37,7 @@
             background-color: #959595;
             color: #585858;
             display: inline;
-            font-weight: 100;
+            font-weight: 500;
             padding: 0 10px;
             font-size: smaller;
         }
@@ -92,17 +92,29 @@
         .team_a_score {
             float: left;
             width: 25px;
-            font-size: xx-large;
+            font-size: 36pt;
             font-weight: 900;
             text-align: center;
+            line-height: 1;
+            margin-left: 5px;
         }
 
         .team_b_score {
             float: right;
             width: 25px;
-            font-size: xx-large;
+            font-size: 36pt;
             font-weight: 900;
             text-align: center;
+            line-height: 1;
+            margin-right: 12px;
+        }
+
+        .map_win {
+            color: darkgreen;
+        }
+
+        .map_loss {
+            color: darkred;
         }
 
         a:link {color: #1887d1;}
@@ -142,13 +154,13 @@
         <div class="row">
         {% for mm in match.matchmap_set.all %}
             <div class="matchmapbox bo{{ match.bestof }}">
-                <div class="team_a_score">
+                <div class="team_a_score {% if mm.team_a_won %}map_win{% endif %}{% if mm.team_b_won %}map_loss{% endif %}">
                     {{ mm.rounds_won_team_a }}
                     {% if match.lineup_a.team_logo_url %}
                         <img src="{{ match.lineup_a.team_logo_url }}" class="teamlogo">
                     {% endif %}
                 </div>
-                <div class="team_b_score">
+                <div class="team_b_score {% if mm.team_b_won %}map_win{% endif %}{% if mm.team_a_won %}map_loss{% endif %}">
                     {{ mm.rounds_won_team_b }}
                     {% if match.lineup_b.team_logo_url %}
                         <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}">

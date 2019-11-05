@@ -93,6 +93,15 @@ class MatchMap(models.Model):
     starting_at = models.DateTimeField()
     delay_minutes = models.IntegerField(default=0)
 
+    def team_a_won(self):
+        return self.rounds_won_team_a > self.rounds_won_team_b
+
+    def is_draw(self):
+        return self.rounds_won_team_a == self.rounds_won_team_b
+
+    def team_b_won(self):
+        return self.rounds_won_team_a < self.rounds_won_team_b
+
     def __str__(self):
         return '{} - {}'.format(self.match, self.starting_at)
 
