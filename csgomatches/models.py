@@ -83,7 +83,7 @@ class Match(models.Model):
 
 class MatchMap(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    played_map = models.ForeignKey(Map, on_delete=models.CASCADE)
+    played_map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
     rounds_won_team_a = models.IntegerField(default=0)
     rounds_won_team_b = models.IntegerField(default=0)
     starting_at = models.DateTimeField()
