@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSGO Matches</title>
+    <link href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,600,700&display=swap" rel="stylesheet">
+    <style type="text/css">
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            background-color: #000000;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .center {
+            margin: auto;
+            width: 800px;
+            padding: 20px;
+            color: #959595;
+            background-color: #585858;
+        }
+
+        h2 {
+            margin: 10px 0;
+            border-bottom: 1px solid #959595;
+        }
+
+        h2 small {
+            font-weight: 100;
+        }
+
+        .bo {
+            border: 1px solid #959595;
+            background-color: #959595;
+            color: #585858;
+            display: inline;
+            font-weight: 100;
+            padding: 0 10px;
+            font-size: smaller;
+        }
+
+        .row {
+            /*margin: 5px;*/
+        }
+
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .matchmapbox {
+            float: left;
+            width: 220px;
+            padding: 10px;
+            border: 1px solid #959595;
+            margin: 10px;
+        }
+
+        .matchmapbox:hover {
+            border: 1px solid #ffc000;
+        }
+
+        .bo1 {
+        }
+
+        .bo2 {
+        }
+
+        .bo3 {
+
+        }
+
+        .bo5 {
+        }
+
+        .start {
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .mapcnt {
+            float: left;
+            width: 25px;
+            font-size: xx-large;
+        }
+
+        .team_a_score {
+            float: left;
+            width: 25px;
+            font-size: xx-large;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .team_b_score {
+            float: right;
+            width: 25px;
+            font-size: xx-large;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        a:link {color: #1887d1;}
+        a:visited {color: #1887d1;}
+        a:active {color: #555;}
+        a:hover {color: #aaa;}
+
+        img.teamlogo {
+            width: 32px;
+            height: 32px;
+        }
+
+
+    </style>
+</head>
+<body>
+
+<div class="center">
+
+    <a href="https://bigclan.gg"><img src="https://bigclan.gg/wp-content/uploads/2019/02/22222222222222222222222222.png" style="float: right"></a>
+
+    <h1>Wann spielt BIG?</h1>
+    <p>Eine Fanseite des <a href="https://bigclan.gg">BIG-Clans</a> </p>
+
+    <p style="margin: 0 0 90px 0"></p>
+
+    {% for match in object_list %}
+
+        <h2>
+            <div class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</div>
+            <div class="bo">{{ match.get_bestof_display }}</div>
+
+            {{ match.lineup_a.team }} vs {{ match.lineup_b.team }}
+
+            <small>{{ match.tournament.name }}</small>
+        </h2>
+        <div class="row">
+        {% for mm in match.matchmap_set.all %}
+            <div class="matchmapbox bo{{ match.bestof }}">
+                <div class="team_a_score">
+                    {{ mm.rounds_won_team_a }}
+                    {% if match.lineup_a.team_logo_url %}
+                        <img src="{{ match.lineup_a.team_logo_url }}" class="teamlogo">
+                    {% endif %}
+                </div>
+                <div class="team_b_score">
+                    {{ mm.rounds_won_team_b }}
+                    {% if match.lineup_b.team_logo_url %}
+                        <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}">
+                    {% endif %}
+                </div>
+                <div class="start">
+                    <strong>{{ mm.played_map }}</strong><br />
+                    {{ mm.starting_at|date:'H:i (e)' }}
+                    {% for cast in mm.cast_set.all %}
+                        <p><a href="{{ cast.stream_url }}">{{ cast.caster }}</a></p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% endfor %}
+    <!--
+    <p style="margin: 50px 0 10px 0">
+        <a href="">Match eintragen</a>
+    </p>
+    -->
+    <p style="margin: 50px 0 10px 0">
+        <small>
+            <a href="">Source Code</a> | Datenquellen: <a href="">HLTV.org</a>, <a href="">99damage</a>
+        </small>
+    </p>
+
+</div>
+
+</body>
+</html>
