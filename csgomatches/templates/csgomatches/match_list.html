@@ -43,13 +43,14 @@
         }
 
         .row {
-            /*margin: 5px;*/
+
         }
 
         .row:after {
             content: "";
             display: table;
             clear: both;
+            margin-bottom: 40px;
         }
 
         .matchmapbox {
@@ -124,7 +125,7 @@
     <a href="https://bigclan.gg"><img src="https://bigclan.gg/wp-content/uploads/2019/02/22222222222222222222222222.png" style="float: right"></a>
 
     <h1>Wann spielt BIG?</h1>
-    <p>Eine Fanseite des <a href="https://bigclan.gg">BIG-Clans</a> </p>
+    <p>Eine Fanseite des <a href="https://bigclan.gg">BIG-Clans</a>.</p>
 
     <p style="margin: 0 0 90px 0"></p>
 
@@ -154,7 +155,7 @@
                     {% endif %}
                 </div>
                 <div class="start">
-                    <strong>{{ mm.played_map }}</strong><br />
+                    <strong>{{ mm.played_map|default_if_none:"-" }}</strong><br />
                     {{ mm.starting_at|date:'H:i (e)' }}
                     {% for cast in mm.cast_set.all %}
                         <p><a href="{{ cast.stream_url }}">{{ cast.caster }}</a></p>
