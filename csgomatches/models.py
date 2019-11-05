@@ -35,7 +35,7 @@ class Lineup(models.Model):
     active_from = models.DateTimeField()
 
     def __str__(self):
-        return '{} ({})'.format(self.team.name, self.active_from)
+        return '{}'.format(self.team.name)
 
 
 class LineupPlayer(models.Model):
@@ -49,7 +49,11 @@ class LineupPlayer(models.Model):
 
 class Tournament(models.Model):
     name = models.CharField(max_length=255)
+    name_alt = models.CharField(max_length=255, null=True, blank=True)
     #mappool = models.ManyToManyField(Map)
+
+    def __str__(self):
+        return self.name
 
 
 class Map(models.Model):

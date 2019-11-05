@@ -1,10 +1,12 @@
 import datetime
 
 from django.db.models import Q
-from django.utils import timezone
+from django.utils import timezone, dateparse
 
 from django.apps import apps
 from django.core.management.base import BaseCommand
+
+import dateutil.parser
 
 from bs4 import BeautifulSoup
 import requests
@@ -26,9 +28,79 @@ class Command(BaseCommand):
         updated_records = 0
         fake = options['fake']
 
-        hltv_url = 'https://www.hltv.org/team/7532/big'
-        response = requests.get(hltv_url)
-        soup = BeautifulSoup(response.text, "html.parser")
-        matchesBox = soup.select('#matchesBox')[0]
-        for teamrow in matchesBox.select('.team-row'):
-            print(teamrow)
+        # hltv
+        #hltv_url = 'https://www.hltv.org/team/7532/big'
+        #response = requests.get(hltv_url)
+        #soup = BeautifulSoup(response.text, "html.parser")
+        #matchesBox = soup.select('#matchesBox')[0]
+        #for teamrow in matchesBox.select('.team-row'):
+        #    print(teamrow)
+
+        # hltv via y0fl0w.de
+        y_url = 'https://big.y0fl0w.de'
+        response_json = requests.get(y_url).json()
+        for event_data in response_json:
+            event_name = event_data.get('event')
+            event_matches = event_data.get('matches', [])
+            tournament = apps.get_model('csgomatches.Tournament').objects.filter(
+                Q(name=event_name) | Q(name_alt=event_name)
+            ).first()
+            if not tournament:
+                tournament = apps.get_model('csgomatches.Tournament')(name=event_name)
+                tournament.save()
+
+            for match_data in event_matches:
+                lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(team__name=match_data.get('t1')).first()
+                lineup_b = apps.get_model('csgomatches.Lineup').objects.filter(team__name=match_data.get('t2')).first()
+
+                if not lineup_a:
+                    team_lineup_a = apps.get_model('csgomatches.Team')(name=match_data.get('t1'))
+                    team_lineup_a.save()
+                    lineup_a = apps.get_model('csgomatches.Lineup')(team=team_lineup_a, active_from=timezone.now())
+                    lineup_a.save()
+
+                if not lineup_b:
+                    team_lineup_b = apps.get_model('csgomatches.Team')(name=match_data.get('t2'))
+                    team_lineup_b.save()
+                    lineup_b = apps.get_model('csgomatches.Lineup')(team=team_lineup_b, active_from=timezone.now())
+                    lineup_b.save()
+
+
+                first_match_start = dateutil.parser.parse(match_data.get('time'))
+                aware_first_match_start = timezone.make_aware(first_match_start)
+
+                print("first_match_start", lineup_a, lineup_b, tournament, first_match_start, aware_first_match_start)
+
+                match = apps.get_model('csgomatches.Match').objects.filter(
+                    tournament=tournament,
+                    lineup_a=lineup_a,
+                    lineup_b=lineup_b,
+                ).first()
+
+                if not match:
+                    match = apps.get_model('csgomatches.Match')(
+                        tournament=tournament,
+                        lineup_a=lineup_a,
+                        lineup_b=lineup_b,
+                        bestof=3
+                    )
+                    match.save()
+
+                existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                    match=match
+                )
+
+                if not existing_matchmaps.exists():
+                    for i in range(3):
+                        matchmap = apps.get_model('csgomatches.MatchMap')(
+                            match=match,
+                            starting_at=aware_first_match_start + timezone.timedelta(hours=i)
+                        )
+                        matchmap.save()
+
+
+
+
+
+
+
