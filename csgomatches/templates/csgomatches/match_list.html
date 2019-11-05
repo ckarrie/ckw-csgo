@@ -126,6 +126,10 @@
             border-top: 2px solid  #ffc000;
         }
 
+        .map_countdown {
+            font-size: x-small;
+        }
+
         a:link {color: #1887d1;}
         a:visited {color: #1887d1;}
         a:active {color: #555;}
@@ -178,9 +182,17 @@
                 <div class="start">
                     {% if mm.is_live %}
                         <div class="map_live">LIVE</div>
+                    {% else %}
+                        {% comment %}
+                        {% if mm.starting_at > match.first_map_at %}
+                        {% else %}
+                            <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                        {% endif %}
+                        {% endcomment %}
+                        <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
                     {% endif %}
-                    <strong>{{ mm.played_map|default_if_none:"-" }}</strong><br />
-                    {{ mm.starting_at|date:'H:i (e)' }}
+                    <strong title="{{ mm.cs_name|default_if_none:"Mapveto steht aus" }}">{{ mm.played_map|default_if_none:"-" }}</strong><br />
+                    <!-- {{ mm.starting_at|date:'H:i (e)' }} -->
                     {% for cast in mm.cast_set.all %}
                         <p><a href="{{ cast.stream_url }}">{{ cast.caster }}</a></p>
                     {% endfor %}
