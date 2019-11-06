@@ -51,6 +51,8 @@ class LineupPlayer(models.Model):
 class Tournament(models.Model):
     name = models.CharField(max_length=255)
     name_alt = models.CharField(max_length=255, null=True, blank=True)
+    name_hltv = models.CharField(max_length=255, null=True, blank=True)
+    name_99dmg = models.CharField(max_length=255, null=True, blank=True)
     #mappool = models.ManyToManyField(Map)
 
     def __str__(self):

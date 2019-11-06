@@ -86,15 +86,22 @@ class Command(BaseCommand):
             event_name = event_data.get('event')
             event_matches = event_data.get('matches', [])
             tournament = apps.get_model('csgomatches.Tournament').objects.filter(
-                Q(name=event_name) | Q(name_alt=event_name)
+                Q(name=event_name) | Q(name_alt=event_name) | Q(name_hltv=event_name) | Q(name_99dmg=event_name)
             ).first()
             if not tournament:
-                tournament = apps.get_model('csgomatches.Tournament')(name=event_name)
+                tournament = apps.get_model('csgomatches.Tournament')(
+                    name=event_name,
+                    name_hltv=event_name
+                )
                 tournament.save()
 
             for match_data in event_matches:
-                lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(team__name=match_data.get('t1')).first()
-                lineup_b = apps.get_model('csgomatches.Lineup').objects.filter(team__name=match_data.get('t2')).first()
+                lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(
+                    Q(team__name=match_data.get('t1')) | Q(team__name_long=match_data.get('t1'))
+                ).first()
+                lineup_b = apps.get_model('csgomatches.Lineup').objects.filter(
+                    Q(team__name=match_data.get('t2')) | Q(team__name_long=match_data.get('t2'))
+                ).first()
 
                 if not lineup_a:
                     team_lineup_a = apps.get_model('csgomatches.Team')(name=match_data.get('t1'))
@@ -240,6 +247,8 @@ class Command(BaseCommand):
                     m_datetime = dateutil.parser.parse(m_datetime.text.strip(), dayfirst=True)
 
                     m_tournament = sub_soup.select('#content')[0].select('div.match_head')[0].select('div.left')[0].text.strip()
+                    # remove part behind " - ", " - Spieltag 1", " - Halbfinale", ...
+                    m_tournament = m_tournament.split(" - ")[0]
 
                     overtime_counter = 0
                     sub_matchesmaps = sub_soup.select('#content')[0].select('div.match_subs')[0].select('div.map')
@@ -257,10 +266,13 @@ class Command(BaseCommand):
 
                     # Get or Create Tournament
                     tournament = apps.get_model('csgomatches.Tournament').objects.filter(
-                        Q(name=m_tournament) | Q(name_alt=m_tournament)
+                        Q(name=m_tournament) | Q(name_alt=m_tournament) | Q(name_hltv=m_tournament) | Q(name_99dmg=m_tournament)
                     ).first()
                     if not tournament:
-                        tournament = apps.get_model('csgomatches.Tournament')(name=m_tournament)
+                        tournament = apps.get_model('csgomatches.Tournament')(
+                            name=m_tournament,
+                            name_99dmg=m_tournament
+                        )
                         tournament.save()
 
                     # Get or Create Lineups
@@ -272,8 +284,12 @@ class Command(BaseCommand):
                     if swap_team_and_score:
                         team_logos.reverse()
 
-                    lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(team__name=team_left).first()
-                    lineup_b = apps.get_model('csgomatches.Lineup').objects.filter(team__name=team_right).first()
+                    lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(
+                        Q(team__name=team_left) | Q(team__name_long=team_left)
+                    ).first()
+                    lineup_b = apps.get_model('csgomatches.Lineup').objects.filter(
+                        Q(team__name=team_right) | Q(team__name_long=team_right)
+                    ).first()
 
                     if not lineup_b:
                         team_b = apps.get_model('csgomatches.Team').objects.filter(name=team_right).first()
@@ -344,7 +360,7 @@ class Command(BaseCommand):
                         ).first()
 
                         if matchmap:
-                            if score_left != matchmap.rounds_won_team_a or score_right != matchmap.rounds_won_team_b:
+                            if score_left > matchmap.rounds_won_team_a or score_right > matchmap.rounds_won_team_b:
                                 matchmap.played_map = played_map
                                 matchmap.rounds_won_team_a = score_left
                                 matchmap.rounds_won_team_b = score_right
