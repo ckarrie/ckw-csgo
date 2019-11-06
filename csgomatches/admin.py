@@ -34,6 +34,19 @@ class TournamentAdmin(admin.ModelAdmin):
                 obj.name_99dmg = obj.name_99dmg.split(" - ")[0]
                 obj.save()
 
+        names = list(set(queryset.values_list('name', flat=True)))
+        for name in names:
+            name_qs = queryset.filter(name=name)
+            obj_1 = name_qs[0]
+            other_objs = name_qs[1:]
+            if other_objs.exists():
+                print(obj_1, "others:", other_objs.count(), other_objs.values_list('id', flat=True))
+                for other_obj in other_objs:
+                    other_obj.match_set.update(tournament=obj_1)
+                    other_obj.delete()
+
+
+
 
 class TeamAdmin(admin.ModelAdmin):
     list_display = ['name', 'name_long',]

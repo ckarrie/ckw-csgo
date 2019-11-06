@@ -95,6 +95,10 @@ class Command(BaseCommand):
                 )
                 tournament.save()
 
+            if not tournament.name_hltv:
+                tournament.name_hltv = event_name
+                tournament.save()
+
             for match_data in event_matches:
                 lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(
                     Q(team__name=match_data.get('t1')) | Q(team__name_long=match_data.get('t1'))
@@ -273,6 +277,10 @@ class Command(BaseCommand):
                             name=m_tournament,
                             name_99dmg=m_tournament
                         )
+                        tournament.save()
+
+                    if not tournament.name_99dmg:
+                        tournament.name_99dmg = m_tournament
                         tournament.save()
 
                     # Get or Create Lineups
