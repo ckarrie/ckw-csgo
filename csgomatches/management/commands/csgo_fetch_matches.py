@@ -80,6 +80,7 @@ class Command(BaseCommand):
 
 
     def crawl_y0fl0w_de(self):
+        map_to_left = ['BIG']
         y_url = 'https://big.y0fl0w.de'
         response_json = requests.get(y_url).json()
         for event_data in response_json:
@@ -118,6 +119,11 @@ class Command(BaseCommand):
                     team_lineup_b.save()
                     lineup_b = apps.get_model('csgomatches.Lineup')(team=team_lineup_b, active_from=timezone.now())
                     lineup_b.save()
+
+                swap_team_and_score = False
+                if match_data.get('t1') not in map_to_left:
+                    swap_team_and_score = True
+                    lineup_a, lineup_b = lineup_b, lineup_a
 
                 first_match_start = dateutil.parser.parse(match_data.get('time'), dayfirst=True)
                 aware_first_match_start = timezone.make_aware(first_match_start)
@@ -179,6 +185,9 @@ class Command(BaseCommand):
                             if results and ':' in results:
                                 t1_res, t2_res = results.split(":")
                                 t1_res, t2_res = int(t1_res), int(t2_res)
+
+                                if swap_team_and_score:
+                                    t1_res, t2_res = t2_res, t1_res
 
                                 matchmap.rounds_won_team_a = t1_res
                                 matchmap.rounds_won_team_b = t2_res
