@@ -82,12 +82,21 @@ class TeamAdmin(admin.ModelAdmin):
             merge_2.delete()
 
 
+class MatchAdmin(admin.ModelAdmin):
+    list_display = ['tournament', 'lineup_a', 'lineup_b', 'bestof', 'first_map_at', 'overall_score']
+    list_filter = ['lineup_a', 'lineup_b']
+
+    def overall_score(self, obj):
+        score = obj.get_overall_score()
+        return '{}:{}'.format(*score)
+
+
 admin.site.register(models.Team, TeamAdmin)
 admin.site.register(models.Lineup)
 admin.site.register(models.LineupPlayer)
 admin.site.register(models.Cast)
 admin.site.register(models.Map)
-admin.site.register(models.Match)
+admin.site.register(models.Match, MatchAdmin)
 admin.site.register(models.MatchMap, MatchMapAdmin)
 admin.site.register(models.Player)
 admin.site.register(models.PlayerRole)

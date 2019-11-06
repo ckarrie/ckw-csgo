@@ -38,6 +38,9 @@ class Lineup(models.Model):
     def __str__(self):
         return '{}'.format(self.team.name)
 
+    class Meta:
+        ordering = ['team__name', '-active_from']
+
 
 class LineupPlayer(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
@@ -57,6 +60,9 @@ class Tournament(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['name']
 
 
 class Map(models.Model):
@@ -86,6 +92,20 @@ class Match(models.Model):
 
     def get_first_matchmap(self):
         return self.matchmap_set.order_by('starting_at').first()
+
+    def get_overall_score(self):
+        lineup_a_mapwins = 0
+        lineup_b_mapwins = 0
+        for mm in self.matchmap_set.all():
+            if mm.has_ended():
+                if mm.team_a_won():
+                    lineup_a_mapwins += 1
+                if mm.team_b_won():
+                    lineup_b_mapwins += 1
+        return (lineup_a_mapwins, lineup_b_mapwins)
+
+    class Meta:
+        ordering = ['-first_map_at']
 
 
 class MatchMap(models.Model):
