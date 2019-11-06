@@ -144,6 +144,37 @@
             height: 32px;
         }
 
+        .navigation {
+        }
+
+        .navigation li {
+            display: inline;
+            list-style-type: none;
+            padding: 5px 20px;
+            background-color: #3e3e3e;
+        }
+
+        .navigation li:hover {
+            background-color: #a8a8a8;
+        }
+
+        .navigation li a {
+            font-weight: 600;
+        }
+
+        .navigation li a:link, .navigation li a:visited, .navigation li a:active, .navigation li a:hover {
+            color: #1887d1;
+            text-decoration: none;
+        }
+
+        .navigation li a:hover {
+            color: #165091;
+        }
+
+        .navigation li.active {
+            border-bottom: 2px solid  #ffc000;
+        }
+
 
     </style>
 </head>
@@ -154,61 +185,74 @@
     <a href="https://bigclan.gg"><img src="https://bigclan.gg/wp-content/uploads/2019/02/22222222222222222222222222.png" style="float: right"></a>
 
     <h1>Wann spielt BIG?</h1>
-    <p>Eine Fanseite des <a href="https://bigclan.gg">BIG-Clans</a>.</p>
+    <p>Eine Fanseite des <a href="https://bigclan.gg">BIG-Clans</a> - </p>
+    <p>von und für die Community.</p>
 
     <p style="margin: 0 0 90px 0"></p>
 
-    {% for match in object_list %}
+    {% block matches %}
 
-        <h2>
-            <div class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</div>
-            <div class="bo">{{ match.get_bestof_display }}</div>
+        {% for match in object_list %}
 
-            {{ match.lineup_a.team }} vs {{ match.lineup_b.team }}
+            <h2>
+                <div class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</div>
+                <div class="bo">{{ match.get_bestof_display }}</div>
 
-            <small>{{ match.tournament.name }}</small>
-        </h2>
-        <div class="row">
-        {% for mm in match.matchmap_set.all %}
-            <div class="matchmapbox bo{{ match.bestof }}">
-                <div class="team_a_score {% if mm.team_a_won %}map_win{% endif %}{% if mm.team_b_won %}map_loss{% endif %}">
-                    {{ mm.rounds_won_team_a }}
-                    {% if match.lineup_a.team_logo_url %}
-                        <img src="{{ match.lineup_a.team_logo_url }}" class="teamlogo">
-                    {% endif %}
-                </div>
-                <div class="team_b_score {% if mm.team_b_won %}map_win{% endif %}{% if mm.team_a_won %}map_loss{% endif %}">
-                    {{ mm.rounds_won_team_b }}
-                    {% if match.lineup_b.team_logo_url %}
-                        <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}">
-                    {% endif %}
-                </div>
-                <div class="start">
-                    {% if mm.is_live %}
-                        <div class="map_live">LIVE</div>
-                    {% else %}
-                        {% comment %}
-                        {% if mm.starting_at > match.first_map_at %}
-                        {% else %}
-                            <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                {{ match.lineup_a.team }} vs {{ match.lineup_b.team }}
+
+                <small>{{ match.tournament.name }}</small>
+            </h2>
+            <div class="row">
+            {% for mm in match.matchmap_set.all %}
+                <div class="matchmapbox bo{{ match.bestof }}">
+                    <div class="team_a_score {% if mm.team_a_won %}map_win{% endif %}{% if mm.team_b_won %}map_loss{% endif %}">
+                        {{ mm.rounds_won_team_a }}
+                        {% if match.lineup_a.team_logo_url %}
+                            <img src="{{ match.lineup_a.team_logo_url }}" class="teamlogo">
                         {% endif %}
-                        {% endcomment %}
-                        {% if mm.has_ended %}
-                            <div class="map_countdown">Map beendet</div>
-                        {% else %}
-                            <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                    </div>
+                    <div class="team_b_score {% if mm.team_b_won %}map_win{% endif %}{% if mm.team_a_won %}map_loss{% endif %}">
+                        {{ mm.rounds_won_team_b }}
+                        {% if match.lineup_b.team_logo_url %}
+                            <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}">
                         {% endif %}
-                    {% endif %}
-                    <strong title="{{ mm.cs_name|default_if_none:"Mapveto steht aus" }}">{{ mm.played_map|default_if_none:"-" }}</strong><br />
-                    <!-- {{ mm.starting_at|date:'H:i (e)' }} -->
-                    {% for cast in mm.cast_set.all %}
-                        <p><a href="{{ cast.stream_url }}">{{ cast.caster }}</a></p>
-                    {% endfor %}
+                    </div>
+                    <div class="start">
+                        {% if mm.is_live %}
+                            <div class="map_live">LIVE</div>
+                        {% else %}
+                            {% comment %}
+                            {% if mm.starting_at > match.first_map_at %}
+                            {% else %}
+                                <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                            {% endif %}
+                            {% endcomment %}
+                            {% if mm.has_ended %}
+                                <div class="map_countdown">Map beendet</div>
+                            {% else %}
+                                <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                            {% endif %}
+                        {% endif %}
+                        <strong title="{{ mm.cs_name|default_if_none:"Mapveto steht aus" }}">{{ mm.played_map|default_if_none:"-" }}</strong><br />
+                        <!-- {{ mm.starting_at|date:'H:i (e)' }} -->
+                        {% for cast in mm.cast_set.all %}
+                            <p><a href="{{ cast.stream_url }}">{{ cast.caster }}</a></p>
+                        {% endfor %}
+                    </div>
                 </div>
+            {% endfor %}
             </div>
         {% endfor %}
-        </div>
-    {% endfor %}
+
+    {% endblock %}
+
+    <ul class="navigation">
+        <li class="{% if current_view == 'index' %}active{% endif %}"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
+        {% for date in date_list %}
+            <li class="{% if year.year == date.year %}active{% endif %}"><a href="{% url 'match_history' year=date.year %}">{{ date|date:"Y" }}</a></li>
+        {% endfor %}
+    </ul>
+
     <!--
     <p style="margin: 50px 0 10px 0">
         <a href="">Match eintragen</a>
@@ -217,11 +261,15 @@
     <p style="margin: 50px 0 10px 0">
         <small>
             <a href="https://bitbucket.org/ckarrie/ckw-csgo">Source Code</a>
+            | <a href="https://bitbucket.org/ckarrie/ckw-csgo/issues">Bug Tracker</a>
             | Datenquellen:
                 <a href="https://www.hltv.org/team/7532/big">HLTV.org</a>,
                 <a href="https://csgo.99damage.de/de/edb/team/13782-big">99damage.de</a>,
                 <a href="https://big.y0fl0w.de">y0fl0w.de</a>
-            | Kontakt: <a href="mailto:ckarrie@gmail.com?subject=wannspieltbig.de Anfrage">Kontakt/Bugs/Matches eintragen</a>
+            | Kontakt: <a href="mailto:ckarrie@gmail.com?subject=wannspieltbig.de Anfrage">Kontakt</a>
+
+            <br>
+            Credits: <code>mightyrepooc</code> (Idee) <code>y0fl0w</code> (Crawler) <code>chrissiMZ</code> (Coding) <code>Philian</code> (Images)
 
         </small>
     </p>
