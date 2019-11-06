@@ -2,7 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Wann spielt BIG?</title>
+    <title>
+        Wann spielt BIG?
+        {% with next_match=object_list.first %}
+            {% if next_match and current_view == 'index' %}
+            Am {{ next_match.first_map_at|date:'d.m.Y H:i' }} gegen {{ next_match.lineup_b.team.name }}
+            {% endif %}
+        {% endwith %}
+    </title>
     <link href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,600,700&display=swap" rel="stylesheet">
     <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-32x32.png" sizes="32x32" />
     <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-192x192.png" sizes="192x192" />

@@ -71,6 +71,16 @@ class Command(BaseCommand):
 
                 print("first_match_start", lineup_a, lineup_b, tournament, first_match_start, aware_first_match_start)
 
+                bestof = 3
+                if "1" in match_data.get('mType', ''):
+                    bestof = 1
+                elif "2" in match_data.get('mType', ''):
+                    bestof = 2
+                elif "3" in match_data.get('mType', ''):
+                    bestof = 3
+                elif "5" in match_data.get('mType', ''):
+                    bestof = 5
+
                 match = apps.get_model('csgomatches.Match').objects.filter(
                     tournament=tournament,
                     lineup_a=lineup_a,
@@ -82,7 +92,7 @@ class Command(BaseCommand):
                         tournament=tournament,
                         lineup_a=lineup_a,
                         lineup_b=lineup_b,
-                        bestof=3
+                        bestof=bestof
                     )
                     match.save()
 
@@ -90,13 +100,45 @@ class Command(BaseCommand):
                     match=match
                 )
 
+                maps_data = match_data.get('maps', [])
+
+                #if existing_matchmaps.count() != len(maps_data):
+
                 if not existing_matchmaps.exists():
-                    for i in range(3):
+                    for i, map_data in enumerate(maps_data):
                         matchmap = apps.get_model('csgomatches.MatchMap')(
                             match=match,
-                            starting_at=aware_first_match_start + timezone.timedelta(hours=i)
+                            starting_at=aware_first_match_start + timezone.timedelta(hours=i),
+                            map_nr=i + 1,
+
                         )
                         matchmap.save()
+
+                else:
+                    for i, map_data in enumerate(maps_data):
+                        results = map_data.get('result')
+                        name = map_data.get('name')
+                        matchmap = apps.get_model('csgomatches.MatchMap').objects.filter(
+                            match=match,
+                            map_nr=i + 1,
+                        ).first()
+                        if matchmap:
+                            if results and ':' in results:
+                                t1_res, t2_res = results.split(":")
+                                t1_res, t2_res = int(t1_res), int(t2_res)
+
+                                matchmap.rounds_won_team_a = t1_res
+                                matchmap.rounds_won_team_b = t2_res
+                                matchmap.save()
+
+                            if name and 'TBA' not in name:
+                                # set map
+                                print("TBD Setting Map name", name, match)
+
+
+                        else:
+                            print("Cannot find MatchMap", match, map_data)
+
 
 
 
