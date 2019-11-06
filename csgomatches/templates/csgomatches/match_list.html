@@ -39,7 +39,9 @@
         }
 
         h2 small {
-            font-weight: 100;
+            font-weight: 400;
+            white-space: nowrap;
+            font-size: small;
         }
 
         .bo {
@@ -256,6 +258,10 @@
                 </div>
             {% endfor %}
             </div>
+        {% empty %}
+            <div class="row">
+                <p>BIG disband? Keine kommenden Matches eingetragen.</p>
+            </div>
         {% endfor %}
 
     {% endblock %}
@@ -263,7 +269,7 @@
     <ul class="navigation">
         <li class="{% if current_view == 'index' %}active{% endif %}"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
         {% for date in date_list %}
-            <li class="{% if year.year == date.year %}active{% endif %}"><a href="{% url 'match_history' year=date.year %}">{{ date|date:"Y" }}</a></li>
+            <li class="{% if year.year == date.year %}active{% endif %}"><a href="{% url 'match_history' year=date.year %}?q={{ date }}">{{ date|date:"Y" }}</a></li>
         {% endfor %}
     </ul>
 

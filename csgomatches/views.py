@@ -16,7 +16,7 @@ class IndexView(generic.ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super(IndexView, self).get_context_data(*args, **kwargs)
         ctx.update({
-            'date_list': self.model.objects.all().dates('first_map_at', 'year'),
+            'date_list': self.model.objects.all().dates('first_map_at', 'year', order='DESC'),
             'current_view': 'index'
         })
         return ctx
@@ -27,5 +27,9 @@ class YearArchiveView(generic.YearArchiveView):
     date_field = 'first_map_at'
     make_object_list = True
     allow_future = False
+    date_list_period = 'year'
+
+    def get_date_list(self, queryset, date_type=None, ordering='ASC'):
+        return self.model.objects.all().dates('first_map_at', 'year', order='DESC')
 
 
