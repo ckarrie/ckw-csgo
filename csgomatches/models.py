@@ -93,9 +93,12 @@ class MatchMap(models.Model):
     rounds_won_team_b = models.IntegerField(default=0)
     starting_at = models.DateTimeField()
     delay_minutes = models.IntegerField(default=0)
+    map_nr = models.IntegerField(null=True)
+    map_pick_of = models.ForeignKey(Lineup, null=True, blank=True, on_delete=models.CASCADE)
+    unplayed = models.BooleanField(default=False)
     #defwin_reason = models.CharField(max_length=255, null=True, blank=True)
     #defwin = models.BooleanField(default=False)
-    #cancelled = models.BooleanField(default=False)
+    cancelled = models.BooleanField(default=False)
 
     def has_ended(self):
         return (self.rounds_won_team_a >= 16 or self.rounds_won_team_b >= 16) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2

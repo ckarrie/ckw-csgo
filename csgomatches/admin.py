@@ -2,9 +2,9 @@ from django.contrib import admin
 from . import models
 
 class MatchMapAdmin(admin.ModelAdmin):
-    list_display = ['match', 'rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'has_ended', 'is_live', 'delay_minutes', 'starting_at']
-    list_editable = ['rounds_won_team_a', 'rounds_won_team_b', 'played_map']
-    list_filter = ['match__tournament', 'match__lineup_a', 'match__lineup_b']
+    list_display = ['match', 'rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'has_ended', 'is_live', 'delay_minutes', 'starting_at', 'unplayed', 'map_nr']
+    list_editable = ['rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'map_nr']
+    list_filter = ['match__tournament', 'match__lineup_a', 'match__lineup_b', 'map_nr']
 
     ordering = ['-starting_at']
 

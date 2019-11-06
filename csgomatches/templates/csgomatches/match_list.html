@@ -175,6 +175,10 @@
             border-bottom: 2px solid  #ffc000;
         }
 
+        .matchmapbox.unplayed {
+            display: none;
+        }
+
 
     </style>
 </head>
@@ -204,7 +208,7 @@
             </h2>
             <div class="row">
             {% for mm in match.matchmap_set.all %}
-                <div class="matchmapbox bo{{ match.bestof }}">
+                <div class="matchmapbox bo{{ match.bestof }} {% if mm.unplayed %}unplayed{% endif %}">
                     <div class="team_a_score {% if mm.team_a_won %}map_win{% endif %}{% if mm.team_b_won %}map_loss{% endif %}">
                         {{ mm.rounds_won_team_a }}
                         {% if match.lineup_a.team_logo_url %}
@@ -234,6 +238,9 @@
                             {% endif %}
                         {% endif %}
                         <strong title="{{ mm.cs_name|default_if_none:"Mapveto steht aus" }}">{{ mm.played_map|default_if_none:"-" }}</strong><br />
+                        {% if mm.map_pick_of %}
+                            <span class="map_countdown">Map pick {{ mm.map_pick_of }}</span><br />
+                        {% endif %}
                         <!-- {{ mm.starting_at|date:'H:i (e)' }} -->
                         {% for cast in mm.cast_set.all %}
                             <p><a href="{{ cast.stream_url }}">{{ cast.caster }}</a></p>
