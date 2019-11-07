@@ -1,9 +1,14 @@
 from django.contrib import admin
 from django.urls import path
+from django.views.decorators.cache import cache_page
+
 from . import views
 
+CACHE_INDEX_TIME = 1*60
+CACHE_ARCHIVE_TIME = 10*60
+
 urlpatterns = [
-    path('', views.IndexView.as_view(), name="match_upcoming"),
-    path('archive/<int:year>/', views.YearArchiveView.as_view(), name="match_history"),
+    path('', cache_page(timeout=CACHE_INDEX_TIME)(views.IndexView.as_view()), name="match_upcoming"),
+    path('archive/<int:year>/', cache_page(timeout=CACHE_ARCHIVE_TIME)(views.YearArchiveView.as_view()), name="match_history"),
     path('admin/', admin.site.urls),
 ]

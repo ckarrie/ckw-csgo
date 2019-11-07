@@ -19,6 +19,6 @@ setup(
     install_requires=[
         'django',
         'requests',
-        'psycopg2-binary', 'bs4', 'python-dateutil',
+        'psycopg2-binary', 'bs4', 'python-dateutil', 'python-memcached',
     ]
 )
