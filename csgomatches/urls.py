@@ -1,11 +1,16 @@
 from django.contrib import admin
 from django.urls import path
 from django.views.decorators.cache import cache_page
+from django.conf import settings
 
 from . import views
 
-CACHE_INDEX_TIME = 1*60
-CACHE_ARCHIVE_TIME = 10*60
+if settings.DEBUG:
+    CACHE_INDEX_TIME = 0
+    CACHE_ARCHIVE_TIME = 0
+else:
+    CACHE_INDEX_TIME = 1*60
+    CACHE_ARCHIVE_TIME = 10*60
 
 urlpatterns = [
     path('', cache_page(timeout=CACHE_INDEX_TIME)(views.IndexView.as_view()), name="match_upcoming"),
