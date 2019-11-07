@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,14 +8,14 @@
         Wann spielt BIG?
         {% with next_match=object_list.first %}
             {% if next_match and current_view == 'index' %}
-            Am {{ next_match.first_map_at|date:'d.m.Y H:i' }} gegen {{ next_match.lineup_b.team.name }}
+                Am {{ next_match.first_map_at|date:'d.m.Y H:i' }} gegen {{ next_match.lineup_b.team.name }}
             {% endif %}
         {% endwith %}
     </title>
     <link href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,600,700&display=swap" rel="stylesheet">
-    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-32x32.png" sizes="32x32" />
-    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-192x192.png" sizes="192x192" />
-    <link rel="apple-touch-icon-precomposed" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-180x180.png" />
+    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-32x32.png" sizes="32x32"/>
+    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-192x192.png" sizes="192x192"/>
+    <link rel="apple-touch-icon-precomposed" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-180x180.png"/>
     <style type="text/css">
         * {
             padding: 0;
@@ -23,6 +25,11 @@
         body {
             background-color: #000000;
             font-family: 'Quicksand', sans-serif;
+        }
+
+        h1 {
+            font-size: 33pt;
+            padding-bottom: 20px;
         }
 
         .center {
@@ -42,6 +49,17 @@
             font-weight: 400;
             white-space: nowrap;
             font-size: small;
+            float: right;
+            margin: 8px 0 0 0;
+            color: #ffffff;
+        }
+
+        h2 span.team_a {
+            color: #fff;
+        }
+
+        h2 span.team_b {
+            color: #fff;
         }
 
         .bo {
@@ -52,6 +70,13 @@
             font-weight: 500;
             padding: 0 10px;
             font-size: smaller;
+        }
+
+        h3 {
+            text-align: center;
+            color: #ffffff;
+            font-weight: 400;
+            font-size: xx-small;
         }
 
         .row {
@@ -135,18 +160,29 @@
             color: #ffc000;
             font-size: x-small;
             font-weight: 500;
-            border-top: 2px solid  #ffc000;
+            border-top: 2px solid #ffc000;
         }
 
         .map_countdown {
             font-size: x-small;
-            border-top: 2px solid  #585858;
+            border-top: 2px solid #585858;
         }
 
-        a:link {color: #1887d1;}
-        a:visited {color: #1887d1;}
-        a:active {color: #555;}
-        a:hover {color: #aaa;}
+        a:link {
+            color: #1887d1;
+        }
+
+        a:visited {
+            color: #1887d1;
+        }
+
+        a:active {
+            color: #555;
+        }
+
+        a:hover {
+            color: #aaa;
+        }
 
         img.teamlogo {
             width: 32px;
@@ -181,11 +217,42 @@
         }
 
         .navigation li.active {
-            border-bottom: 2px solid  #ffc000;
+            border-bottom: 2px solid #ffc000;
         }
 
         .matchmapbox.unplayed {
             display: none;
+        }
+
+        .logo {
+            float: right;
+            width: 268px;
+            height: 130px;
+            overflow: hidden;
+        }
+
+        .logo img {
+            width: 300px;
+            height: 203px;
+            margin: -39px 0 0 -6px;
+        }
+
+
+
+        .white {
+            color: #ffffff;
+        }
+
+        @media only screen and (max-width: 1000px) {
+            .hide-on-small {
+                display: none;
+            }
+        }
+
+        @media only screen and (min-width: 1000px) {
+            .hide-on-large {
+                display: none;
+            }
         }
 
 
@@ -195,13 +262,14 @@
 
 <div class="center">
 
-    <a href="https://bigclan.gg"><img src="https://bigclan.gg/wp-content/uploads/2019/02/22222222222222222222222222.png" style="float: right"></a>
+    <div class="logo">
+        <a href="https://bigclan.gg" target="_blank" title="Zur Webseite bigclan.gg"><img src="{% static 'csgomatches/logos/BIGLOGO-04.png' %}"></a>
+    </div>
 
-    <h1>Wann spielt BIG?</h1>
-    <p>Eine Fanseite des <a href="https://bigclan.gg">BIG-Clans</a> - </p>
-    <p>von und für die Community.</p>
+    <h1>Wann spielt <span class="white">BIG</span>?</h1>
+    <p>Eine Fanseite des <a href="https://bigclan.gg">BIG-Clans</a> - von und für die Community.</p>
 
-    <p style="margin: 0 0 90px 0"></p>
+    <p style="margin: 0 0 60px 0"></p>
 
     {% block matches %}
 
@@ -209,54 +277,57 @@
 
             <h2>
                 <div class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</div>
-                <div class="bo">{{ match.get_bestof_display }}</div>
+                <!-- <div class="bo" style="float: right; margin-top: 3px">{{ match.get_bestof_display }}</div> -->
 
-                {{ match.lineup_a.team }} vs {{ match.lineup_b.team }}
+                <span class="team_a">{{ match.lineup_a.team }}</span> vs <span class="team_b">{{ match.lineup_b.team }}</span>
 
-                <small>{{ match.tournament.name }}</small>
+                <small class="hide-on-small">{{ match.tournament.name }}</small>
             </h2>
+
+            <h3 class="hide-on-large">{{ match.tournament.name }}</h3>
+
             <div class="row">
-            {% for mm in match.matchmap_set.all %}
-                <div class="matchmapbox bo{{ match.bestof }} {% if mm.unplayed %}unplayed{% endif %}">
-                    <div class="team_a_score {% if mm.team_a_won %}map_win{% endif %}{% if mm.team_b_won %}map_loss{% endif %}">
-                        {{ mm.rounds_won_team_a }}
-                        {% if match.lineup_a.team_logo_url %}
-                            <img src="{{ match.lineup_a.team_logo_url }}" class="teamlogo">
-                        {% endif %}
-                    </div>
-                    <div class="team_b_score {% if mm.team_b_won %}map_win{% endif %}{% if mm.team_a_won %}map_loss{% endif %}">
-                        {{ mm.rounds_won_team_b }}
-                        {% if match.lineup_b.team_logo_url %}
-                            <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}">
-                        {% endif %}
-                    </div>
-                    <div class="start">
-                        {% if mm.is_live %}
-                            <div class="map_live">LIVE</div>
-                        {% else %}
-                            {% comment %}
+                {% for mm in match.matchmap_set.all %}
+                    <div class="matchmapbox bo{{ match.bestof }} {% if mm.unplayed %}unplayed{% endif %}">
+                        <div class="team_a_score {% if mm.team_a_won %}map_win{% endif %}{% if mm.team_b_won %}map_loss{% endif %}">
+                            {{ mm.rounds_won_team_a }}
+                            {% if match.lineup_a.team_logo_url %}
+                                <img src="{{ match.lineup_a.team_logo_url }}" class="teamlogo">
+                            {% endif %}
+                        </div>
+                        <div class="team_b_score {% if mm.team_b_won %}map_win{% endif %}{% if mm.team_a_won %}map_loss{% endif %}">
+                            {{ mm.rounds_won_team_b }}
+                            {% if match.lineup_b.team_logo_url %}
+                                <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}">
+                            {% endif %}
+                        </div>
+                        <div class="start">
+                            {% if mm.is_live %}
+                                <div class="map_live">LIVE</div>
+                            {% else %}
+                                {% comment %}
                             {% if mm.starting_at > match.first_map_at %}
                             {% else %}
                                 <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
                             {% endif %}
                             {% endcomment %}
-                            {% if mm.has_ended %}
-                                <div class="map_countdown">Map beendet</div>
-                            {% else %}
-                                <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                                {% if mm.has_ended %}
+                                    <div class="map_countdown">Map beendet</div>
+                                {% else %}
+                                    <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                        <strong title="{{ mm.cs_name|default_if_none:"Mapveto steht aus" }}">{{ mm.played_map|default_if_none:"-" }}</strong><br />
-                        {% if mm.map_pick_of %}
-                            <span class="map_countdown">Map pick {{ mm.map_pick_of }}</span><br />
-                        {% endif %}
-                        <!-- {{ mm.starting_at|date:'H:i (e)' }} -->
-                        {% for cast in mm.cast_set.all %}
-                            <p><a href="{{ cast.stream_url }}">{{ cast.caster }}</a></p>
-                        {% endfor %}
+                            <strong title="{{ mm.cs_name|default_if_none:"Mapveto steht aus" }}">{{ mm.played_map|default_if_none:"-" }}</strong><br/>
+                            {% if mm.map_pick_of %}
+                                <span class="map_countdown">Map pick {{ mm.map_pick_of }}</span><br/>
+                            {% endif %}
+                            <!-- {{ mm.starting_at|date:'H:i (e)' }} -->
+                            {% for cast in mm.cast_set.all %}
+                                <p><a href="{{ cast.stream_url }}">{{ cast.caster }}</a></p>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
             </div>
         {% empty %}
             <div class="row">
@@ -283,9 +354,9 @@
             <a href="https://bitbucket.org/ckarrie/ckw-csgo">Source Code</a>
             | <a href="https://bitbucket.org/ckarrie/ckw-csgo/issues">Bug Tracker</a>
             | Datenquellen:
-                <a href="https://www.hltv.org/team/7532/big">HLTV.org</a>,
-                <a href="https://csgo.99damage.de/de/edb/team/13782-big">99damage.de</a>,
-                <a href="https://big.y0fl0w.de">y0fl0w.de</a>
+            <a href="https://www.hltv.org/team/7532/big">HLTV.org</a>,
+            <a href="https://csgo.99damage.de/de/edb/team/13782-big">99damage.de</a>,
+            <a href="https://big.y0fl0w.de">y0fl0w.de</a>
             | <a href="mailto:ckarrie@gmail.com?subject=wannspieltbig.de Anfrage">Kontakt</a>
 
             <br>
