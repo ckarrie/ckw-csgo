@@ -409,7 +409,7 @@ class Command(BaseCommand):
                         ).first()
 
                         if matchmap:
-                            if score_left > matchmap.rounds_won_team_a or score_right > matchmap.rounds_won_team_b:
+                            if score_left > matchmap.rounds_won_team_a or score_right > matchmap.rounds_won_team_b or played_map != matchmap.played_map:
                                 matchmap.played_map = played_map
                                 matchmap.rounds_won_team_a = score_left
                                 matchmap.rounds_won_team_b = score_right
