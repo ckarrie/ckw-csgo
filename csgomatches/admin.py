@@ -49,6 +49,7 @@ class TournamentAdmin(admin.ModelAdmin):
 
 
 class TeamAdmin(admin.ModelAdmin):
+    search_fields = ['name', 'name_long']
     list_display = ['name', 'name_long',]
     actions = ['merge']
 
@@ -81,6 +82,12 @@ class TeamAdmin(admin.ModelAdmin):
             merge_2.lineup_set.all().update(team=merge_1)
             merge_2.delete()
 
+            #for lu i
+
+class LineupAdmin(admin.ModelAdmin):
+    search_fields = ['team__name', 'team__name_long']
+    list_display = ['team', 'team_logo_url', 'active_from']
+
 
 class MatchAdmin(admin.ModelAdmin):
     list_display = ['tournament', 'lineup_a', 'lineup_b', 'bestof', 'first_map_at', 'overall_score']
@@ -92,7 +99,7 @@ class MatchAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.Team, TeamAdmin)
-admin.site.register(models.Lineup)
+admin.site.register(models.Lineup, LineupAdmin)
 admin.site.register(models.LineupPlayer)
 admin.site.register(models.Cast)
 admin.site.register(models.Map)

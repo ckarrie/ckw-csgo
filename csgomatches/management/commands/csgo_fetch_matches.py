@@ -1,15 +1,21 @@
-import datetime
-
-from django.db.models import Q
-from django.utils import timezone, dateparse
-
+import dateutil.parser
+import requests
+from bs4 import BeautifulSoup
 from django.apps import apps
 from django.core.management.base import BaseCommand
+from django.db.models import Q
+from django.utils import timezone
 
-import dateutil.parser
-
-from bs4 import BeautifulSoup
-import requests
+HLTV_MAP_NAMES_TO_CS_NAME = {
+    'Nuke': 'de_nuke',
+    'Overpass': 'de_overpass',
+    'Mirage': 'de_mirage',
+    'Train': 'de_train',
+    'Dust2': 'de_dust2',
+    'Inferno': 'de_inferno',
+    'Cache': 'de_cache',
+    'Vertigo': 'de_vertigo',
+}
 
 
 class Command(BaseCommand):
@@ -64,11 +70,11 @@ class Command(BaseCommand):
         fake = options['fake']
 
         # hltv
-        #hltv_url = 'https://www.hltv.org/team/7532/big'
-        #response = requests.get(hltv_url)
-        #soup = BeautifulSoup(response.text, "html.parser")
-        #matchesBox = soup.select('#matchesBox')[0]
-        #for teamrow in matchesBox.select('.team-row'):
+        # hltv_url = 'https://www.hltv.org/team/7532/big'
+        # response = requests.get(hltv_url)
+        # soup = BeautifulSoup(response.text, "html.parser")
+        # matchesBox = soup.select('#matchesBox')[0]
+        # for teamrow in matchesBox.select('.team-row'):
         #    print(teamrow)
 
 
@@ -77,7 +83,6 @@ class Command(BaseCommand):
             self.crawl_y0fl0w_de()
         if options['dmg99']:
             self.crawl_99damage_de(include_archive_pages=options['include_archive_pages'])
-
 
     def crawl_y0fl0w_de(self):
         map_to_left = ['BIG']
@@ -114,10 +119,18 @@ class Command(BaseCommand):
                     lineup_a = apps.get_model('csgomatches.Lineup')(team=team_lineup_a, active_from=timezone.now())
                     lineup_a.save()
 
+                if lineup_a and match_data.get('t1_hltvID') and not lineup_a.team_logo_url:
+                    lineup_a.team_logo_url = 'https://static.hltv.org/images/team/logo/' + match_data.get('t1_hltvID')
+                    lineup_a.save()
+
                 if not lineup_b:
                     team_lineup_b = apps.get_model('csgomatches.Team')(name=match_data.get('t2'))
                     team_lineup_b.save()
                     lineup_b = apps.get_model('csgomatches.Lineup')(team=team_lineup_b, active_from=timezone.now())
+                    lineup_b.save()
+
+                if lineup_b and match_data.get('t2_hltvID') and not lineup_b.team_logo_url:
+                    lineup_b.team_logo_url = 'https://static.hltv.org/images/team/logo/' + match_data.get('t2_hltvID')
                     lineup_b.save()
 
                 swap_team_and_score = False
@@ -189,14 +202,32 @@ class Command(BaseCommand):
                                 if swap_team_and_score:
                                     t1_res, t2_res = t2_res, t1_res
 
+
                                 matchmap.rounds_won_team_a = t1_res
                                 matchmap.rounds_won_team_b = t2_res
                                 matchmap.save()
 
                             if name and 'TBA' not in name:
                                 # set map
+                                cs_name = HLTV_MAP_NAMES_TO_CS_NAME.get(name, None)
+                                # not found in HLTV_MAP_NAMES_TO_CS_NAME
+                                if cs_name:
+                                    played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
+                                        cs_name=cs_name,
+                                        defaults={
+                                            'name': name
+                                        }
+                                    )
+                                else:
+                                    played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
+                                        cs_name='de_' + name.lower(),
+                                        defaults={
+                                            'name': name
+                                        }
+                                    )
                                 print("TBD Setting Map name", name, match)
-
+                                matchmap.played_map = played_map
+                                matchmap.save()
 
                         else:
                             print("Cannot find MatchMap", match, map_data)
@@ -204,8 +235,8 @@ class Command(BaseCommand):
     def crawl_99damage_de(self, include_archive_pages=False):
         map_to_left = ['BIG', 'BIG.A']
         dmg_urls = [
-            'https://csgo.99damage.de/de/matches&filter_team=13782', # BIG
-            'https://csgo.99damage.de/de/matches&filter_team=22961', # BIG. OMEN Academy
+            'https://csgo.99damage.de/de/matches&filter_team=13782',  # BIG
+            'https://csgo.99damage.de/de/matches&filter_team=22961',  # BIG. OMEN Academy
         ]
 
         limit_subpages = 5
@@ -251,9 +282,8 @@ class Command(BaseCommand):
                         swap_team_and_score = True
                         team_left, team_right = team_right, team_left
 
-
                     matches_url = link.attrs.get('href').strip()
-                    #print(" - Crawling URL...", matches_url)
+                    # print(" - Crawling URL...", matches_url)
                     sub_response = requests.get(matches_url)
                     sub_soup = BeautifulSoup(sub_response.text, "html.parser")
                     m_datetime = sub_soup.select('#content')[0].select('div.match_head')[0].select('div.right')[0]
@@ -265,11 +295,11 @@ class Command(BaseCommand):
 
                     overtime_counter = 0
                     sub_matchesmaps = sub_soup.select('#content')[0].select('div.match_subs')[0].select('div.map')
-                    #print("Found .map", len(sub_matchesmaps))
+                    # print("Found .map", len(sub_matchesmaps))
                     map_indexes = []
                     map_index_cnt = 0
                     for s_map in sub_matchesmaps:
-                        #print(s_map.attrs.get('title'))
+                        # print(s_map.attrs.get('title'))
                         if 'Overtime' in s_map.attrs.get('title'):
                             overtime_counter += 1
                         else:
@@ -323,7 +353,6 @@ class Command(BaseCommand):
                     ).first()
 
                     # Get or create Match
-
                     if not match:
                         bestof = 3
                         if 'Liga' in m_tournament:
@@ -345,7 +374,7 @@ class Command(BaseCommand):
 
                     for i in range(map_cnt):
                         i_without_overtime = map_indexes[i]
-                        #print(map_cnt, overtime_counter, i, i_without_overtime)
+                        # print(map_cnt, overtime_counter, i, i_without_overtime)
                         sum_divs = sub_soup.select('#content')[0].select('div.match_subs')[0].select('div.sum')
                         if sum_divs:
                             map_score = sum_divs[i].text.strip()
@@ -364,12 +393,15 @@ class Command(BaseCommand):
                         print(m_tournament, team_left, team_right, score_left, score_right, date, "sub=", m_datetime, mapinfos)
 
                         # get or create Maps
-                        played_map, played_map_created =  apps.get_model('csgomatches.Map').objects.get_or_create(
-                            cs_name=mapinfos.get('name'),
-                            defaults={
-                                'name': mapinfos.get('name')
-                            }
-                        )
+                        if 'de_tba' in mapinfos.get('name'):
+                            played_map = None
+                        else:
+                            played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
+                                cs_name=mapinfos.get('name'),
+                                defaults={
+                                    'name': mapinfos.get('name')
+                                }
+                            )
 
                         matchmap = apps.get_model('csgomatches.MatchMap').objects.filter(
                             match=match,
@@ -394,5 +426,3 @@ class Command(BaseCommand):
 
                             )
                             matchmap.save()
-
-
