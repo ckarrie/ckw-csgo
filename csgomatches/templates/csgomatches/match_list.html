@@ -28,11 +28,12 @@
         }
 
         a:link {
-            color: #1887d1;
+            color: #aaa;
+
         }
 
         a:visited {
-            color: #1887d1;
+            color: #aaa;
         }
 
         a:active {
@@ -40,7 +41,7 @@
         }
 
         a:hover {
-            color: #aaa;
+            color: #1887d1;
         }
 
         h1 {
@@ -246,12 +247,25 @@
             color: #ffffff;
         }
 
+        .footer {
+            margin: 50px 0 10px 0;
+            padding: 10px 10px;
+            background-color: #3e3e3e;
+        }
+
+        .footer hr {
+            border: 1px solid #555555;
+            margin: 10px 0;
+            /*border-radius: 5px;*/
+        }
+
         /* Mobile Styles */
         @media only screen and (max-width: 1000px) {
 
             .hide-on-small {
                 display: none;
             }
+
             body {
                 background: #000000;
             }
@@ -306,13 +320,13 @@
 </div>
 
 <div class="center">
-
     <div class="logo">
         <a href="https://bigclan.gg" target="_blank" title="Zur Webseite bigclan.gg"><img src="{% static 'csgomatches/logos/BIGLOGO-04.png' %}"></a>
     </div>
 
     <h1><a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a></h1>
     <p>Eine Fanseite des <a href="https://bigclan.gg">BIG-Clans</a> - von und für die Community.</p>
+
 
     <p style="margin: 0 0 60px 0"></p>
 
@@ -394,21 +408,26 @@
         <a href="">Match eintragen</a>
     </p>
     -->
-    <p style="margin: 50px 0 10px 0">
-        <small>
-            <a href="https://bitbucket.org/ckarrie/ckw-csgo">Source Code</a>
-            | <a href="https://bitbucket.org/ckarrie/ckw-csgo/issues">Bug Tracker</a>
-            | Datenquellen:
-            <a href="https://www.hltv.org/team/7532/big">HLTV.org</a>,
-            <a href="https://csgo.99damage.de/de/edb/team/13782-big">99damage.de</a>,
-            <a href="https://big.y0fl0w.de">y0fl0w.de</a>
-            | <a href="mailto:ckarrie@gmail.com?subject=wannspieltbig.de Anfrage">Kontakt</a>
+    <div class="footer">
+        <p>
+            <small>Export kommende Matches [<code><a href="{% url 'ics_upcoming_big' %}">iCal</a></code>, <code><a href="https://big.y0fl0w.de">JSON</a></code>]</small>
+        </p>
+        <hr>
+        <p>
+            <small>
+                <a href="https://bitbucket.org/ckarrie/ckw-csgo">Source Code</a>
+                | <a href="https://bitbucket.org/ckarrie/ckw-csgo/issues">Bug Tracker</a>
+                | Datenquellen:
+                <a href="https://www.hltv.org/team/7532/big">HLTV.org</a> via <a href="https://big.y0fl0w.de">y0fl0w.de</a>,
+                <a href="https://csgo.99damage.de/de/edb/team/13782-big">99damage.de</a>
+                | <a href="mailto:ckarrie@gmail.com?subject=wannspieltbig.de Anfrage">Kontakt</a>
 
-            <br>
-            Credits: <code>mightyrepooc</code> (Idee) <code>y0fl0w</code> (Crawler) <code>chrissiMZ</code> (Coding, Fotos) <code>Philian</code> (BIG-Logo)
+                <br>
+                Credits: <code>mightyrepooc</code> (Idee) <code>y0fl0w</code> (Crawler) <code>chrissiMZ</code> (Coding, Fotos) <code>Philian</code> (BIG-Logo)
 
-        </small>
-    </p>
+            </small>
+        </p>
+    </div>
 
 </div>
 

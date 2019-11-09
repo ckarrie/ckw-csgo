@@ -27,3 +27,4 @@ class UpcomingEventsFeed(ICalFeed):
     def item_link(self, item):
         return '#matchup-{}'.format(item.pk)
 
+

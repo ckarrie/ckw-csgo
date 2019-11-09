@@ -16,6 +16,6 @@ else:
 urlpatterns = [
     path('', cache_page(timeout=CACHE_INDEX_TIME)(views.IndexView.as_view()), name="match_upcoming"),
     path('archive/<int:year>/', cache_page(timeout=CACHE_ARCHIVE_TIME)(views.YearArchiveView.as_view()), name="match_history"),
-    path('feeds/big_upcoming.ics', feeds.UpcomingEventsFeed()),
+    path('feeds/big_upcoming.ics', feeds.UpcomingEventsFeed(), name='ics_upcoming_big'),
     path('admin/', admin.site.urls),
 ]
