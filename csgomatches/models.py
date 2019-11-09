@@ -152,17 +152,23 @@ class MatchMap(models.Model):
             self.match.save()
 
     class Meta:
-        ordering = ['-starting_at']
+        ordering = ['starting_at']
 
 
-class Cast(models.Model):
-    matchmap = models.ForeignKey(MatchMap, on_delete=models.CASCADE)
-    caster = models.CharField(max_length=255)
-    stream_url = models.URLField()
-    vod_url = models.URLField(null=True, blank=True)
+class ExternalLink(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    link_type = models.CharField(max_length=255, choices=(
+        ('hltv_match', 'HLTV Matchlink'),
+        ('99dmg_match', '99DMG Matchlink'),
+        ('twitch_cast', 'Twitch Cast'),
+        ('twitch_vod', 'Twitch VOD'),
+        ('youtube_vod', 'Youtube VOD'),
+    ))
+    title = models.CharField(max_length=255)
+    url = models.URLField()
 
     def __str__(self):
-        return '{}: {}'.format(self.caster, self.matchmap)
+        return '{}: {}'.format(self.title, self.match)
 
 
 

@@ -79,7 +79,7 @@ class TeamAdmin(admin.ModelAdmin):
             merge_1.name = new_name
             merge_1.name_long = new_long
             merge_1.save()
-            merge_2.lineup_set.all().update(team=merge_1)
+            merge_2.lineup_set.update(team=merge_1)
             merge_2.delete()
 
             #for lu i
@@ -92,16 +92,24 @@ class LineupAdmin(admin.ModelAdmin):
 class MatchAdmin(admin.ModelAdmin):
     list_display = ['tournament', 'lineup_a', 'lineup_b', 'bestof', 'first_map_at', 'overall_score']
     list_filter = ['lineup_a', 'lineup_b']
+    search_fields = ['lineup_b__team__name', 'lineup_b__team__name_long', 'tournament__name']
+    autocomplete_fields = ['lineup_a', 'lineup_b', 'tournament']
 
     def overall_score(self, obj):
         score = obj.get_overall_score()
         return '{}:{}'.format(*score)
 
 
+class ExternalLinkAdmin(admin.ModelAdmin):
+    list_display = ['match', 'link_type', 'title', 'url']
+    raw_id_fields = ['match']
+    #autocomplete_fields = ['match']
+
+
 admin.site.register(models.Team, TeamAdmin)
 admin.site.register(models.Lineup, LineupAdmin)
 admin.site.register(models.LineupPlayer)
-admin.site.register(models.Cast)
+admin.site.register(models.ExternalLink, ExternalLinkAdmin)
 admin.site.register(models.Map)
 admin.site.register(models.Match, MatchAdmin)
 admin.site.register(models.MatchMap, MatchMapAdmin)
