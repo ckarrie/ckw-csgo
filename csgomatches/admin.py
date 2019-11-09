@@ -103,6 +103,7 @@ class MatchAdmin(admin.ModelAdmin):
 class ExternalLinkAdmin(admin.ModelAdmin):
     list_display = ['match', 'link_type', 'title', 'url']
     raw_id_fields = ['match']
+    list_editable = ['url', 'title']
     #autocomplete_fields = ['match']
 
 
