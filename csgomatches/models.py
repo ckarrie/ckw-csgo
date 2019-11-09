@@ -170,6 +170,9 @@ class ExternalLink(models.Model):
     def __str__(self):
         return '{}: {}'.format(self.title, self.match)
 
+    class Meta:
+        ordering = ['match', 'link_type']
+
 
 
 

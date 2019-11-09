@@ -247,6 +247,10 @@
             color: #ffffff;
         }
 
+        a.twitch_cast:link, a.twitch_cast:visited {
+            color: #ffc000;
+        }
+
         .footer {
             margin: 50px 0 10px 0;
             padding: 10px 10px;
@@ -335,7 +339,7 @@
         {% for match in object_list %}
 
             <h2>
-                <div class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</div>
+                <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
                 <!-- <div class="bo" style="float: right; margin-top: 3px">{{ match.get_bestof_display }}</div> -->
 
                 <span class="team_a">{{ match.lineup_a.team }}</span> vs <span class="team_b">{{ match.lineup_b.team }}</span>
@@ -345,7 +349,7 @@
                 </small>
                 <small style="margin-right: 10px;">
                     {% for link in match.externallink_set.all %}
-                        <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})"><code>{{ link.get_link_type_display }}</code></a>
+                        <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
                     {% endfor %}
                 </small>
             </h2>
