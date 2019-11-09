@@ -151,6 +151,9 @@ class MatchMap(models.Model):
             self.match.first_map_at = first_matchmap.starting_at
             self.match.save()
 
+    class Meta:
+        ordering = ['-starting_at']
+
 
 class Cast(models.Model):
     matchmap = models.ForeignKey(MatchMap, on_delete=models.CASCADE)

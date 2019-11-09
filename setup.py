@@ -20,5 +20,6 @@ setup(
         'django',
         'requests',
         'psycopg2-binary', 'bs4', 'python-dateutil', 'python-memcached',
+        'django_ical',
     ]
 )
