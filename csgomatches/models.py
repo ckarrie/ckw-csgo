@@ -158,11 +158,11 @@ class MatchMap(models.Model):
 class ExternalLink(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     link_type = models.CharField(max_length=255, choices=(
-        ('hltv_match', 'HLTV Matchlink'),
-        ('99dmg_match', '99DMG Matchlink'),
-        ('twitch_cast', 'Twitch Cast'),
-        ('twitch_vod', 'Twitch VOD'),
-        ('youtube_vod', 'Youtube VOD'),
+        ('hltv_match', 'HLTV'),
+        ('99dmg_match', '99DMG'),
+        ('twitch_cast', 'Cast'),
+        ('twitch_vod', 'VOD'),
+        ('youtube_vod', 'VOD'),
     ))
     title = models.CharField(max_length=255)
     url = models.URLField()

@@ -77,138 +77,153 @@ class Command(BaseCommand):
         # for teamrow in matchesBox.select('.team-row'):
         #    print(teamrow)
 
-
-
-        if options['y0fl0w']:
-            self.crawl_y0fl0w_de()
         if options['dmg99']:
             self.crawl_99damage_de(include_archive_pages=options['include_archive_pages'])
 
-    def crawl_y0fl0w_de(self):
+        if options['y0fl0w']:
+            self.crawl_y0fl0w_de(include_archive_pages=True)
+
+    def crawl_y0fl0w_de(self, include_archive_pages=True):
         map_to_left = ['BIG']
-        y_url = 'https://big.y0fl0w.de'
-        response_json = requests.get(y_url).json()
-        for event_data in response_json:
-            event_name = event_data.get('event')
-            event_matches = event_data.get('matches', [])
-            tournament = apps.get_model('csgomatches.Tournament').objects.filter(
-                Q(name=event_name) | Q(name_alt=event_name) | Q(name_hltv=event_name) | Q(name_99dmg=event_name)
-            ).first()
-            if not tournament:
-                tournament = apps.get_model('csgomatches.Tournament')(
-                    name=event_name,
-                    name_hltv=event_name
-                )
-                tournament.save()
+        json_urls = ['https://big.y0fl0w.de', ]
+        if include_archive_pages:
+            json_urls += [
+                'https://big.y0fl0w.de/?finished=true'
+            ]
 
-            if not tournament.name_hltv:
-                tournament.name_hltv = event_name
-                tournament.save()
-
-            for match_data in event_matches:
-                lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(
-                    Q(team__name=match_data.get('t1')) | Q(team__name_long=match_data.get('t1'))
+        for y_url in json_urls:
+            response_json = requests.get(y_url).json()
+            for event_data in response_json:
+                event_name = event_data.get('event')
+                event_matches = event_data.get('matches', [])
+                if ' - ' in event_name:
+                    event_name = event_name.split(' - ')[0]
+                tournament = apps.get_model('csgomatches.Tournament').objects.filter(
+                    Q(name=event_name) | Q(name_alt=event_name) | Q(name_hltv=event_name) | Q(name_99dmg=event_name)
                 ).first()
-                lineup_b = apps.get_model('csgomatches.Lineup').objects.filter(
-                    Q(team__name=match_data.get('t2')) | Q(team__name_long=match_data.get('t2'))
-                ).first()
+                if not tournament:
+                    tournament = apps.get_model('csgomatches.Tournament')(
+                        name=event_name,
+                        name_hltv=event_name
+                    )
+                    tournament.save()
 
-                if not lineup_a:
-                    team_lineup_a = apps.get_model('csgomatches.Team')(name=match_data.get('t1'))
-                    team_lineup_a.save()
-                    lineup_a = apps.get_model('csgomatches.Lineup')(team=team_lineup_a, active_from=timezone.now())
-                    lineup_a.save()
+                if not tournament.name_hltv:
+                    tournament.name_hltv = event_name
+                    tournament.save()
 
-                if lineup_a and match_data.get('t1_hltvID') and not lineup_a.team_logo_url:
-                    lineup_a.team_logo_url = 'https://static.hltv.org/images/team/logo/' + match_data.get('t1_hltvID')
-                    lineup_a.save()
+                for match_data in event_matches:
+                    lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(
+                        Q(team__name=match_data.get('t1')) | Q(team__name_long=match_data.get('t1'))
+                    ).first()
+                    lineup_b = apps.get_model('csgomatches.Lineup').objects.filter(
+                        Q(team__name=match_data.get('t2')) | Q(team__name_long=match_data.get('t2'))
+                    ).first()
 
-                if not lineup_b:
-                    team_lineup_b = apps.get_model('csgomatches.Team')(name=match_data.get('t2'))
-                    team_lineup_b.save()
-                    lineup_b = apps.get_model('csgomatches.Lineup')(team=team_lineup_b, active_from=timezone.now())
-                    lineup_b.save()
+                    if not lineup_a:
+                        team_lineup_a = apps.get_model('csgomatches.Team')(
+                            Q(name__iexact=match_data.get('t1')) | Q(name_long__iexact=match_data.get('t1'))
+                        )
+                        team_lineup_a.save()
+                        lineup_a = apps.get_model('csgomatches.Lineup')(team=team_lineup_a, active_from=timezone.now())
+                        lineup_a.save()
 
-                if lineup_b and match_data.get('t2_hltvID') and not lineup_b.team_logo_url:
-                    lineup_b.team_logo_url = 'https://static.hltv.org/images/team/logo/' + match_data.get('t2_hltvID')
-                    lineup_b.save()
+                    if lineup_a and match_data.get('t1_hltvID') and not lineup_a.team_logo_url:
+                        lineup_a.team_logo_url = 'https://static.hltv.org/images/team/logo/' + match_data.get('t1_hltvID')
+                        lineup_a.save()
 
-                swap_team_and_score = False
-                if match_data.get('t1') not in map_to_left:
-                    swap_team_and_score = True
-                    lineup_a, lineup_b = lineup_b, lineup_a
+                    if not lineup_b:
+                        team_lineup_b = apps.get_model('csgomatches.Team')(
+                            Q(name__iexact=match_data.get('t2')) | Q(name_long__iexact=match_data.get('t2'))
+                        )
+                        team_lineup_b.save()
+                        lineup_b = apps.get_model('csgomatches.Lineup')(team=team_lineup_b, active_from=timezone.now())
+                        lineup_b.save()
 
-                first_match_start = dateutil.parser.parse(match_data.get('time'), dayfirst=True)
-                aware_first_match_start = timezone.make_aware(first_match_start)
+                    if lineup_b and match_data.get('t2_hltvID') and not lineup_b.team_logo_url:
+                        lineup_b.team_logo_url = 'https://static.hltv.org/images/team/logo/' + match_data.get('t2_hltvID')
+                        lineup_b.save()
 
-                print("first_match_start", lineup_a, lineup_b, tournament, first_match_start, aware_first_match_start)
+                    swap_team_and_score = False
+                    if match_data.get('t1') not in map_to_left:
+                        swap_team_and_score = True
+                        lineup_a, lineup_b = lineup_b, lineup_a
 
-                bestof = 3
-                if "1" in match_data.get('mType', ''):
-                    bestof = 1
-                elif "2" in match_data.get('mType', ''):
-                    bestof = 2
-                elif "3" in match_data.get('mType', ''):
+                    first_match_start = dateutil.parser.parse(match_data.get('time'), dayfirst=True)
+                    aware_first_match_start = timezone.make_aware(first_match_start)
+
+                    print("first_match_start", lineup_a, lineup_b, tournament, first_match_start, aware_first_match_start)
+
                     bestof = 3
-                elif "5" in match_data.get('mType', ''):
-                    bestof = 5
+                    if "1" in match_data.get('mType', ''):
+                        bestof = 1
+                    elif "2" in match_data.get('mType', ''):
+                        bestof = 2
+                    elif "3" in match_data.get('mType', ''):
+                        bestof = 3
+                    elif "5" in match_data.get('mType', ''):
+                        bestof = 5
 
-                match = apps.get_model('csgomatches.Match').objects.filter(
-                    tournament=tournament,
-                    lineup_a=lineup_a,
-                    lineup_b=lineup_b,
-                ).first()
-
-                if not match:
-                    match = apps.get_model('csgomatches.Match')(
+                    match = apps.get_model('csgomatches.Match').objects.filter(
                         tournament=tournament,
                         lineup_a=lineup_a,
                         lineup_b=lineup_b,
-                        bestof=bestof
-                    )
-                    match.save()
+                    ).first()
 
-                existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
-                    match=match
-                )
-
-                maps_data = match_data.get('maps', [])
-
-                # if existing_matchmaps.count() != len(maps_data):
-
-                #https://www.hltv.org/matches/2337711/match <- added match, strange hltv behaviour
-                match_id = match_data.get('hltvMatchID')
-                if match_id:
-                    hltv_url = 'https://www.hltv.org/matches/{}/match'.format(match_id)
-                    apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
-                        url = hltv_url,
-                        match = match,
-                        link_type = 'hltv_match',
-                        defaults={
-                            'title': str(match),
-                        }
-                    )
-
-
-                if not existing_matchmaps.exists():
-                    for i, map_data in enumerate(maps_data):
-                        matchmap = apps.get_model('csgomatches.MatchMap')(
-                            match=match,
-                            starting_at=aware_first_match_start + timezone.timedelta(hours=i),
-                            map_nr=i + 1,
-
+                    if not match:
+                        match = apps.get_model('csgomatches.Match')(
+                            tournament=tournament,
+                            lineup_a=lineup_a,
+                            lineup_b=lineup_b,
+                            bestof=bestof
                         )
-                        matchmap.save()
+                        match.save()
 
-                else:
+                    existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                        match=match
+                    )
+
+                    maps_data = match_data.get('maps', [])
+
+                    # if existing_matchmaps.count() != len(maps_data):
+
+                    #https://www.hltv.org/matches/2337711/match <- added match, strange hltv behaviour
+                    match_id = match_data.get('hltvMatchID')
+                    if match_id:
+                        hltv_url = 'https://www.hltv.org/matches/{}/match'.format(match_id)
+                        apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
+                            url = hltv_url,
+                            match = match,
+                            link_type = 'hltv_match',
+                            defaults={
+                                'title': str(match),
+                            }
+                        )
+
                     for i, map_data in enumerate(maps_data):
                         results = map_data.get('result')
-                        name = map_data.get('name')
-                        matchmap = apps.get_model('csgomatches.MatchMap').objects.filter(
-                            match=match,
-                            map_nr=i + 1,
-                        ).first()
-                        if matchmap:
+                        starting_at = aware_first_match_start + timezone.timedelta(hours=i)
+
+                        if i >= 2 and starting_at < timezone.now() and results == '-':
+                            unplayed_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                                match=match,
+                                map_nr__gte=3,
+                                rounds_won_team_a=0,
+                                rounds_won_team_b=0,
+                                starting_at__lt=timezone.now()
+                            )
+                            unplayed_matchmaps.delete()
+
+                        else:
+                            matchmap, matchmap_created = apps.get_model('csgomatches.MatchMap').objects.get_or_create(
+                                match=match,
+                                map_nr=i + 1,
+                                defaults={
+                                    'starting_at': starting_at,
+                                }
+                            )
+                            name = map_data.get('name')
+
                             if results and ':' in results:
                                 t1_res, t2_res = results.split(":")
                                 t1_res, t2_res = int(t1_res), int(t2_res)
@@ -216,35 +231,24 @@ class Command(BaseCommand):
                                 if swap_team_and_score:
                                     t1_res, t2_res = t2_res, t1_res
 
-
-                                matchmap.rounds_won_team_a = t1_res
-                                matchmap.rounds_won_team_b = t2_res
-                                matchmap.save()
+                                if t1_res > matchmap.rounds_won_team_a or t2_res > matchmap.rounds_won_team_b:
+                                    matchmap.rounds_won_team_a = t1_res
+                                    matchmap.rounds_won_team_b = t2_res
+                                    matchmap.save()
 
                             if name and 'TBA' not in name:
                                 # set map
-                                cs_name = HLTV_MAP_NAMES_TO_CS_NAME.get(name, None)
+                                cs_name = HLTV_MAP_NAMES_TO_CS_NAME.get(name, 'de_' + name.lower())
                                 # not found in HLTV_MAP_NAMES_TO_CS_NAME
-                                if cs_name:
-                                    played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
-                                        cs_name=cs_name,
-                                        defaults={
-                                            'name': name
-                                        }
-                                    )
-                                else:
-                                    played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
-                                        cs_name='de_' + name.lower(),
-                                        defaults={
-                                            'name': name
-                                        }
-                                    )
+                                played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
+                                    cs_name=cs_name,
+                                    defaults={
+                                        'name': name
+                                    }
+                                )
                                 print("TBD Setting Map name", name, match)
                                 matchmap.played_map = played_map
                                 matchmap.save()
-
-                        else:
-                            print("Cannot find MatchMap", match, map_data)
 
     def crawl_99damage_de(self, include_archive_pages=False):
         map_to_left = ['BIG', 'BIG.A']
@@ -353,7 +357,9 @@ class Command(BaseCommand):
                     ).first()
 
                     if not lineup_b:
-                        team_b = apps.get_model('csgomatches.Team').objects.filter(name=team_right).first()
+                        team_b = apps.get_model('csgomatches.Team').objects.filter(
+                            Q(name__iexact=team_right) | Q(name_long__iexact=team_right)
+                        ).first()
                         if not team_b:
                             team_b = apps.get_model('csgomatches.Team')(name=team_right)
                             team_b.save()
@@ -383,6 +389,16 @@ class Command(BaseCommand):
                             bestof=bestof
                         )
                         match.save()
+
+                    #Match Link
+                    apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
+                        url=matches_url,
+                        match=match,
+                        link_type='99dmg_match',
+                        defaults={
+                            'title': str(match),
+                        }
+                    )
 
                     # Prepoulate Maps
 

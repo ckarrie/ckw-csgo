@@ -20,7 +20,7 @@ class MatchMapAdmin(admin.ModelAdmin):
 class TournamentAdmin(admin.ModelAdmin):
     search_fields = ['name', 'name_alt', 'name_hltv', 'name_99dmg']
     list_display = ['name', 'name_alt', 'name_hltv', 'name_99dmg']
-    actions = ['cleanup']
+    actions = ['cleanup', 'merge_two']
 
     def cleanup(self, request, queryset):
         for obj in queryset:
@@ -45,7 +45,23 @@ class TournamentAdmin(admin.ModelAdmin):
                     other_obj.match_set.update(tournament=obj_1)
                     other_obj.delete()
 
+    def merge_two(self, request, queryset):
+        first = queryset[0]
+        second = queryset[1]
+        if second.name_hltv:
+            first.name_hltv = second.name_hltv
+        if second.name_99dmg:
+            first.name_99dmg = second.name_99dmg
 
+        existing_matches = second.match_set.all()
+        for em in existing_matches:
+            first_match = models.Match.objects.filter(tournament=first, lineup_a=em.lineup_a, lineup_b=em.lineup_b).first()
+            if first_match:
+                em.externallink_set.update(match=first_match)
+                em.delete()
+
+        first.save()
+        second.delete()
 
 
 class TeamAdmin(admin.ModelAdmin):
