@@ -14,8 +14,23 @@ else:
     CACHE_ARCHIVE_TIME = 10*60
 
 urlpatterns = [
-    path('', cache_page(timeout=CACHE_INDEX_TIME)(views.IndexView.as_view()), name="match_upcoming"),
-    path('archive/<int:year>/', cache_page(timeout=CACHE_ARCHIVE_TIME)(views.YearArchiveView.as_view()), name="match_history"),
-    path('feeds/big_upcoming.ics', feeds.UpcomingEventsFeed(), name='ics_upcoming_big'),
-    path('admin/', admin.site.urls),
+    path(
+        '',
+        cache_page(timeout=CACHE_INDEX_TIME)(views.IndexView.as_view()),
+        name="match_upcoming"
+    ),
+    path(
+        'archive/<int:year>/',
+        cache_page(timeout=CACHE_ARCHIVE_TIME)(views.YearArchiveView.as_view()),
+        name="match_history"
+    ),
+    path(
+        'feeds/big_upcoming.ics',
+        cache_page(timeout=CACHE_INDEX_TIME)(feeds.UpcomingEventsFeed()),
+        name='ics_upcoming_big'
+    ),
+    path(
+        'admin/',
+        admin.site.urls
+    ),
 ]

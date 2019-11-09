@@ -176,6 +176,20 @@ class Command(BaseCommand):
 
                 # if existing_matchmaps.count() != len(maps_data):
 
+                #https://www.hltv.org/matches/2337711/
+                match_id = match_data.get('hltvMatchID')
+                if match_id:
+                    hltv_url = 'https://www.hltv.org/matches/{}/'.format(match_id)
+                    apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
+                        url = hltv_url,
+                        match = match,
+                        link_type = 'hltv_match',
+                        defaults={
+                            'title': str(match)
+                        }
+                    )
+
+
                 if not existing_matchmaps.exists():
                     for i, map_data in enumerate(maps_data):
                         matchmap = apps.get_model('csgomatches.MatchMap')(
