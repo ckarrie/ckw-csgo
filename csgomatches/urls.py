@@ -42,6 +42,10 @@ urlpatterns = [
     ),
     path('sitemap.xml', cache_page(CACHE_ARCHIVE_TIME)(sitemap), {
         'sitemaps': sitemaps,
+        'template_name': 'csgomatches/feeds/google.xml'
+    }, name='django.contrib.sitemaps.views.sitemap'),
+    path('sitemap-google-news.xml', cache_page(CACHE_ARCHIVE_TIME)(sitemap), {
+        'sitemaps': sitemaps,
         'template_name': 'csgomatches/feeds/google-news.xml'
     }, name='django.contrib.sitemaps.views.sitemap'),
     path(
