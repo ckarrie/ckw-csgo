@@ -1,0 +1,15 @@
+User-agent: *
+Disallow:
+Sitemap: https://wannspieltbig.de/sitemap.xml.
+
+# too many repeated hits, too quick
+User-agent: litefinder
+Disallow: /
+
+# Yahoo. too many repeated hits, too quick
+User-agent: Slurp
+Disallow: /
+
+# too many repeated hits, too quick
+User-agent: Baidu
+Disallow: /
