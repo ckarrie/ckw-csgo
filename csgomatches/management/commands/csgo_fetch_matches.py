@@ -210,6 +210,8 @@ class Command(BaseCommand):
                                 link_type = 'twitch_vod'
                                 mlang, mnr = vod_lang.split('_')
                                 vod_title = 'VOD #{} ({})'.format(mnr, mlang)
+                                if '/videos/v' in vod_url:
+                                    vod_url = vod_url.replace('/videos/v', '/videos/')
                             if '_m' in vod_lang and 'youtube' in vod_url:
                                 link_type = 'youtube_vod'
                                 mlang, mnr = vod_lang.split('_')

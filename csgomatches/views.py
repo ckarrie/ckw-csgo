@@ -23,7 +23,7 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         qs = super(IndexView, self).get_queryset()
         qs = qs.filter(
-            first_map_at__gte=timezone.now() - timezone.timedelta(hours=6)
+            first_map_at__gte=timezone.now() - timezone.timedelta(hours=6),
         ).order_by('first_map_at')
         return qs
 
