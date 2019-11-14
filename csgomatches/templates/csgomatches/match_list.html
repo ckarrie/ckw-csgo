@@ -423,11 +423,23 @@
                 <h3 class="hide-on-large">{{ match.tournament.name }}</h3>
                 <div class="hide-on-large matchlinks">
                     {% for link in match.externallink_set.all %}
-                        {% ifchanged link.link_flag %}
-                            <img src="{% static link.get_flag_url %}" class="flag">
+                        {% if current_view == 'index' %}
+                            {% ifchanged link.link_flag %}
+                                <img src="{% static link.get_flag_url %}" class="flag">
+                            {% else %}
+                            {% endifchanged %}
+                            <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}">{{ link.get_link_type_display }}</a>
                         {% else %}
-                        {% endifchanged %}
-                        <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}">{{ link.get_link_type_display }}</a>
+
+                            {% if link.link_type != 'twitch_cast' %}
+                                {% ifchanged link.link_flag %}
+                                    <img src="{% static link.get_flag_url %}" class="flag">
+                                {% else %}
+                                {% endifchanged %}
+                                <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})">{{ link.get_link_type_display }}</a>
+
+                            {% endif %}
+                        {% endif %}
                     {% endfor %}
                 </div>
 
