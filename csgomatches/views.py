@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.utils import timezone
@@ -21,7 +22,9 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         qs = super(IndexView, self).get_queryset()
-        qs = qs.filter(first_map_at__date__gte=timezone.now().date()).order_by('first_map_at')
+        qs = qs.filter(
+            first_map_at__gte=timezone.now() - timezone.timedelta(hours=6)
+        ).order_by('first_map_at')
         return qs
 
     def get_context_data(self, *args, **kwargs):

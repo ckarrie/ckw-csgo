@@ -4,11 +4,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
         Wann spielt BIG?
         {% with next_match=object_list.first %}
             {% if next_match and current_view == 'index' %}
-                Am {{ next_match.first_map_at|date:'d.m.Y H:i' }} gegen {{ next_match.lineup_b.team.name }}
+                Am {{ next_match.first_map_at|date:'d.m.Y H:i' }} {{ next_match.lineup_a.team.name }} gegen {{ next_match.lineup_b.team.name }}
             {% endif %}
         {% endwith %}
     </title>
@@ -52,14 +53,6 @@
         h1 a:link, h1 a:visited, h1 a:active, h1 a:hover {
             color: inherit;
             text-decoration: none;
-        }
-
-        .center {
-            margin: auto;
-            width: 800px;
-            padding: 20px;
-            color: #c3c3c3;
-            background-color: #585858;
         }
 
         h2 {
@@ -199,7 +192,6 @@
         }
 
         .navigation li {
-            display: inline;
             list-style-type: none;
             padding: 5px 20px;
             background-color: #3e3e3e;
@@ -228,19 +220,6 @@
 
         .matchmapbox.unplayed {
             display: none;
-        }
-
-        .logo {
-            float: right;
-            width: 268px;
-            height: 130px;
-            overflow: hidden;
-        }
-
-        .logo img {
-            width: 300px;
-            height: 203px;
-            margin: -39px 0 0 -6px;
         }
 
         .white {
@@ -273,6 +252,57 @@
             body {
                 background: #000000;
             }
+
+            .center {
+                padding: 20px;
+                color: #c3c3c3;
+                background-color: #585858;
+            }
+
+            .logo {
+                overflow: hidden;
+                width: 120px;
+                float: right;
+            }
+
+            .logo img {
+                width: 115px;
+                margin: -12px 0 -10px 10px;
+            }
+
+            h1 {
+                font-size: 22pt;
+                padding-bottom: 10px;
+                line-height: 0.95;
+            }
+
+            .matches {
+                padding-top: 20px;
+            }
+
+            h3 {
+                font-size: 12pt;
+            }
+
+            .matchmapbox {
+                width: 33%;
+            }
+
+            .map_countdown {
+                font-size: 12pt;
+                border-top: 2px solid #585858;
+                display: table-cell;
+            }
+
+            .matches h2 {
+                font-size: 14pt;
+            }
+
+            .matchlinks {
+                text-align: center;
+                font-size: 10pt;
+            }
+
         }
 
         /* Desktop Styles */
@@ -287,8 +317,40 @@
             }
 
             .center {
+                margin: auto;
+                width: 800px;
+                padding: 20px;
+                color: #c3c3c3;
+                background-color: #585858;
                 opacity: 0.99;
             }
+
+            h1 {
+                font-size: 33pt;
+                padding-bottom: 20px;
+            }
+
+            .logo {
+                float: right;
+                width: 268px;
+                height: 130px;
+                overflow: hidden;
+            }
+
+            .logo img {
+                width: 300px;
+                height: 203px;
+                margin: -39px 0 0 -6px;
+            }
+
+            .matches {
+                padding-top: 60px;
+            }
+
+            .navigation li {
+                display: inline;
+            }
+
         }
 
         {% comment %}
@@ -331,83 +393,98 @@
     <h1><a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a></h1>
     <p>Eine Fanseite des <a href="https://bigclan.gg">BIG-Clans</a> - von und für die Community.</p>
 
+    <div class="matches">
 
-    <p style="margin: 0 0 60px 0"></p>
+        {% block matches %}
 
-    {% block matches %}
+            {% for match in object_list %}
 
-        {% for match in object_list %}
+                <h2>
+                    <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
+                    <!-- <div class="bo" style="float: right; margin-top: 3px">{{ match.get_bestof_display }}</div> -->
 
-            <h2>
-                <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
-                <!-- <div class="bo" style="float: right; margin-top: 3px">{{ match.get_bestof_display }}</div> -->
+                    <span class="team_a">{{ match.lineup_a.team }}</span> vs <span class="team_b">{{ match.lineup_b.team }}</span>
 
-                <span class="team_a">{{ match.lineup_a.team }}</span> vs <span class="team_b">{{ match.lineup_b.team }}</span>
-
-                <small class="hide-on-small">
-                    {{ match.tournament.name }}
-                </small>
-                <small style="margin-right: 10px;">
-                    {% for link in match.externallink_set.all %}
-                        <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
-                    {% endfor %}
-                </small>
-            </h2>
-
-            <h3 class="hide-on-large">{{ match.tournament.name }}</h3>
-
-            <div class="row">
-                {% for mm in match.matchmap_set.all %}
-                    <div class="matchmapbox bo{{ match.bestof }} {% if mm.unplayed %}unplayed{% endif %}">
-                        <div class="team_a_score {% if mm.team_a_won %}map_win{% endif %}{% if mm.team_b_won %}map_loss{% endif %}">
-                            {{ mm.rounds_won_team_a }}
-                            {% if match.lineup_a.team_logo_url %}
-                                <img src="{{ match.lineup_a.team_logo_url }}" class="teamlogo">
-                            {% endif %}
-                        </div>
-                        <div class="team_b_score {% if mm.team_b_won %}map_win{% endif %}{% if mm.team_a_won %}map_loss{% endif %}">
-                            {{ mm.rounds_won_team_b }}
-                            {% if match.lineup_b.team_logo_url %}
-                                <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}">
-                            {% endif %}
-                        </div>
-                        <div class="start">
-                            {% if mm.is_live %}
-                                <div class="map_live">LIVE</div>
+                    <small class="hide-on-small">
+                        {{ match.tournament.name }}
+                    </small>
+                    <small style="margin-right: 10px;" class="hide-on-small">
+                        {% for link in match.externallink_set.all %}
+                            {% ifchanged link.link_flag %}
+                                <img src="{% static link.get_flag_url %}" class="flag">
+                                <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
                             {% else %}
-                                {% comment %}
+                                <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
+                            {% endifchanged %}
+                        {% endfor %}
+                    </small>
+                </h2>
+
+                <h3 class="hide-on-large">{{ match.tournament.name }}</h3>
+                <div class="hide-on-large matchlinks">
+                    {% for link in match.externallink_set.all %}
+                        {% ifchanged link.link_flag %}
+                            <img src="{% static link.get_flag_url %}" class="flag">
+                        {% else %}
+                        {% endifchanged %}
+                        <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}">{{ link.get_link_type_display }}</a>
+                    {% endfor %}
+                </div>
+
+                <div class="row">
+                    {% for mm in match.matchmap_set.all %}
+                        <div class="matchmapbox bo{{ match.bestof }} {% if mm.unplayed %}unplayed{% endif %}">
+                            <div class="team_a_score {% if mm.team_a_won %}map_win{% endif %}{% if mm.team_b_won %}map_loss{% endif %}">
+                                {{ mm.rounds_won_team_a }}
+                                {% if match.lineup_a.team_logo_url %}
+                                    <img src="{{ match.lineup_a.team_logo_url }}" class="teamlogo">
+                                {% endif %}
+                            </div>
+                            <div class="team_b_score {% if mm.team_b_won %}map_win{% endif %}{% if mm.team_a_won %}map_loss{% endif %}">
+                                {{ mm.rounds_won_team_b }}
+                                {% if match.lineup_b.team_logo_url %}
+                                    <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}">
+                                {% endif %}
+                            </div>
+                            <div class="start">
+                                {% if mm.is_live %}
+                                    <div class="map_live">LIVE</div>
+                                {% else %}
+                                    {% comment %}
                             {% if mm.starting_at > match.first_map_at %}
                             {% else %}
                                 <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
                             {% endif %}
                             {% endcomment %}
-                                {% if mm.has_ended %}
-                                    <div class="map_countdown">Map beendet</div>
-                                {% else %}
-                                    <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                                    {% if mm.has_ended %}
+                                        <div class="map_countdown">Map beendet</div>
+                                    {% else %}
+                                        <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                                    {% endif %}
                                 {% endif %}
-                            {% endif %}
-                            <strong title="{{ mm.cs_name|default_if_none:"Mapveto steht aus" }}">{{ mm.played_map|default_if_none:"-" }}</strong><br/>
-                            {% if mm.map_pick_of %}
-                                <span class="map_countdown">Map pick {{ mm.map_pick_of }}</span><br/>
-                            {% endif %}
-                            {% comment %}
+                                <strong title="{{ mm.cs_name|default_if_none:"Mapveto steht aus" }}">{{ mm.played_map|default_if_none:"-" }}</strong><br/>
+                                {% if mm.map_pick_of %}
+                                    <span class="map_countdown">Map pick {{ mm.map_pick_of }}</span><br/>
+                                {% endif %}
+                                {% comment %}
                             <!-- {{ mm.starting_at|date:'H:i (e)' }} -->
                             {% for cast in mm.cast_set.all %}
                                 <p><a href="{{ cast.stream_url }}">{{ cast.caster }}</a></p>
                             {% endfor %}
                             {% endcomment %}
+                            </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% empty %}
-            <div class="row">
-                <p>BIG disband? Keine kommenden Matches eingetragen.</p>
-            </div>
-        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% empty %}
+                <div class="row">
+                    <p>BIG disband? Keine kommenden Matches eingetragen.</p>
+                </div>
+            {% endfor %}
 
-    {% endblock %}
+        {% endblock %}
+
+    </div>
 
     <ul class="navigation">
         <li class="{% if current_view == 'index' %}active{% endif %}"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
@@ -436,7 +513,7 @@
                 | <a href="mailto:ckarrie@gmail.com?subject=wannspieltbig.de Anfrage">Kontakt</a>
 
                 <br>
-                Credits: <code>mightyrepooc</code> (Idee) <code>y0fl0w</code> (Crawler) <code>chrissiMZ</code> (Coding, Fotos) <code>Philian</code> (BIG-Logo)
+                Credits: <code>mightyrepooc</code> (Idee) <code>y0fl0w</code> (HLTV Crawler, VOD- und Streamlinks) <code>chrissiMZ</code> (Coding, Fotos) <code>Philian</code> (BIG-Logo)
 
             </small>
         </p>

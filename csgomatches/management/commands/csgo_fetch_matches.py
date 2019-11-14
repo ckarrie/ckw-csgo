@@ -200,6 +200,49 @@ class Command(BaseCommand):
                             }
                         )
 
+                    vods_data = match_data.get('vods', {})
+                    if isinstance(vods_data, dict):
+                        for vod_lang, vod_url in vods_data.items():
+                            link_type = 'twitch_vod'
+                            vod_title = str(match)
+                            mlang = ''
+                            if '_m' in vod_lang and 'https://twitch.tv/videos/' in vod_url:
+                                link_type = 'twitch_vod'
+                                mlang, mnr = vod_lang.split('_')
+                                vod_title = 'VOD #{} ({})'.format(mnr, mlang)
+                            if '_m' in vod_lang and 'youtube' in vod_url:
+                                link_type = 'youtube_vod'
+                                mlang, mnr = vod_lang.split('_')
+                                vod_title = 'VOD #{} ({})'.format(mnr, mlang)
+                            if vod_lang == 'demo':
+                                link_type = 'hltv_demo'
+                                mlang = 'eu'
+
+                            apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
+                                url=vod_url,
+                                match=match,
+                                link_type=link_type,
+                                defaults={
+                                    'title': vod_title,
+                                    'link_flag': mlang
+                                }
+                            )
+
+                    streams_data = match_data.get('streams', {})
+                    if isinstance(vods_data, dict):
+                        for steam_lang, stream_url in streams_data.items():
+                            link_type = 'twitch_cast'
+
+                            apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
+                                url=stream_url,
+                                match=match,
+                                link_type=link_type,
+                                defaults={
+                                    'title': str(match),
+                                    'link_flag': steam_lang
+                                }
+                            )
+
                     for i, map_data in enumerate(maps_data):
                         results = map_data.get('result')
                         starting_at = aware_first_match_start + timezone.timedelta(hours=i)
@@ -397,6 +440,7 @@ class Command(BaseCommand):
                         link_type='99dmg_match',
                         defaults={
                             'title': str(match),
+                            'link_flag': 'de'
                         }
                     )
 

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.sites.models import Site
 
 # Create your models here.
 from django.utils import timezone
@@ -122,10 +123,19 @@ class MatchMap(models.Model):
     #defwin = models.BooleanField(default=False)
     cancelled = models.BooleanField(default=False)
 
+    def get_prev_map(self):
+        return self.match.matchmap_set.filter(map_nr__lt=self.map_nr).order_by('map_nr').last()
+
+    def get_next_map(self):
+        return self.match.matchmap_set.filter(map_nr__gt=self.map_nr).order_by('map_nr').first()
+
     def has_ended(self):
         return (self.rounds_won_team_a >= 16 or self.rounds_won_team_b >= 16) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2
 
     def is_live(self):
+        prev = self.get_prev_map()
+        if prev and prev.is_live():
+            return False
         has_ended = self.has_ended()
         if has_ended:
             return False
@@ -159,22 +169,33 @@ class ExternalLink(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     link_type = models.CharField(max_length=255, choices=(
         ('hltv_match', 'HLTV'),
+        ('hltv_demo', 'Demo'),
         ('99dmg_match', '99DMG'),
         ('twitch_cast', 'Cast'),
         ('twitch_vod', 'VOD'),
         ('youtube_vod', 'VOD'),
     ))
+    link_flag = models.CharField(max_length=3, default='en')
     title = models.CharField(max_length=255)
     url = models.URLField()
+
+    def get_flag_url(self):
+        return 'csgomatches/flags/{}.png'.format(self.link_flag)
 
     def __str__(self):
         return '{}: {}'.format(self.title, self.match)
 
     class Meta:
-        ordering = ['match', 'link_type']
+        ordering = ['match', 'link_flag', 'link_type']
 
 
+class CSGOSiteSetting(models.Model):
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    main_team = models.ForeignKey('csgomatches.Team', on_delete=models.CASCADE, related_name='main_team_settings')
+    second_team = models.ForeignKey('csgomatches.Team', on_delete=models.CASCADE, related_name='sec_team_settings')
 
+    class Meta:
+        unique_together = ['site', 'main_team', 'second_team']
 
 
 
