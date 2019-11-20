@@ -515,4 +515,19 @@ class Command(BaseCommand):
                             matchmap.save()
                             print("[crawl_99damage_de]  - created Matchmap mapinfos=", mapinfos, " matchmap.pk=", matchmap.pk, ' map_nr=', str(map_nr), sep='')
 
-
+                    existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                        match=match,
+                    )
+                    if existing_matchmaps.count() > map_cnt >= 2 and match.bestof == 3:
+                        if match.starting_at < timezone.now():
+                            unplayed_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                                match=match,
+                                map_nr__gte=3,
+                                rounds_won_team_a=0,
+                                rounds_won_team_b=0,
+                                starting_at__lt=timezone.now()
+                            )
+                            if unplayed_matchmaps.exists():
+                                for unplayed_mm in unplayed_matchmaps:
+                                    print("[crawl_99damage_de]  - deleted unplayed Matchmap map_nr=", unplayed_mm.map_nr)
+                                    unplayed_mm.delete()
