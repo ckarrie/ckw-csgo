@@ -256,7 +256,9 @@
             color: white;
         }
 
-
+        .map_pick {
+            font-size: small;
+        }
 
         /* Mobile Styles */
         @media only screen and (max-width: 1000px) {
@@ -325,10 +327,6 @@
 
             .map_ended {
                 display: none;
-            }
-
-            .map_pick {
-                font-size: small;
             }
 
         }
@@ -478,13 +476,13 @@
                                 <div class="team_a_score {% if mm.team_a_won %}map_win{% endif %}{% if mm.team_b_won %}map_loss{% endif %}">
                                     {{ mm.rounds_won_team_a }}
                                     {% if match.lineup_a.team_logo_url %}
-                                        <img src="{{ match.lineup_a.team_logo_url }}" class="teamlogo">
+                                        <img class="teamlogo" src="{{ match.lineup_a.team_logo_url }}" alt="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}" title="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}">
                                     {% endif %}
                                 </div>
                                 <div class="team_b_score {% if mm.team_b_won %}map_win{% endif %}{% if mm.team_a_won %}map_loss{% endif %}">
                                     {{ mm.rounds_won_team_b }}
                                     {% if match.lineup_b.team_logo_url %}
-                                        <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}">
+                                        <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}" alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}">
                                     {% endif %}
                                 </div>
                                 <div class="start">
@@ -506,7 +504,7 @@
                                     <span class="played_map">{{ mm.played_map|default_if_none:"-" }}</span>
                                     <br/>
                                     {% if mm.map_pick_of %}
-                                        <span class="map_pick no-wrap">({{ mm.map_pick_of }})</span><br/>
+                                        <span class="map_pick no-wrap" title="Map pick von">({{ mm.map_pick_of }})</span><br/>
                                     {% endif %}
                                     {% comment %}
                                 <!-- {{ mm.starting_at|date:'H:i (e)' }} -->
