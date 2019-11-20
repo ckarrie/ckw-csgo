@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        Wann spielt BIG?
+        Wann spielt{% if current_view == 'index' %}{% else %}e{% endif %} BIG?
         {% with next_match=object_list.first %}
             {% if next_match and current_view == 'index' %}
                 Am {{ next_match.first_map_at|date:'d.m.Y H:i' }} {{ next_match.lineup_a.team.name }} gegen {{ next_match.lineup_b.team.name }}
