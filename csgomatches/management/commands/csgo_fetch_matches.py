@@ -121,9 +121,7 @@ class Command(BaseCommand):
                     ).first()
 
                     if not lineup_a:
-                        team_lineup_a = apps.get_model('csgomatches.Team')(
-                            Q(name__iexact=match_data.get('t1')) | Q(name_long__iexact=match_data.get('t1'))
-                        )
+                        team_lineup_a = apps.get_model('csgomatches.Team')(name=match_data.get('t1'))
                         team_lineup_a.save()
                         lineup_a = apps.get_model('csgomatches.Lineup')(team=team_lineup_a, active_from=timezone.now())
                         lineup_a.save()
@@ -133,9 +131,7 @@ class Command(BaseCommand):
                         lineup_a.save()
 
                     if not lineup_b:
-                        team_lineup_b = apps.get_model('csgomatches.Team')(
-                            Q(name__iexact=match_data.get('t2')) | Q(name_long__iexact=match_data.get('t2'))
-                        )
+                        team_lineup_b = apps.get_model('csgomatches.Team')(name=match_data.get('t2'))
                         team_lineup_b.save()
                         lineup_b = apps.get_model('csgomatches.Lineup')(team=team_lineup_b, active_from=timezone.now())
                         lineup_b.save()
