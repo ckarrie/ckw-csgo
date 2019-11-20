@@ -148,7 +148,7 @@ class Command(BaseCommand):
                     first_match_start = dateutil.parser.parse(match_data.get('time'), dayfirst=True)
                     aware_first_match_start = timezone.make_aware(first_match_start)
 
-                    print("first_match_start", lineup_a, lineup_b, tournament, first_match_start, aware_first_match_start)
+                    print("[crawl_y0fl0w_de] first_match_start", lineup_a, lineup_b, tournament, first_match_start, aware_first_match_start)
 
                     bestof = 3
                     if "1" in match_data.get('mType', ''):
@@ -253,6 +253,7 @@ class Command(BaseCommand):
                                 rounds_won_team_b=0,
                                 starting_at__lt=timezone.now()
                             )
+                            print("[crawl_y0fl0w_de] deleted unplayed Matchmap map_data=", map_data, "unplayed_matchmaps.pk=", unplayed_matchmaps.values_list('pk', flat=True))
                             unplayed_matchmaps.delete()
 
                         else:
@@ -264,6 +265,9 @@ class Command(BaseCommand):
                                 }
                             )
                             name = map_data.get('name')
+
+                            if matchmap_created:
+                                print("[crawl_y0fl0w_de] created Matchmap map_data=", map_data, "matchmap.pk=", matchmap.pk, 'map_nr=', str(i+1))
 
                             if results and ':' in results:
                                 t1_res, t2_res = results.split(":")
@@ -287,7 +291,7 @@ class Command(BaseCommand):
                                         'name': name
                                     }
                                 )
-                                print("TBD Setting Map name", name, match)
+                                print("[crawl_y0fl0w_de] Setting Map name", name, match)
                                 matchmap.played_map = played_map
                                 matchmap.save()
 
@@ -462,7 +466,7 @@ class Command(BaseCommand):
                             score_left, score_right = int(score_left), int(score_right)
                             if swap_team_and_score:
                                 score_left, score_right = score_right, score_left
-                        print(m_tournament, team_left, team_right, score_left, score_right, date, "sub=", m_datetime, mapinfos)
+                        print("[crawl_99damage_de] Matchmap data", m_tournament, team_left, team_right, score_left, score_right, date, "sub=", m_datetime, mapinfos)
 
                         # get or create Maps
                         if 'de_tba' in mapinfos.get('name'):
@@ -498,3 +502,5 @@ class Command(BaseCommand):
 
                             )
                             matchmap.save()
+                            if matchmap:
+                                print("[crawl_99damage_de] created Matchmap mapinfos=", mapinfos, "matchmap.pk=", matchmap.pk, 'map_nr=', str(i_without_overtime + 1))
