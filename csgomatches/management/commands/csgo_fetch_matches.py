@@ -524,8 +524,8 @@ class Command(BaseCommand):
                             unplayed_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
                                 match=match,
                                 map_nr__gte=3,
-                                rounds_won_team_a=0,
-                                rounds_won_team_b=0,
+                                #rounds_won_team_a=0,
+                                #rounds_won_team_b=0,
                                 starting_at__lt=timezone.now()
                             )
                             if unplayed_matchmaps.exists():
