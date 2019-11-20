@@ -452,7 +452,7 @@ class Command(BaseCommand):
                     existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
                         match=match,
                     )
-                    print("[crawl_99damage_de]  - existing MatchMaps ", existing_matchmaps)
+                    print("[crawl_99damage_de]  - existing MatchMaps (before)", existing_matchmaps)
 
                     # Prepoulate Maps
 
@@ -518,6 +518,7 @@ class Command(BaseCommand):
                     existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
                         match=match,
                     )
+                    print("[crawl_99damage_de]  - existing MatchMaps (after)", existing_matchmaps, existing_matchmaps.count(), map_cnt, "bo=", match.bestof)
                     if existing_matchmaps.count() > map_cnt >= 2 and match.bestof == 3:
                         if match.first_map_at < timezone.now():
                             unplayed_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
