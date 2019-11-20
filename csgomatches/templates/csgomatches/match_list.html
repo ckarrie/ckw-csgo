@@ -436,13 +436,13 @@
                             {{ match.tournament.name }}
                         </small>
                         <small style="margin-right: 10px;" class="hide-on-small">
-                            {% for link in match.externallink_set.all %}
+                            {% for link in match.externallink_set.visible %}
                                 {% ifchanged link.link_flag %}
                                     <img src="{% static link.get_flag_url %}" class="flag">
-                                    <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
                                 {% else %}
-                                    <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
+
                                 {% endifchanged %}
+                                <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
                             {% endfor %}
                         </small>
                     </h2>

@@ -94,6 +94,12 @@ class Match(models.Model):
     def get_first_matchmap(self):
         return self.matchmap_set.order_by('starting_at').first()
 
+    def has_ended(self):
+        team_a, team_b = self.get_overall_score()
+        if team_a > team_b or team_b > team_a:
+            return True
+        return False
+
     def get_overall_score(self):
         lineup_a_mapwins = 0
         lineup_b_mapwins = 0
@@ -164,6 +170,17 @@ class MatchMap(models.Model):
     class Meta:
         ordering = ['starting_at']
 
+class ExternalLinkManager(models.Manager):
+    def visible(self):
+        all_links = self.all()
+        exclude_ids = []
+        for link in all_links:
+            if link.match.has_ended() and link.link_type == 'twitch_cast':
+                exclude_ids.append(link.pk)
+
+        if exclude_ids:
+            return all_links.exclude(id__in=exclude_ids)
+        return all_links
 
 class ExternalLink(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
@@ -178,6 +195,7 @@ class ExternalLink(models.Model):
     link_flag = models.CharField(max_length=3, default='en')
     title = models.CharField(max_length=255)
     url = models.URLField()
+    objects = ExternalLinkManager()
 
     def get_flag_url(self):
         return 'csgomatches/flags/{}.png'.format(self.link_flag)
