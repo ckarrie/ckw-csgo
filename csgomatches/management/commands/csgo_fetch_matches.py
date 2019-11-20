@@ -519,7 +519,7 @@ class Command(BaseCommand):
                         match=match,
                     )
                     if existing_matchmaps.count() > map_cnt >= 2 and match.bestof == 3:
-                        if match.starting_at < timezone.now():
+                        if match.first_map_at < timezone.now():
                             unplayed_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
                                 match=match,
                                 map_nr__gte=3,
