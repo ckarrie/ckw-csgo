@@ -435,6 +435,7 @@ class Command(BaseCommand):
                             bestof=bestof
                         )
                         match.save()
+                        print("[crawl_99damage_de] created new Match", match)
 
                     #Match Link
                     apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
@@ -447,9 +448,16 @@ class Command(BaseCommand):
                         }
                     )
 
+                    print("[crawl_99damage_de] Match ", match, " map_cnt=", map_cnt, " map_indexes=", map_indexes, sep='')
+                    existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                        match=match,
+                    )
+                    print("[crawl_99damage_de]  - existing MatchMaps ", existing_matchmaps)
+
                     # Prepoulate Maps
 
                     for i in range(map_cnt):
+                        map_nr = i + 1
                         i_without_overtime = map_indexes[i]
                         # print(map_cnt, overtime_counter, i, i_without_overtime)
                         sum_divs = sub_soup.select('#content')[0].select('div.match_subs')[0].select('div.sum')
@@ -467,7 +475,7 @@ class Command(BaseCommand):
                             score_left, score_right = int(score_left), int(score_right)
                             if swap_team_and_score:
                                 score_left, score_right = score_right, score_left
-                        print("[crawl_99damage_de] Matchmap data", m_tournament, team_left, team_right, score_left, score_right, date, "sub=", m_datetime, mapinfos)
+                        print("[crawl_99damage_de]  - Matchmap data", m_tournament, team_left, team_right, score_left, score_right, date, "sub=", m_datetime, mapinfos)
 
                         # get or create Maps
                         if 'de_tba' in mapinfos.get('name'):
@@ -482,8 +490,10 @@ class Command(BaseCommand):
 
                         matchmap = apps.get_model('csgomatches.MatchMap').objects.filter(
                             match=match,
-                            map_nr=i_without_overtime + 1
+                            map_nr=map_nr
                         ).first()
+                        if matchmap:
+                            print("[crawl_99damage_de]    - found Matchmap #", matchmap.map_nr, matchmap, sep='')
 
                         if matchmap:
                             if score_left > matchmap.rounds_won_team_a or score_right > matchmap.rounds_won_team_b or played_map != matchmap.played_map:
@@ -495,13 +505,14 @@ class Command(BaseCommand):
                         if not matchmap:
                             matchmap = apps.get_model('csgomatches.MatchMap')(
                                 match=match,
-                                map_nr=i_without_overtime + 1,
+                                map_nr=map_nr,
                                 played_map=played_map,
                                 rounds_won_team_a=score_left,
                                 rounds_won_team_b=score_right,
-                                starting_at=m_datetime + timezone.timedelta(hours=i_without_overtime),
+                                starting_at=m_datetime + timezone.timedelta(hours=map_nr),
 
                             )
                             matchmap.save()
-                            if matchmap:
-                                print("[crawl_99damage_de] created Matchmap mapinfos=", mapinfos, "matchmap.pk=", matchmap.pk, 'map_nr=', str(i_without_overtime + 1))
+                            print("[crawl_99damage_de]  - created Matchmap mapinfos=", mapinfos, " matchmap.pk=", matchmap.pk, ' map_nr=', str(map_nr), sep='')
+
+

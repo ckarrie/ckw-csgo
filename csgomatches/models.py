@@ -158,7 +158,7 @@ class MatchMap(models.Model):
         return (self.rounds_won_team_a < self.rounds_won_team_b) and (self.rounds_won_team_a >= 16 or self.rounds_won_team_b >= 16)
 
     def __str__(self):
-        return '{} - {}'.format(self.match, self.starting_at)
+        return '{} - {} Map #{}'.format(self.match, self.starting_at.date(), self.map_nr)
 
     def save(self, *args, **kwargs):
         super(MatchMap, self).save(*args, **kwargs)
