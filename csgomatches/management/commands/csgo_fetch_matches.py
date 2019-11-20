@@ -243,6 +243,13 @@ class Command(BaseCommand):
 
                     for i, map_data in enumerate(maps_data):
                         results = map_data.get('result')
+                        map_pick_team_text = map_data.get('pick')
+                        if map_pick_team_text:
+                            map_pick_lineup = apps.get_model('csgomatches.Lineup').objects.filter(
+                                Q(team__name=map_pick_team_text) | Q(team__name_long=map_pick_team_text)
+                            ).first()
+                        else:
+                            map_pick_lineup = None
                         starting_at = aware_first_match_start + timezone.timedelta(hours=i)
 
                         if i >= 2 and starting_at < timezone.now() and results == '-':
@@ -294,6 +301,10 @@ class Command(BaseCommand):
                                 )
                                 print("[crawl_y0fl0w_de] Setting Map name", name, match)
                                 matchmap.played_map = played_map
+                                matchmap.save()
+
+                            if map_pick_lineup and matchmap.map_pick_of is None:
+                                matchmap.map_pick_of = map_pick_lineup
                                 matchmap.save()
 
     def crawl_99damage_de(self, include_archive_pages=False):
