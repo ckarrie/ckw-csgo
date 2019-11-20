@@ -253,8 +253,9 @@ class Command(BaseCommand):
                                 rounds_won_team_b=0,
                                 starting_at__lt=timezone.now()
                             )
-                            print("[crawl_y0fl0w_de] deleted unplayed Matchmap map_data=", map_data, "unplayed_matchmaps.pk=", unplayed_matchmaps.values_list('pk', flat=True))
-                            unplayed_matchmaps.delete()
+                            if unplayed_matchmaps.exists():
+                                print("[crawl_y0fl0w_de] deleted unplayed Matchmap map_data=", map_data, "unplayed_matchmaps.pk=", unplayed_matchmaps.values_list('pk', flat=True))
+                                unplayed_matchmaps.delete()
 
                         else:
                             matchmap, matchmap_created = apps.get_model('csgomatches.MatchMap').objects.get_or_create(
