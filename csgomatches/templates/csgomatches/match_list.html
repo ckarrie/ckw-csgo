@@ -188,6 +188,10 @@
             height: 32px;
         }
 
+        .no-wrap {
+            white-space: nowrap;
+        }
+
         .navigation {
         }
 
@@ -252,9 +256,7 @@
             color: white;
         }
 
-        .map_pick {
-            white-space: nowrap;
-        }
+
 
         /* Mobile Styles */
         @media only screen and (max-width: 1000px) {
@@ -323,6 +325,10 @@
 
             .map_ended {
                 display: none;
+            }
+
+            .map_pick {
+                white-space: nowrap;
             }
 
         }
@@ -500,7 +506,7 @@
                                     <span class="played_map">{{ mm.played_map|default_if_none:"-" }}</span>
                                     <br/>
                                     {% if mm.map_pick_of %}
-                                        <span class="map_pick">Map pick {{ mm.map_pick_of }}</span><br/>
+                                        <span class="map_pick">Map pick: <span class="no-wrap">{{ mm.map_pick_of }}</span></span><br/>
                                     {% endif %}
                                     {% comment %}
                                 <!-- {{ mm.starting_at|date:'H:i (e)' }} -->
