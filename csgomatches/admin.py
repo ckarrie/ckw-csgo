@@ -65,8 +65,8 @@ class TournamentAdmin(admin.ModelAdmin):
 
 
 class TeamAdmin(admin.ModelAdmin):
-    search_fields = ['name', 'name_long']
-    list_display = ['name', 'name_long',]
+    search_fields = ['name', 'name_long', 'name_alt']
+    list_display = ['name', 'name_long', 'name_alt']
     actions = ['merge']
 
     def merge(self, request, queryset):
@@ -101,7 +101,7 @@ class TeamAdmin(admin.ModelAdmin):
             #for lu i
 
 class LineupAdmin(admin.ModelAdmin):
-    search_fields = ['team__name', 'team__name_long']
+    search_fields = ['team__name', 'team__name_long', 'team__name_alt']
     list_display = ['team', 'team_logo_url', 'active_from']
 
 

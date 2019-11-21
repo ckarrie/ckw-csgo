@@ -415,7 +415,7 @@ class Command(BaseCommand):
 
                     if not lineup_b:
                         team_b = apps.get_model('csgomatches.Team').objects.filter(
-                            Q(name__iexact=team_right) | Q(name_long__iexact=team_right)
+                            Q(name__iexact=team_right) | Q(name_long__iexact=team_right) | Q(name_alt__iexact=team_right)
                         ).first()
                         if not team_b:
                             team_b = apps.get_model('csgomatches.Team')(name=team_right)
