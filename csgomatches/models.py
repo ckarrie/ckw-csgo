@@ -8,6 +8,7 @@ from django.utils import timezone
 class Team(models.Model):
     name = models.CharField(max_length=255)
     name_long = models.CharField(max_length=255, null=True, blank=True)
+    name_alt = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.name

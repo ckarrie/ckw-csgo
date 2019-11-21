@@ -114,10 +114,10 @@ class Command(BaseCommand):
 
                 for match_data in event_matches:
                     lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(
-                        Q(team__name=match_data.get('t1')) | Q(team__name_long=match_data.get('t1'))
+                        Q(team__name=match_data.get('t1')) | Q(team__name_long=match_data.get('t1')) | Q(team__name_alt=match_data.get('t1'))
                     ).first()
                     lineup_b = apps.get_model('csgomatches.Lineup').objects.filter(
-                        Q(team__name=match_data.get('t2')) | Q(team__name_long=match_data.get('t2'))
+                        Q(team__name=match_data.get('t2')) | Q(team__name_long=match_data.get('t2')) | Q(team__name_alt=match_data.get('t2'))
                     ).first()
 
                     if not lineup_a:
@@ -246,7 +246,7 @@ class Command(BaseCommand):
                         map_pick_team_text = map_data.get('pick')
                         if map_pick_team_text:
                             map_pick_lineup = apps.get_model('csgomatches.Lineup').objects.filter(
-                                Q(team__name=map_pick_team_text) | Q(team__name_long=map_pick_team_text)
+                                Q(team__name=map_pick_team_text) | Q(team__name_long=map_pick_team_text) | Q(team__name_alt=map_pick_team_text)
                             ).first()
                         else:
                             map_pick_lineup = None
@@ -407,10 +407,10 @@ class Command(BaseCommand):
                         team_logos.reverse()
 
                     lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(
-                        Q(team__name=team_left) | Q(team__name_long=team_left)
+                        Q(team__name=team_left) | Q(team__name_long=team_left) | Q(team__name_alt=team_left)
                     ).first()
                     lineup_b = apps.get_model('csgomatches.Lineup').objects.filter(
-                        Q(team__name=team_right) | Q(team__name_long=team_right)
+                        Q(team__name=team_right) | Q(team__name_long=team_right) | Q(team__name_alt=team_right)
                     ).first()
 
                     if not lineup_b:
