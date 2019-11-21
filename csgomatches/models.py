@@ -86,6 +86,14 @@ class Match(models.Model):
         (5, 'BO5'),
     ))
     first_map_at = models.DateTimeField(null=True, blank=True)
+    cancelled = models.IntegerField(
+        default=0,
+        choices=(
+            (0, 'normal'),
+            (1, 'Defwin in favour of team A'),
+            (2, 'Defwin in favour of team B'),
+        )
+    )
 
     def __str__(self):
         if self.lineup_a and self.lineup_b:
@@ -96,6 +104,8 @@ class Match(models.Model):
         return self.matchmap_set.order_by('starting_at').first()
 
     def has_ended(self):
+        if self.cancelled > 0:
+            return True
         team_a, team_b = self.get_overall_score()
         if team_a > team_b or team_b > team_a:
             return True
@@ -111,6 +121,22 @@ class Match(models.Model):
                 if mm.team_b_won():
                     lineup_b_mapwins += 1
         return (lineup_a_mapwins, lineup_b_mapwins)
+
+    def team_a_won(self):
+        if self.cancelled == 1:
+            return True
+        t_a, t_b = self.get_overall_score()
+        return t_a > t_b
+
+    def team_b_won(self):
+        if self.cancelled == 2:
+            return True
+        t_a, t_b = self.get_overall_score()
+        return t_a < t_b
+
+    def is_draw(self):
+        t_a, t_b = self.get_overall_score()
+        return t_a == t_b
 
     class Meta:
         ordering = ['-first_map_at']

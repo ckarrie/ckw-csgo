@@ -472,50 +472,60 @@
                     </div>
 
                     <div class="row">
-                        {% for mm in match.matchmap_set.all %}
-                            <div class="matchmapbox bo{{ match.bestof }} {% if mm.unplayed %}unplayed{% endif %} {% if mm.is_live %}live{% endif %} {% if mm.has_ended %}ended{% endif %} {% if mm == fmm %}firstmatchmap{% else %}othermatchmap{% endif %}">
-                                <div class="team_a_score {% if mm.team_a_won %}map_win{% endif %}{% if mm.team_b_won %}map_loss{% endif %}">
-                                    {{ mm.rounds_won_team_a }}
-                                    {% if match.lineup_a.team_logo_url %}
-                                        <img class="teamlogo" src="{{ match.lineup_a.team_logo_url }}" alt="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}" title="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}">
-                                    {% endif %}
-                                </div>
-                                <div class="team_b_score {% if mm.team_b_won %}map_win{% endif %}{% if mm.team_a_won %}map_loss{% endif %}">
-                                    {{ mm.rounds_won_team_b }}
-                                    {% if match.lineup_b.team_logo_url %}
-                                        <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}" alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}">
-                                    {% endif %}
-                                </div>
-                                <div class="start">
-                                    {% if mm.is_live %}
-                                        <div class="map_live">LIVE</div>
-                                    {% else %}
-                                        {% comment %}
-                                {% if mm.starting_at > match.first_map_at %}
-                                {% else %}
-                                    <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                        {% if match.cancelled %}
+                            <div class="matchmapbox bo{{ match.bestof }} cancelled">
+                                {% if match.cancelled == 1 %}
+                                    Defwin für {{ match.lineup_a.team.name }}
+                                {% elif match.cancelled == 2 %}
+                                    Defwin für {{ match.lineup_b.team.name }}
                                 {% endif %}
-                                {% endcomment %}
-                                        {% if mm.has_ended %}
-                                            <div class="map_countdown map_ended">Map beendet</div>
-                                        {% else %}
-                                            <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
-                                        {% endif %}
-                                    {% endif %}
-                                    <span class="played_map">{{ mm.played_map|default_if_none:"-" }}</span>
-                                    <br/>
-                                    {% if mm.map_pick_of %}
-                                        <span class="map_pick no-wrap" title="Map pick von {{ mm.map_pick_of }}">({{ mm.map_pick_of }})</span><br/>
-                                    {% endif %}
-                                    {% comment %}
-                                <!-- {{ mm.starting_at|date:'H:i (e)' }} -->
-                                {% for cast in mm.cast_set.all %}
-                                    <p><a href="{{ cast.stream_url }}">{{ cast.caster }}</a></p>
-                                {% endfor %}
-                                {% endcomment %}
-                                </div>
                             </div>
-                        {% endfor %}
+                        {% else %}
+                            {% for mm in match.matchmap_set.all %}
+                                <div class="matchmapbox bo{{ match.bestof }} {% if mm.unplayed %}unplayed{% endif %} {% if mm.is_live %}live{% endif %} {% if mm.has_ended %}ended{% endif %} {% if mm == fmm %}firstmatchmap{% else %}othermatchmap{% endif %}">
+                                    <div class="team_a_score {% if mm.team_a_won %}map_win{% endif %}{% if mm.team_b_won %}map_loss{% endif %}">
+                                        {{ mm.rounds_won_team_a }}
+                                        {% if match.lineup_a.team_logo_url %}
+                                            <img class="teamlogo" src="{{ match.lineup_a.team_logo_url }}" alt="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}" title="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}">
+                                        {% endif %}
+                                    </div>
+                                    <div class="team_b_score {% if mm.team_b_won %}map_win{% endif %}{% if mm.team_a_won %}map_loss{% endif %}">
+                                        {{ mm.rounds_won_team_b }}
+                                        {% if match.lineup_b.team_logo_url %}
+                                            <img class="teamlogo" src="{{ match.lineup_b.team_logo_url }}" alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}">
+                                        {% endif %}
+                                    </div>
+                                    <div class="start">
+                                        {% if mm.is_live %}
+                                            <div class="map_live">LIVE</div>
+                                        {% else %}
+                                            {% comment %}
+                                    {% if mm.starting_at > match.first_map_at %}
+                                    {% else %}
+                                        <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                                    {% endif %}
+                                    {% endcomment %}
+                                            {% if mm.has_ended %}
+                                                <div class="map_countdown map_ended">Map beendet</div>
+                                            {% else %}
+                                                <div class="map_countdown">in {{ mm.starting_at|timeuntil }}</div>
+                                            {% endif %}
+                                        {% endif %}
+                                        <span class="played_map">{{ mm.played_map|default_if_none:"-" }}</span>
+                                        <br/>
+                                        {% if mm.map_pick_of %}
+                                            <span class="map_pick no-wrap" title="Map pick von {{ mm.map_pick_of }}">({{ mm.map_pick_of }})</span><br/>
+                                        {% endif %}
+                                        {% comment %}
+                                    <!-- {{ mm.starting_at|date:'H:i (e)' }} -->
+                                    {% for cast in mm.cast_set.all %}
+                                        <p><a href="{{ cast.stream_url }}">{{ cast.caster }}</a></p>
+                                    {% endfor %}
+                                    {% endcomment %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 {% endwith %}
             {% empty %}
