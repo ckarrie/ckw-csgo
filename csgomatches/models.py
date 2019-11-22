@@ -80,7 +80,7 @@ class Map(models.Model):
 
 class Match(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
-    slug = models.SlugField(unique=True, allow_unicode=True, null=True, blank=True, max_length=255)
+    slug = models.SlugField(unique=True, allow_unicode=False, null=True, blank=True, max_length=255)
     lineup_a = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_a_set', null=True, blank=True)
     lineup_b = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_b_set', null=True, blank=True)
     bestof = models.IntegerField(choices=(
@@ -158,9 +158,9 @@ class Match(models.Model):
         )
         if similar_matches_in_same_tournament.exclude(pk=self.pk).exists():
             idx = list(similar_matches_in_same_tournament).index(self)
-            self.slug = slugify("{}-{}-{}".format(self.tournament.name, self, idx), allow_unicode=True)
+            self.slug = slugify("{}-{}-{}".format(self.tournament.name, self, idx))
         else:
-            self.slug = slugify("{}-{}".format(self.tournament.name, self), allow_unicode=True)
+            self.slug = slugify("{}-{}".format(self.tournament.name, self))
         existing_slugs = Match.objects.filter(slug=self.slug).exclude(pk=self.pk)
         if existing_slugs.exists():
             self.slug = slugify("id-{}".format(self.pk))
