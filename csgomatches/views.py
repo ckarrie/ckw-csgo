@@ -60,7 +60,8 @@ class MatchDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         ctx = super(MatchDetailView, self).get_context_data(**kwargs)
         ctx.update({
-            'score': self.object.get_overall_score()
+            'score': self.object.get_overall_score(),
+            'bg_url': get_random_background_image_url()
         })
         return ctx
 
