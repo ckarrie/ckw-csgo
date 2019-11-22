@@ -54,5 +54,13 @@ class YearArchiveView(generic.YearArchiveView):
         })
         return ctx
 
+class MatchDetailView(generic.DetailView):
+    model = models.Match
 
+    def get_context_data(self, **kwargs):
+        ctx = super(MatchDetailView, self).get_context_data(**kwargs)
+        ctx.update({
+            'score': self.object.get_overall_score()
+        })
+        return ctx
 

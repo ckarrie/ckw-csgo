@@ -2,7 +2,10 @@ from django.db import models
 from django.contrib.sites.models import Site
 
 # Create your models here.
+from django.template import defaultfilters
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import slugify
 
 
 class Team(models.Model):
@@ -77,6 +80,7 @@ class Map(models.Model):
 
 class Match(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+    slug = models.SlugField(unique=True, allow_unicode=True, null=True, blank=True, max_length=255)
     lineup_a = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_a_set', null=True, blank=True)
     lineup_b = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_b_set', null=True, blank=True)
     bestof = models.IntegerField(choices=(
@@ -103,9 +107,19 @@ class Match(models.Model):
     def get_first_matchmap(self):
         return self.matchmap_set.order_by('starting_at').first()
 
+    def is_live(self):
+        if self.has_ended():
+            return False
+        return self.first_map_at < timezone.now()
+
     def has_ended(self):
         if self.cancelled > 0:
             return True
+        last_map = self.matchmap_set.order_by('map_nr').last()
+        if last_map:
+            if last_map.has_ended():
+                return True
+            #if last_map.starting_at
         team_a, team_b = self.get_overall_score()
         if team_a > team_b or team_b > team_a:
             return True
@@ -137,6 +151,23 @@ class Match(models.Model):
     def is_draw(self):
         t_a, t_b = self.get_overall_score()
         return t_a == t_b
+    
+    def save(self, *args, **kwargs):
+        similar_matches_in_same_tournament = self.tournament.match_set.filter(
+            lineup_a=self.lineup_a, lineup_b=self.lineup_b
+        )
+        if similar_matches_in_same_tournament.exclude(pk=self.pk).exists():
+            idx = list(similar_matches_in_same_tournament).index(self)
+            self.slug = slugify("{}-{}-{}".format(self.tournament.name, self, idx), allow_unicode=True)
+        else:
+            self.slug = slugify("{}-{}".format(self.tournament.name, self), allow_unicode=True)
+        existing_slugs = Match.objects.filter(slug=self.slug).exclude(pk=self.pk)
+        if existing_slugs.exists():
+            self.slug = slugify("id-{}".format(self.pk))
+        super(Match, self).save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('match_details', kwargs={'slug': self.slug})
 
     class Meta:
         ordering = ['-first_map_at']

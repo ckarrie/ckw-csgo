@@ -1,0 +1,31 @@
+{% extends 'csgomatches/base/base.html' %}
+
+{% load static %}
+
+{% block page_title %}
+    {{ object }} - {{ object.first_map_at.date }} - {{ object.tournament.name }} - Wann spielt BIG?
+{% endblock %}
+
+{% block content_header_h1 %}
+    <a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a>
+{% endblock %}
+
+{% block content %}
+    <div class="content-header">
+        <h2>{{ object }} - {{ score.0 }}:{{ score.1 }}</h2>
+    </div>
+    <div class="match">
+        <p>
+            {{ object.tournament }} - {{ object.first_map_at }}
+        </p>
+        <p><small>Work in Progress</small></p>
+
+    </div>
+    <p>&nbsp;</p>
+{% endblock %}
+
+{% block navigation %}
+    <ul class="navigation">
+        <li class="active"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
+    </ul>
+{% endblock %}

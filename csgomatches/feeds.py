@@ -16,10 +16,13 @@ class UpcomingEventsFeed(ICalFeed):
 
     def items(self):
         return models.Match.objects.filter(
-            first_map_at__date__gte=timezone.now().date()
+            first_map_at__date__gte=timezone.now().date() - timezone.timedelta(days=2)
         ).order_by('first_map_at')
 
     def item_title(self, item):
+        if item.is_live() or item.has_ended():
+            score_a, score_b = item.get_overall_score()
+            return "{} - {}:{}".format(item, score_a, score_b)
         return str(item)
 
     def item_description(self, item):
@@ -29,7 +32,7 @@ class UpcomingEventsFeed(ICalFeed):
         return item.first_map_at
 
     def item_link(self, item):
-        return '#matchup-{}'.format(item.pk)
+        return item.get_absolute_url()
 
 
 class UpcomingMatchesSitemap(Sitemap):
@@ -42,7 +45,7 @@ class UpcomingMatchesSitemap(Sitemap):
         ).order_by('first_map_at')
 
     def location(self, obj):
-        return '/#matchup-{}'.format(obj.pk)
+        return obj.get_absolute_url()
 
     def lastmod(self, obj):
         return obj.first_map_at
@@ -58,8 +61,7 @@ class ArchiveMatchesSitemap(Sitemap):
         ).order_by('-first_map_at')
 
     def location(self, obj):
-        archive_url = reverse('match_history', kwargs={'year': obj.first_map_at.year})
-        return '{}#matchup-{}'.format(archive_url, obj.pk)
+        return obj.get_absolute_url()
 
     def lastmod(self, obj):
         return obj.first_map_at

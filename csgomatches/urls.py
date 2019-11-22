@@ -32,6 +32,11 @@ urlpatterns = [
         name="match_history"
     ),
     path(
+        '<slug:slug>',
+        cache_page(timeout=CACHE_INDEX_TIME)(views.MatchDetailView.as_view()),
+        name="match_details"
+    ),
+    path(
         'feeds/big_upcoming.ics',
         cache_page(timeout=CACHE_INDEX_TIME)(feeds.UpcomingEventsFeed()),
         name='ics_upcoming_big'

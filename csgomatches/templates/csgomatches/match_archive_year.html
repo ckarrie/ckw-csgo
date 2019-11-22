@@ -1,2 +1,29 @@
-{% extends 'csgomatches/match_list.html' %}
+{% extends 'csgomatches/base/base.html' %}
 
+{% block page_title %}
+    Wie ging BIG aus? - Matcharchiv {{ year.year }}
+{% endblock %}
+
+{% block content %}
+    <div class="content-header">
+        <h2>Match-Archiv {{ year.year }}</h2>
+    </div>
+    <div class="matches">
+        {% for match in object_list %}
+            {% include 'csgomatches/blocks/match.html' %}
+        {% empty %}
+            <div class="row">
+                <p>Keine Matches im Archiv von {{ year.year }} gefunden.</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block navigation %}
+    <ul class="navigation">
+        <li class=""><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
+        {% for date in date_list %}
+            <li class="{% if year.year == date.year %}active{% endif %}"><a href="{% url 'match_history' year=date.year %}">{{ date|date:"Y" }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

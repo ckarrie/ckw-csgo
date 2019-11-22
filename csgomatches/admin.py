@@ -106,7 +106,7 @@ class LineupAdmin(admin.ModelAdmin):
 
 
 class MatchAdmin(admin.ModelAdmin):
-    list_display = ['tournament', 'lineup_a', 'lineup_b', 'bestof', 'first_map_at', 'overall_score']
+    list_display = ['tournament', 'lineup_a', 'lineup_b', 'bestof', 'first_map_at', 'overall_score', 'slug']
     list_filter = ['lineup_a', 'lineup_b']
     search_fields = ['lineup_b__team__name', 'lineup_b__team__name_long', 'tournament__name']
     autocomplete_fields = ['lineup_a', 'lineup_b', 'tournament']
@@ -125,6 +125,11 @@ class ExternalLinkAdmin(admin.ModelAdmin):
     #autocomplete_fields = ['match']
 
 
+def save_global(modeladmin, request, queryset):
+    for obj in queryset:
+        obj.save()
+
+
 admin.site.register(models.Team, TeamAdmin)
 admin.site.register(models.Lineup, LineupAdmin)
 admin.site.register(models.LineupPlayer)
@@ -135,3 +140,5 @@ admin.site.register(models.MatchMap, MatchMapAdmin)
 admin.site.register(models.Player)
 admin.site.register(models.PlayerRole)
 admin.site.register(models.Tournament, TournamentAdmin)
+
+admin.site.add_action(save_global, 'save_selected')

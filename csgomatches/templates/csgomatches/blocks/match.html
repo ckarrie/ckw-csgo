@@ -1,0 +1,55 @@
+{% load static %}
+
+{% with fmm=match.matchmap_set.first %}
+    <h2>
+        <a class="matchdetail-link" href="{{ match.get_absolute_url }}" title="Match-Details {{ match }}">
+            <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
+            <!-- <div class="bo" style="float: right; margin-top: 3px">{{ match.get_bestof_display }}</div> -->
+
+            <span class="team_a">{{ match.lineup_a.team }}</span> vs <span class="team_b">{{ match.lineup_b.team }}</span>
+
+        </a>
+
+        <small class="hide-on-small">
+            {{ match.tournament.name }}
+        </small>
+
+
+        <small style="margin-right: 10px;" class="hide-on-small">
+            {% for link in match.externallink_set.visible %}
+                {% ifchanged link.link_flag %}
+                    <img src="{% static link.get_flag_url %}" class="flag">
+                {% else %}
+
+                {% endifchanged %}
+                <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
+            {% endfor %}
+        </small>
+    </h2>
+
+    <h3 class="hide-on-large">{{ match.tournament.name }}</h3>
+
+    <div class="hide-on-large matchlinks">
+        {% for link in match.externallink_set.all %}
+            {% if current_view == 'index' %}
+                {% ifchanged link.link_flag %}
+                    <img src="{% static link.get_flag_url %}" class="flag">
+                {% else %}
+                {% endifchanged %}
+                <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}">{{ link.get_link_type_display }}</a>
+            {% else %}
+
+                {% if link.link_type != 'twitch_cast' %}
+                    {% ifchanged link.link_flag %}
+                        <img src="{% static link.get_flag_url %}" class="flag">
+                    {% else %}
+                    {% endifchanged %}
+                    <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})">{{ link.get_link_type_display }}</a>
+
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% include 'csgomatches/blocks/box_matchrow.html' %}
+{% endwith %}
