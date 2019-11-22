@@ -145,7 +145,11 @@ class Command(BaseCommand):
                         swap_team_and_score = True
                         lineup_a, lineup_b = lineup_b, lineup_a
 
-                    first_match_start = dateutil.parser.parse(match_data.get('time'), dayfirst=True)
+                    if len(match_data.get('time')) >= 13 and match_data.get('time').isdigit():
+                        first_match_timestamp = int(match_data.get('time')[:10])
+                        first_match_start = timezone.datetime.fromtimestamp(first_match_timestamp)
+                    else:
+                        first_match_start = dateutil.parser.parse(match_data.get('time'), dayfirst=True)
                     aware_first_match_start = timezone.make_aware(first_match_start)
 
                     print("[crawl_y0fl0w_de] first_match_start", lineup_a, lineup_b, tournament, first_match_start, aware_first_match_start)
