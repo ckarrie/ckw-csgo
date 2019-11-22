@@ -96,6 +96,7 @@ class HLTVMapSerializer(serializers.Serializer):
 
 class HLTVMatchSerializer(serializers.Serializer):
     hltv_match_id = serializers.IntegerField()
+    api_match_url = serializers.SerializerMethodField(read_only=True, source='get_api_match_url')
     team_a_name = serializers.CharField(max_length=256, read_only=True)
     team_a_id = serializers.IntegerField(read_only=True)
     team_b_name = serializers.CharField(max_length=256, read_only=True)
@@ -103,6 +104,14 @@ class HLTVMatchSerializer(serializers.Serializer):
     maps = HLTVMapSerializer(many=True, read_only=True)
     team_id_to_name = serializers.DictField(read_only=True)
     name_to_team_id = serializers.DictField(read_only=True)
+
+    def get_api_match_url(self, obj):
+        if obj.hltv_match_id:
+            csgo_match = apps.get_model('csgomatches.Match').objects.filter(hltv_match_id=obj.hltv_match_id).first()
+            if csgo_match:
+                url = reverse('match_all-detail', kwargs={'pk': csgo_match.pk})
+                request = self.context.get('request')
+                return request.build_absolute_uri(url)
 
     def create(self, validated_data):
         hltv_match_id = validated_data.get('hltv_match_id')
