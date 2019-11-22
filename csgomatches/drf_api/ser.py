@@ -67,9 +67,10 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
     matchmaps = CSGOMatchMapSerializer(many=True, source='matchmap_set')
 
     def get_livescore_url(self, obj):
-        url = reverse('match_livescore-detail', kwargs={'pk': obj.hltv_match_id})
-        request = self.context.get('request')
-        return request.build_absolute_uri(url)
+        if obj.hltv_match_id:
+            url = reverse('match_livescore-detail', kwargs={'pk': obj.hltv_match_id})
+            request = self.context.get('request')
+            return request.build_absolute_uri(url)
 
     def get_html_detail_url(self, obj):
         url = obj.get_absolute_url()
