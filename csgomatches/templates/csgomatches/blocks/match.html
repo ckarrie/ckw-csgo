@@ -4,10 +4,7 @@
     <h2>
         <a class="matchdetail-link" href="{{ match.get_absolute_url }}" title="Match-Details {{ match }}">
             <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
-            <!-- <div class="bo" style="float: right; margin-top: 3px">{{ match.get_bestof_display }}</div> -->
-
             <span class="team_a">{{ match.lineup_a.team }}</span> vs <span class="team_b">{{ match.lineup_b.team }}</span>
-
         </a>
 
         <small class="hide-on-small">
