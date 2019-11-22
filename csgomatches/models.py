@@ -8,10 +8,21 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 
+class TeamManager(models.Manager):
+    def search_team(self, name):
+        return self.filter(
+            models.Q(name__iexact=name) |
+            models.Q(name_long__iexact=name) |
+            models.Q(name_alt__iexact=name)
+        ).first()
+
 class Team(models.Model):
     name = models.CharField(max_length=255)
     name_long = models.CharField(max_length=255, null=True, blank=True)
     name_alt = models.CharField(max_length=255, null=True, blank=True)
+    hltv_id = models.IntegerField(null=True, blank=True)
+
+    objects = TeamManager()
 
     def __str__(self):
         return self.name
@@ -98,6 +109,7 @@ class Match(models.Model):
             (2, 'Defwin in favour of team B'),
         )
     )
+    hltv_match_id = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
         if self.lineup_a and self.lineup_b:
@@ -168,6 +180,9 @@ class Match(models.Model):
 
     def get_absolute_url(self):
         return reverse('match_details', kwargs={'slug': self.slug})
+
+    def get_livescore_url(self):
+        return
 
     class Meta:
         ordering = ['-first_map_at']

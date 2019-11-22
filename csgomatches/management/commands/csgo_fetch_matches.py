@@ -5,6 +5,8 @@ from django.apps import apps
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils import timezone
+from csgomatches.utils.scrapers.hltv import convert_to_score, get_hlvt_score
+import asyncio
 
 HLTV_MAP_NAMES_TO_CS_NAME = {
     'Nuke': 'de_nuke',
@@ -84,7 +86,7 @@ class Command(BaseCommand):
             self.crawl_y0fl0w_de(include_archive_pages=True)
 
     def crawl_y0fl0w_de(self, include_archive_pages=True):
-        map_to_left = ['BIG']
+        map_to_left = ['BIG',]
         json_urls = ['https://big.y0fl0w.de', ]
         if include_archive_pages:
             json_urls += [
@@ -130,6 +132,10 @@ class Command(BaseCommand):
                         lineup_a.team_logo_url = 'https://static.hltv.org/images/team/logo/' + match_data.get('t1_hltvID')
                         lineup_a.save()
 
+                    if lineup_a and match_data.get('t1_hltvID') and not lineup_a.team.hltv_id:
+                        lineup_a.team.hltv_id = int(match_data.get('t1_hltvID'))
+                        lineup_a.team.save()
+
                     if not lineup_b:
                         team_lineup_b = apps.get_model('csgomatches.Team')(name=match_data.get('t2'))
                         team_lineup_b.save()
@@ -139,6 +145,10 @@ class Command(BaseCommand):
                     if lineup_b and match_data.get('t2_hltvID') and not lineup_b.team_logo_url:
                         lineup_b.team_logo_url = 'https://static.hltv.org/images/team/logo/' + match_data.get('t2_hltvID')
                         lineup_b.save()
+
+                    if lineup_b and match_data.get('t2_hltvID') and not lineup_b.team.hltv_id:
+                        lineup_b.team.hltv_id = int(match_data.get('t2_hltvID'))
+                        lineup_b.team.save()
 
                     swap_team_and_score = False
                     if match_data.get('t1') not in map_to_left:
@@ -175,7 +185,8 @@ class Command(BaseCommand):
                             tournament=tournament,
                             lineup_a=lineup_a,
                             lineup_b=lineup_b,
-                            bestof=bestof
+                            bestof=bestof,
+                            hltv_match_id=match_data.get('hltvMatchID', '')
                         )
                         match.save()
 
@@ -189,6 +200,7 @@ class Command(BaseCommand):
 
                     #https://www.hltv.org/matches/2337711/match <- added match, strange hltv behaviour
                     match_id = match_data.get('hltvMatchID')
+                    hltv_livescore_data = None
                     if match_id:
                         hltv_url = 'https://www.hltv.org/matches/{}/match'.format(match_id)
                         apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
@@ -199,6 +211,13 @@ class Command(BaseCommand):
                                 'title': str(match),
                             }
                         )
+
+                        if not match.hltv_match_id:
+                            match.hltv_match_id = match_id
+                            match.save()
+
+                        #if match.is_live():
+                        hltv_livescore_data = asyncio.get_event_loop().run_until_complete(get_hlvt_score(int(match.hltv_match_id)))
 
                     vods_data = match_data.get('vods', {})
                     if isinstance(vods_data, dict):
@@ -254,6 +273,7 @@ class Command(BaseCommand):
                             ).first()
                         else:
                             map_pick_lineup = None
+
                         starting_at = aware_first_match_start + timezone.timedelta(hours=i)
 
                         if i >= 2 and starting_at < timezone.now() and results == '-':
@@ -281,6 +301,24 @@ class Command(BaseCommand):
                             if matchmap_created:
                                 print("[crawl_y0fl0w_de] created Matchmap map_data=", map_data, "matchmap.pk=", matchmap.pk, 'map_nr=', str(i+1))
 
+                            livescore = convert_to_score(hltv_livescore_data, map_nr=i + 1)
+                            if livescore:
+                                livescore_by_team = {}
+
+                                for team_id, team_score in livescore.items():
+                                    team = apps.get_model('csgomatches.Team').objects.filter(hltv_id=int(team_id)).first()
+                                    if team:
+                                        livescore_by_team[team] = team_score
+
+                                if len(livescore_by_team) == 2:
+                                    t1_score = livescore_by_team[match.lineup_a.team]
+                                    t2_score = livescore_by_team[match.lineup_b.team]
+                                    if swap_team_and_score:
+                                        # convert to 'incorrent' - will be later returned if swap_team_and_score is True
+                                        t1_score, t2_score = t2_score, t1_score
+                                    results = "{}:{}".format(t1_score, t2_score)
+                                    print("[crawl_y0fl0w_de]  - Results by WebSocket livescore", results)
+
                             if results and ':' in results:
                                 t1_res, t2_res = results.split(":")
                                 t1_res, t2_res = int(t1_res), int(t2_res)
@@ -303,7 +341,7 @@ class Command(BaseCommand):
                                         'name': name
                                     }
                                 )
-                                print("[crawl_y0fl0w_de] Setting Map name", name, match)
+                                print("[crawl_y0fl0w_de]  - Setting Map name", name, match)
                                 matchmap.played_map = played_map
                                 matchmap.save()
 

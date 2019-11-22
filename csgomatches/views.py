@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django.db.models import Q
 from django.shortcuts import render
 from django.templatetags.static import static
@@ -5,6 +7,7 @@ from django.utils import timezone
 from django.views import generic
 
 import random
+import asyncio
 
 from . import models
 
@@ -64,4 +67,3 @@ class MatchDetailView(generic.DetailView):
             'bg_url': get_random_background_image_url()
         })
         return ctx
-

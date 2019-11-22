@@ -66,7 +66,7 @@ class TournamentAdmin(admin.ModelAdmin):
 
 class TeamAdmin(admin.ModelAdmin):
     search_fields = ['name', 'name_long', 'name_alt']
-    list_display = ['name', 'name_long', 'name_alt']
+    list_display = ['name', 'name_long', 'name_alt', 'hltv_id']
     actions = ['merge']
 
     def merge(self, request, queryset):
@@ -106,7 +106,7 @@ class LineupAdmin(admin.ModelAdmin):
 
 
 class MatchAdmin(admin.ModelAdmin):
-    list_display = ['tournament', 'lineup_a', 'lineup_b', 'bestof', 'first_map_at', 'overall_score', 'slug']
+    list_display = ['tournament', 'lineup_a', 'lineup_b', 'bestof', 'first_map_at', 'overall_score', 'slug',]
     list_filter = ['lineup_a', 'lineup_b']
     search_fields = ['lineup_b__team__name', 'lineup_b__team__name_long', 'tournament__name']
     autocomplete_fields = ['lineup_a', 'lineup_b', 'tournament']

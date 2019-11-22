@@ -1,10 +1,13 @@
 from django.conf import settings
+from django.conf.urls import url
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.views.decorators.cache import cache_page
 from django.contrib.sitemaps.views import sitemap
 from django.views.generic import TemplateView
 
+from csgomatches.drf_api.urls import router
+api_urlpatterns = router.urls
 from . import feeds
 from . import views
 
@@ -57,5 +60,8 @@ urlpatterns = [
         'robots.txt',
         TemplateView.as_view(template_name="csgomatches/feeds/robots.txt", content_type="text/plain"),
         name="robots_file"
-    )
+    ),
+    path('api/', include(router.urls), )
 ]
+
+#urlpatterns += api_urlpatterns
