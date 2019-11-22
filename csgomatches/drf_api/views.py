@@ -1,23 +1,30 @@
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, pagination
 from django.apps import apps
 
 from . import ser
 from . import ser_objects
 
+class CSGOPagination(pagination.LimitOffsetPagination):
+    max_limit = 50
+    default_limit = 20
+
 class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.Team').objects.all()
     serializer_class = ser.CSGOTeamSerializer
+    pagination_class = CSGOPagination
 
 class TournamentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.Tournament').objects.all()
     serializer_class = ser.CSGOTournamentSerializer
+    pagination_class = CSGOPagination
 
 class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.Match').objects.all()
     serializer_class = ser.CSGOMatchSerializer
+    pagination_class = CSGOPagination
 
     @method_decorator(cache_page(60 * 5))
     def list(self, request, *args, **kwargs):
@@ -27,6 +34,7 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
 class MatchUpcomingViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.Match').objects.filter(first_map_at__gte=timezone.now())
     serializer_class = ser.CSGOMatchSerializer
+    pagination_class = CSGOPagination
 
     @method_decorator(cache_page(10))
     def list(self, request, *args, **kwargs):
@@ -35,6 +43,7 @@ class MatchUpcomingViewSet(viewsets.ReadOnlyModelViewSet):
 class LineupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.Lineup').objects.all()
     serializer_class = ser.CSGOLineupSerializer
+    pagination_class = CSGOPagination
 
     @method_decorator(cache_page(60 * 5))
     def list(self, request, *args, **kwargs):
@@ -45,6 +54,7 @@ class HLTVLiveScoreViewSet(mixins.RetrieveModelMixin,
                            mixins.ListModelMixin,
                            mixins.CreateModelMixin,
                            viewsets.GenericViewSet):
+    pagination_class = CSGOPagination
 
     def get_queryset(self):
         last_7_days = timezone.now() - timezone.timedelta(days=7)
