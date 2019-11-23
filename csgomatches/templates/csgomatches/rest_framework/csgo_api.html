@@ -1,0 +1,9 @@
+{% extends "rest_framework/api.html" %}
+{% load static %}
+
+{% block branding %}
+    <a class='navbar-brand' rel="nofollow" href="{% url 'api-root' %}">
+        <img src="{% static 'csgomatches/logos/BIGLOGO-02.png' %}" style="width: 40px; float: right; margin: -20px 0 0 8px;">
+        REST-API {{ request.get_host }}
+    </a>
+{% endblock %}

@@ -1,7 +1,8 @@
-from rest_framework import routers
+from rest_framework import routers, renderers
 from . import views
 
 router = routers.DefaultRouter()
+router.APIRootView = views.CSGOAPIRootView
 router.register(r'team', viewset=views.TeamViewSet)
 router.register(r'tournament', viewset=views.TournamentViewSet)
 router.register(r'lineup', viewset=views.LineupViewSet)
