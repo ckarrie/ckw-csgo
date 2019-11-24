@@ -63,11 +63,16 @@ class TournamentAdmin(admin.ModelAdmin):
         first.save()
         second.delete()
 
+class LineupInline(admin.TabularInline):
+    model = models.Lineup
+    extra = 0
+
 
 class TeamAdmin(admin.ModelAdmin):
     search_fields = ['name', 'name_long', 'name_alt']
     list_display = ['name', 'name_long', 'name_alt', 'hltv_id']
     actions = ['merge']
+    inlines = [LineupInline]
 
     def merge(self, request, queryset):
         merge_1 = queryset[0]
@@ -110,13 +115,16 @@ class MatchMapInline(admin.TabularInline):
     verbose_name = 'Map'
     verbose_name_plural = 'Match Maps'
 
+class ExternalLinkInline(admin.TabularInline):
+    model = models.ExternalLink
+    extra = 0
 
 class MatchAdmin(admin.ModelAdmin):
     list_display = ['tournament', 'lineup_a', 'lineup_b', 'bestof', 'first_map_at', 'overall_score', 'slug',]
     list_filter = ['lineup_a', 'lineup_b']
     search_fields = ['lineup_b__team__name', 'lineup_b__team__name_long', 'tournament__name']
     autocomplete_fields = ['lineup_a', 'lineup_b', 'tournament']
-    inlines = [MatchMapInline]
+    inlines = [MatchMapInline, ExternalLinkInline]
 
     def overall_score(self, obj):
         score = obj.get_overall_score()
