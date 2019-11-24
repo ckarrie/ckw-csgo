@@ -1,3 +1,5 @@
+import asyncio
+
 import dateutil.parser
 import requests
 from bs4 import BeautifulSoup
@@ -5,8 +7,8 @@ from django.apps import apps
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils import timezone
+
 from csgomatches.utils.scrapers.hltv import convert_to_score, get_hlvt_score
-import asyncio
 
 HLTV_MAP_NAMES_TO_CS_NAME = {
     'Nuke': 'de_nuke',
@@ -86,7 +88,7 @@ class Command(BaseCommand):
             self.crawl_y0fl0w_de(include_archive_pages=True)
 
     def crawl_y0fl0w_de(self, include_archive_pages=True):
-        map_to_left = ['BIG',]
+        map_to_left = ['BIG', ]
         json_urls = ['https://big.y0fl0w.de', ]
         if include_archive_pages:
             json_urls += [
@@ -115,12 +117,15 @@ class Command(BaseCommand):
                     tournament.save()
 
                 for match_data in event_matches:
-                    lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(
-                        Q(team__name__iexact=match_data.get('t1')) | Q(team__name_long__iexact=match_data.get('t1')) | Q(team__name_alt__iexact=match_data.get('t1'))
-                    ).first()
-                    lineup_b = apps.get_model('csgomatches.Lineup').objects.filter(
-                        Q(team__name__iexact=match_data.get('t2')) | Q(team__name_long__iexact=match_data.get('t2')) | Q(team__name_alt__iexact=match_data.get('t2'))
-                    ).first()
+                    if len(match_data.get('time')) >= 13 and match_data.get('time').isdigit():
+                        first_match_timestamp = int(match_data.get('time')[:10])
+                        first_match_start = timezone.datetime.fromtimestamp(first_match_timestamp)
+                    else:
+                        first_match_start = dateutil.parser.parse(match_data.get('time'), dayfirst=True)
+                    aware_first_match_start = timezone.make_aware(first_match_start)
+
+                    lineup_a = apps.get_model('csgomatches.Lineup').objects.search_active_lineup(name=match_data.get('t1'), ref_dt=aware_first_match_start)
+                    lineup_b = apps.get_model('csgomatches.Lineup').objects.search_active_lineup(name=match_data.get('t2'), ref_dt=aware_first_match_start)
 
                     if not lineup_a:
                         team_lineup_a = apps.get_model('csgomatches.Team')(name=match_data.get('t1'))
@@ -154,13 +159,6 @@ class Command(BaseCommand):
                     if match_data.get('t1') not in map_to_left:
                         swap_team_and_score = True
                         lineup_a, lineup_b = lineup_b, lineup_a
-
-                    if len(match_data.get('time')) >= 13 and match_data.get('time').isdigit():
-                        first_match_timestamp = int(match_data.get('time')[:10])
-                        first_match_start = timezone.datetime.fromtimestamp(first_match_timestamp)
-                    else:
-                        first_match_start = dateutil.parser.parse(match_data.get('time'), dayfirst=True)
-                    aware_first_match_start = timezone.make_aware(first_match_start)
 
                     print("[crawl_y0fl0w_de] first_match_start", lineup_a, lineup_b, tournament, first_match_start, aware_first_match_start)
 
@@ -198,15 +196,15 @@ class Command(BaseCommand):
 
                     # if existing_matchmaps.count() != len(maps_data):
 
-                    #https://www.hltv.org/matches/2337711/match <- added match, strange hltv behaviour
+                    # https://www.hltv.org/matches/2337711/match <- added match, strange hltv behaviour
                     match_id = match_data.get('hltvMatchID')
                     hltv_livescore_data = None
                     if match_id:
                         hltv_url = 'https://www.hltv.org/matches/{}/match'.format(match_id)
                         apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
-                            url = hltv_url,
-                            match = match,
-                            link_type = 'hltv_match',
+                            url=hltv_url,
+                            match=match,
+                            link_type='hltv_match',
                             defaults={
                                 'title': str(match),
                             }
@@ -216,7 +214,7 @@ class Command(BaseCommand):
                             match.hltv_match_id = match_id
                             match.save()
 
-                        #if match.is_live():
+                        # if match.is_live():
                         hltv_livescore_data = asyncio.get_event_loop().run_until_complete(get_hlvt_score(int(match.hltv_match_id)))
 
                     vods_data = match_data.get('vods', {})
@@ -267,14 +265,11 @@ class Command(BaseCommand):
                     for i, map_data in enumerate(maps_data):
                         results = map_data.get('result')
                         map_pick_team_text = map_data.get('pick')
+                        starting_at = aware_first_match_start + timezone.timedelta(hours=i)
                         if map_pick_team_text:
-                            map_pick_lineup = apps.get_model('csgomatches.Lineup').objects.filter(
-                                Q(team__name=map_pick_team_text) | Q(team__name_long=map_pick_team_text) | Q(team__name_alt=map_pick_team_text)
-                            ).first()
+                            map_pick_lineup = apps.get_model('csgomatches.Lineup').objects.search_active_lineup(name=map_pick_team_text, ref_dt=starting_at)
                         else:
                             map_pick_lineup = None
-
-                        starting_at = aware_first_match_start + timezone.timedelta(hours=i)
 
                         if i >= 2 and starting_at < timezone.now() and results == '-':
                             unplayed_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
@@ -299,7 +294,7 @@ class Command(BaseCommand):
                             name = map_data.get('name')
 
                             if matchmap_created:
-                                print("[crawl_y0fl0w_de] created Matchmap map_data=", map_data, "matchmap.pk=", matchmap.pk, 'map_nr=', str(i+1))
+                                print("[crawl_y0fl0w_de] created Matchmap map_data=", map_data, "matchmap.pk=", matchmap.pk, 'map_nr=', str(i + 1))
 
                             livescore = convert_to_score(hltv_livescore_data, map_nr=i + 1)
                             if livescore:
@@ -448,12 +443,8 @@ class Command(BaseCommand):
                     if swap_team_and_score:
                         team_logos.reverse()
 
-                    lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(
-                        Q(team__name__iexact=team_left) | Q(team__name_long__iexact=team_left) | Q(team__name_alt__iexact=team_left)
-                    ).first()
-                    lineup_b = apps.get_model('csgomatches.Lineup').objects.filter(
-                        Q(team__name__iexact=team_right) | Q(team__name_long__iexact=team_right) | Q(team__name_alt__iexact=team_right)
-                    ).first()
+                    lineup_a = apps.get_model('csgomatches.Lineup').objects.search_active_lineup(name=team_left, ref_dt=m_datetime)
+                    lineup_b = apps.get_model('csgomatches.Lineup').objects.search_active_lineup(name=team_right, ref_dt=m_datetime)
 
                     if not lineup_b:
                         team_b = apps.get_model('csgomatches.Team').objects.filter(
@@ -490,7 +481,7 @@ class Command(BaseCommand):
                         match.save()
                         print("[crawl_99damage_de] created new Match", match)
 
-                    #Match Link
+                    # Match Link
                     apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
                         url=matches_url,
                         match=match,
@@ -577,8 +568,8 @@ class Command(BaseCommand):
                             unplayed_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
                                 match=match,
                                 map_nr__gte=3,
-                                #rounds_won_team_a=0,
-                                #rounds_won_team_b=0,
+                                # rounds_won_team_a=0,
+                                # rounds_won_team_b=0,
                                 starting_at__lt=timezone.now()
                             )
                             if unplayed_matchmaps.exists():

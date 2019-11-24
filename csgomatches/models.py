@@ -45,17 +45,58 @@ class PlayerRole(models.Model):
     def __str__(self):
         return self.name
 
+class LineupManager(models.Manager):
+    def search_active_lineup(self, name, ref_dt=None):
+        qs = self.filter(
+            models.Q(team__name__iexact=name) |
+            models.Q(team__name_long__iexact=name) |
+            models.Q(team__name_alt__iexact=name)
+        )
+        if ref_dt and ref_dt < timezone.now():
+            # past matches with (maybe) older lineups
+            return self.filter(active_from__gt=ref_dt).order_by('active_from').first()
+        return qs.filter(is_active=True).first()
 
 class Lineup(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     team_logo_url = models.URLField(null=True, blank=True)
     active_from = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
+
+    objects = LineupManager()
+
+    def get_previous_lineup(self):
+        return self.team.lineup_set.filter(
+            active_from__lt=self.active_from
+        ).order_by('-active_from').first()
+    
+    def get_next_lineup(self):
+        return self.team.lineup_set.filter(
+            active_from__gt=self.active_from
+        ).order_by('active_from').first()
+
+    def get_is_active(self):
+        next_lu = self.get_next_lineup()
+        if next_lu:
+            return False
+        return True
 
     def __str__(self):
         return '{}'.format(self.team.name)
+    
+    def save(self, *args, **kwargs):
+        next_lu = self.get_next_lineup()
+        if next_lu:
+            self.is_active = False
+        prev_lu = self.get_previous_lineup()
+        if prev_lu:
+            prev_lu.is_active = False
+            prev_lu.save()
+        super(Lineup, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ['team__name', '-active_from']
+        unique_together = ('team', 'active_from')
 
 
 class LineupPlayer(models.Model):

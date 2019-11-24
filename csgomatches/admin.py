@@ -1,6 +1,33 @@
 from django.contrib import admin, messages
+
 from . import models
 
+
+# Inlines
+class LineupPlayerInline(admin.TabularInline):
+    model = models.LineupPlayer
+    extra = 5
+    max_num = 5
+
+
+class LineupInline(admin.TabularInline):
+    model = models.Lineup
+    extra = 0
+
+
+class MatchMapInline(admin.TabularInline):
+    model = models.MatchMap
+    extra = 0
+    verbose_name = 'Map'
+    verbose_name_plural = 'Match Maps'
+
+
+class ExternalLinkInline(admin.TabularInline):
+    model = models.ExternalLink
+    extra = 0
+
+
+# Models
 class MatchMapAdmin(admin.ModelAdmin):
     list_display = ['match', 'rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'has_ended', 'is_live', 'delay_minutes', 'starting_at', 'unplayed', 'map_nr']
     list_editable = ['rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'map_nr']
@@ -10,10 +37,12 @@ class MatchMapAdmin(admin.ModelAdmin):
 
     def has_ended(self, obj):
         return obj.has_ended()
+
     has_ended.boolean = True
 
     def is_live(self, obj):
         return obj.is_live()
+
     is_live.boolean = True
 
 
@@ -63,10 +92,6 @@ class TournamentAdmin(admin.ModelAdmin):
         first.save()
         second.delete()
 
-class LineupInline(admin.TabularInline):
-    model = models.Lineup
-    extra = 0
-
 
 class TeamAdmin(admin.ModelAdmin):
     search_fields = ['name', 'name_long', 'name_alt']
@@ -103,24 +128,22 @@ class TeamAdmin(admin.ModelAdmin):
             merge_2.lineup_set.update(team=merge_1)
             merge_2.delete()
 
-            #for lu i
+            # for lu i
+
 
 class LineupAdmin(admin.ModelAdmin):
     search_fields = ['team__name', 'team__name_long', 'team__name_alt']
-    list_display = ['team', 'team_logo_url', 'active_from']
+    list_display = ['team', 'team_logo_url', 'active_from', 'get_is_active', 'is_active']
+    list_filter = ['is_active']
+    inlines = [LineupPlayerInline]
 
-class MatchMapInline(admin.TabularInline):
-    model = models.MatchMap
-    extra = 0
-    verbose_name = 'Map'
-    verbose_name_plural = 'Match Maps'
+    def get_is_active(self, obj):
+        return obj.get_is_active()
+    get_is_active.boolean = True
 
-class ExternalLinkInline(admin.TabularInline):
-    model = models.ExternalLink
-    extra = 0
 
 class MatchAdmin(admin.ModelAdmin):
-    list_display = ['tournament', 'lineup_a', 'lineup_b', 'bestof', 'first_map_at', 'overall_score', 'slug',]
+    list_display = ['tournament', 'lineup_a', 'lineup_b', 'bestof', 'first_map_at', 'overall_score', 'slug', ]
     list_filter = ['lineup_a', 'lineup_b']
     search_fields = ['lineup_b__team__name', 'lineup_b__team__name_long', 'tournament__name']
     autocomplete_fields = ['lineup_a', 'lineup_b', 'tournament']
@@ -131,13 +154,26 @@ class MatchAdmin(admin.ModelAdmin):
         return '{}:{}'.format(*score)
 
 
+class PlayerAdmin(admin.ModelAdmin):
+    list_display = ['__str__', 'ingame_name', 'ingame_name_long', 'real_name']
+    search_fields = ['ingame_name', 'ingame_name_long', 'real_name']
+    list_editable = ['ingame_name', 'ingame_name_long', 'real_name']
+
+
+class LineupPlayerAdmin(admin.ModelAdmin):
+    list_display = ['player', 'role', 'lineup']
+    list_editable = ['role']
+    list_filter = ['role']
+    search_fields = ['player__ingame_name', 'lineup__team__name']
+
+
 class ExternalLinkAdmin(admin.ModelAdmin):
     list_display = ['match', 'link_type', 'title', 'url', 'link_flag']
     list_filter = ['link_flag']
     raw_id_fields = ['match']
     list_editable = ['url', 'title']
     search_fields = ['url']
-    #autocomplete_fields = ['match']
+    # autocomplete_fields = ['match']
 
 
 def save_global(modeladmin, request, queryset):
@@ -147,12 +183,12 @@ def save_global(modeladmin, request, queryset):
 
 admin.site.register(models.Team, TeamAdmin)
 admin.site.register(models.Lineup, LineupAdmin)
-admin.site.register(models.LineupPlayer)
+admin.site.register(models.LineupPlayer, LineupPlayerAdmin)
 admin.site.register(models.ExternalLink, ExternalLinkAdmin)
 admin.site.register(models.Map)
 admin.site.register(models.Match, MatchAdmin)
 admin.site.register(models.MatchMap, MatchMapAdmin)
-admin.site.register(models.Player)
+admin.site.register(models.Player, PlayerAdmin)
 admin.site.register(models.PlayerRole)
 admin.site.register(models.Tournament, TournamentAdmin)
 
