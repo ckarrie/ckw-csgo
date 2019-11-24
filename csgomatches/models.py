@@ -210,8 +210,13 @@ class Match(models.Model):
             lineup_a=self.lineup_a, lineup_b=self.lineup_b
         )
         if similar_matches_in_same_tournament.exclude(pk=self.pk).exists():
-            idx = list(similar_matches_in_same_tournament).index(self)
-            self.slug = slugify("{}-{}-{}".format(self.tournament.name, self, idx))
+            try:
+                idx = list(similar_matches_in_same_tournament).index(self)
+            except ValueError:
+                # object was moved
+                self.slug = slugify("id-{}".format(self.pk))
+            else:
+                self.slug = slugify("{}-{}-{}".format(self.tournament.name, self, idx))
         else:
             self.slug = slugify("{}-{}".format(self.tournament.name, self))
         existing_slugs = Match.objects.filter(slug=self.slug).exclude(pk=self.pk)
