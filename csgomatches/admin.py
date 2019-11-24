@@ -104,12 +104,19 @@ class LineupAdmin(admin.ModelAdmin):
     search_fields = ['team__name', 'team__name_long', 'team__name_alt']
     list_display = ['team', 'team_logo_url', 'active_from']
 
+class MatchMapInline(admin.TabularInline):
+    model = models.MatchMap
+    extra = 0
+    verbose_name = 'Map'
+    verbose_name_plural = 'Match Maps'
+
 
 class MatchAdmin(admin.ModelAdmin):
     list_display = ['tournament', 'lineup_a', 'lineup_b', 'bestof', 'first_map_at', 'overall_score', 'slug',]
     list_filter = ['lineup_a', 'lineup_b']
     search_fields = ['lineup_b__team__name', 'lineup_b__team__name_long', 'tournament__name']
     autocomplete_fields = ['lineup_a', 'lineup_b', 'tournament']
+    inlines = [MatchMapInline]
 
     def overall_score(self, obj):
         score = obj.get_overall_score()
