@@ -4,7 +4,12 @@
     <h2>
         <a class="matchdetail-link" href="{{ match.get_absolute_url }}" title="Match-Details {{ match }}">
             <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
-            <span class="team_a">{{ match.lineup_a.team }}</span> vs <span class="team_b">{{ match.lineup_b.team }}</span>
+            <span class="team_a">{{ match.lineup_a.team }}</span>
+            {% if match.lineup_b %}
+                vs <span class="team_b">{{ match.lineup_b.team }}</span>
+            {% else %}
+                at {{ match.tournament.name }}
+            {% endif %}
         </a>
 
         <small class="hide-on-small">
