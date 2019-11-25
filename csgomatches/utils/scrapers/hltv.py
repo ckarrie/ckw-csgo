@@ -69,6 +69,8 @@ def build_players(team_mdl: models.Team):
     current_lineup = team_mdl.lineup_set.active_lineups().first()
     if team_mdl.hltv_id:
         team_dict = get_hltv_id_from_team_name(team_mdl=team_mdl, return_team_json=True)
+        if not team_dict:
+            return 
         players = team_dict.get('players', [])
 
         if len(players) == 5:
