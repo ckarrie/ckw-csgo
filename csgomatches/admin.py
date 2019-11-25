@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.utils.safestring import mark_safe
 
 from . import models
 
@@ -95,9 +96,12 @@ class TournamentAdmin(admin.ModelAdmin):
 
 class TeamAdmin(admin.ModelAdmin):
     search_fields = ['name', 'name_long', 'name_alt']
-    list_display = ['name', 'name_long', 'name_alt', 'hltv_id']
+    list_display = ['name', 'name_long', 'name_alt', 'hltv_id', 'hltv_link', 'lineup_logo']
     list_editable = ['name_alt', 'hltv_id']
-    actions = ['merge']
+    actions = [
+        #'merge',  # deactivated - need fix
+        'get_hltv_id_from_name'
+    ]
     inlines = [LineupInline]
 
     def merge(self, request, queryset):
@@ -130,6 +134,35 @@ class TeamAdmin(admin.ModelAdmin):
             merge_2.delete()
 
             # for lu i
+
+    def get_hltv_id_from_name(self, request, queryset):
+        for obj in queryset.filter(hltv_id__isnull=True):
+            obj.hltv_id = obj.get_hltv_id_from_name()
+            if obj.hltv_id:
+                obj.save()
+                self.message_user(
+                    request,
+                    "Found HLTV ID {} for {}".format(obj.hltv_id, obj.name),
+                    level=messages.SUCCESS
+                )
+
+    def hltv_link(self, obj):
+        url = obj.get_hltv_team_link()
+        if url:
+            return mark_safe('<a href="{}" target="_blank">{}</a>'.format(url, obj.name))
+        return ''
+
+    def lineup_logo(self, obj):
+        current_lineup = obj.lineup_set.filter(team_logo_url__isnull=False).active_lineups().first()
+        if current_lineup:
+            url = current_lineup.team_logo_url
+            if url.startswith("https://static.hltv.org/images/team/logo/"):
+                hltv_static, url_part = url.split("https://static.hltv.org/images/team/logo/")
+                if url_part == str(obj.hltv_id):
+                    return mark_safe('<img style="width: 35px" src="{url}" alt="{url}" title="{url}"> SAME ID'.format(url=url))
+                else:
+                    return mark_safe('<img style="width: 35px" src="{url}" alt="{url}" title="{url}"> DIFFERENT ID'.format(url=url))
+            return mark_safe('<img style="width: 35px" src="{url}" alt="{url}" title="{url}">'.format(url=url))
 
 
 class LineupAdmin(admin.ModelAdmin):

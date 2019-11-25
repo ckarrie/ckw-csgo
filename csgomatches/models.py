@@ -16,6 +16,14 @@ class Team(models.Model):
 
     objects = managers.TeamManager()
 
+    def get_hltv_id_from_name(self):
+        from .utils.scrapers.hltv import get_hltv_id_from_team_name
+        return get_hltv_id_from_team_name(team_mdl=self)
+
+    def get_hltv_team_link(self):
+        if self.hltv_id:
+            return 'https://www.hltv.org/team/{}/team'.format(self.hltv_id)
+
     def __str__(self):
         return self.name
 

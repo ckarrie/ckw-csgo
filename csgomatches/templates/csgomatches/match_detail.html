@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block page_title %}
-    {{ match }} - {{ match.first_map_at|date:"SHORT_DATE_FORMAT" }} - {{ match.tournament.name }} - Wann spielt BIG?
+    {{ match }} - {{ match.first_map_at|date:"SHORT_DATE_FORMAT" }} - {{ match.tournament.name }} - Matchdetails - Wann spielt BIG?
 {% endblock %}
 
 {% block content_header_h1 %}
@@ -15,8 +15,12 @@
         <h2>
             <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
             <span class="team_a">{{ match.lineup_a.team }}</span>
-            <span class="{% if match.team_a_won %}map_win{% elif match.team_b_won %}map_loss{% elif match.is_draw %}map_draw{% endif %}">{{ score.0 }}</span>:<span class="{% if match.team_a_won %}map_loss{% elif match.team_b_won %}map_win{% elif match.is_draw %}map_draw{% endif %}">{{ score.1 }}</span>
-            <span class="team_b">{{ match.lineup_b.team }}</span>
+            {% if match.lineup_b %}
+                <span class="{% if match.team_a_won %}map_win{% elif match.team_b_won %}map_loss{% elif match.is_draw %}map_draw{% endif %}">{{ score.0 }}</span>:<span class="{% if match.team_a_won %}map_loss{% elif match.team_b_won %}map_win{% elif match.is_draw %}map_draw{% endif %}">{{ score.1 }}</span>
+                <span class="team_b">{{ match.lineup_b.team }}</span>
+            {% else %}
+                at {{ match.tournament.name }}
+            {% endif %}
 
             <small class="hide-on-small">
                 {{ match.tournament.name }}
@@ -35,7 +39,9 @@
                 {% else %}
 
                 {% endifchanged %}
-                <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
+                <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}">
+                    <code>{{ link.get_link_type_display }} ({{ link.title }})</code>
+                </a>
             {% endfor %}
         </div>
     </div>
