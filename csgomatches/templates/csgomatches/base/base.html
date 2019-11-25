@@ -222,6 +222,7 @@
         a.matchdetail-link:link, a.matchdetail-link:visited, a.matchdetail-link:active {
             text-decoration: none;
         }
+
         a.matchdetail-link:hover {
             text-decoration: none;
         }
@@ -491,19 +492,22 @@
     </p>
     -->
     <div class="footer">
-        <p style="font-size: small">
-            Fun-Facts: </p>
+        {% if statistics %}
+            <p style="font-size: small">
+                Fun-Facts: </p>
             <ul>
                 <li style="font-size: small"><a href="{{ statistics.last_sixteen_zero.match.get_absolute_url }}">letzte 16:0 Überfahrt</a> vor {{ statistics.last_sixteen_zero.starting_at|timesince }}</li>
                 <li style="font-size: small"><a href="{{ statistics.last_zero_sixteen.match.get_absolute_url }}">letzter 0:16 Throw</a> vor {{ statistics.last_zero_sixteen.starting_at|timesince }}</li>
                 <li style="font-size: small"><a href="{{ statistics.last_sixteen_fourteen.match.get_absolute_url }}">letzter knapper Sieg</a> 16:14 vor {{ statistics.last_sixteen_fourteen.starting_at|timesince }}</li>
                 <li style="font-size: small"><a href="{{ statistics.last_fourteen_sixteen.match.get_absolute_url }}">letzte knappe Niederlage</a> 14:16 vor {{ statistics.last_fourteen_sixteen.starting_at|timesince }}</li>
             </ul>
-        <hr>
+            <hr>
+        {% endif %}
         <p>
             <small>
                 Export kommende Matches [<code><a href="{% url 'ics_upcoming_big' %}">iCal</a></code>, <code><a href="https://big.y0fl0w.de">JSON</a></code>]
-                [<code><a href="{% url 'api-root' %}" target="_blank">API</a></code>]</small>
+                [<code><a href="{% url 'api-root' %}" target="_blank">API</a></code>]
+            </small>
         </p>
         <hr>
         <p>
