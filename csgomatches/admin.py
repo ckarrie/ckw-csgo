@@ -96,6 +96,7 @@ class TournamentAdmin(admin.ModelAdmin):
 class TeamAdmin(admin.ModelAdmin):
     search_fields = ['name', 'name_long', 'name_alt']
     list_display = ['name', 'name_long', 'name_alt', 'hltv_id']
+    list_editable = ['name_alt', 'hltv_id']
     actions = ['merge']
     inlines = [LineupInline]
 
