@@ -288,6 +288,12 @@
             border-radius: 10px;
         }
 
+        .footer ul {
+            margin-left: 1rem;
+            list-style-type: circle;
+
+        }
+
         .matchlinks-details h4 {
             font-weight: 400;
             /*font-size: medium;*/
@@ -410,6 +416,14 @@
                 display: inline;
             }
 
+            .lineup_a_box {
+                margin: 20px 0 20px 10px;
+            }
+
+            .lineup_b_box {
+                margin: 20px 0 20px 10px;
+            }
+
         }
 
         {% comment %}
@@ -477,6 +491,15 @@
     </p>
     -->
     <div class="footer">
+        <p style="font-size: small">
+            Fun-Facts: </p>
+            <ul>
+                <li style="font-size: small"><a href="{{ statistics.last_sixteen_zero.match.get_absolute_url }}">letzte 16:0 Überfahrt</a> vor {{ statistics.last_sixteen_zero.starting_at|timesince }}</li>
+                <li style="font-size: small"><a href="{{ statistics.last_zero_sixteen.match.get_absolute_url }}">letzter 0:16 Throw</a> vor {{ statistics.last_zero_sixteen.starting_at|timesince }}</li>
+                <li style="font-size: small"><a href="{{ statistics.last_sixteen_fourteen.match.get_absolute_url }}">letzter knapper Sieg</a> 16:14 vor {{ statistics.last_sixteen_fourteen.starting_at|timesince }}</li>
+                <li style="font-size: small"><a href="{{ statistics.last_fourteen_sixteen.match.get_absolute_url }}">letzte knappe Niederlage</a> 14:16 vor {{ statistics.last_fourteen_sixteen.starting_at|timesince }}</li>
+            </ul>
+        <hr>
         <p>
             <small>
                 Export kommende Matches [<code><a href="{% url 'ics_upcoming_big' %}">iCal</a></code>, <code><a href="https://big.y0fl0w.de">JSON</a></code>]

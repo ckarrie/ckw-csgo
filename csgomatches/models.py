@@ -29,13 +29,14 @@ class Team(models.Model):
 
 
 class Player(models.Model):
-    steam_id = models.CharField(max_length=255)
+    steam_id = models.CharField(max_length=255, null=True, blank=True)
     ingame_name = models.CharField(max_length=255)
-    ingame_name_long = models.CharField(max_length=255, null=True, blank=True)
-    real_name = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    hltv_id = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return self.ingame_name
+        return '{} "{}" {}'.format(self.first_name, self.ingame_name, self.last_name)
 
 
 class PlayerRole(models.Model):
@@ -91,11 +92,13 @@ class Lineup(models.Model):
 
 class LineupPlayer(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    role = models.ForeignKey(PlayerRole, on_delete=models.CASCADE)
+    role = models.ForeignKey(PlayerRole, on_delete=models.CASCADE, null=True, blank=True)
     lineup = models.ForeignKey(Lineup, on_delete=models.CASCADE)
 
     def __str__(self):
-        return '{} ({})'.format(self.player.ingame_name, self.role.name)
+        if self.role:
+            return '{} ({})'.format(self.player.ingame_name, self.role.name)
+        return '{} @ {}'.format(self.player.ingame_name, self.lineup.team.name)
 
 
 class Tournament(models.Model):

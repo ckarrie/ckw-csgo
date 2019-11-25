@@ -7,6 +7,7 @@ from . import models
 # Inlines
 class LineupPlayerInline(admin.TabularInline):
     model = models.LineupPlayer
+    autocomplete_fields = ['player']
     extra = 5
     max_num = 5
 
@@ -100,7 +101,8 @@ class TeamAdmin(admin.ModelAdmin):
     list_editable = ['name_alt', 'hltv_id']
     actions = [
         #'merge',  # deactivated - need fix
-        'get_hltv_id_from_name'
+        'get_hltv_id_from_name',
+        'build_players'
     ]
     inlines = [LineupInline]
 
@@ -164,10 +166,21 @@ class TeamAdmin(admin.ModelAdmin):
                     return mark_safe('<img style="width: 35px" src="{url}" alt="{url}" title="{url}"> DIFFERENT ID'.format(url=url))
             return mark_safe('<img style="width: 35px" src="{url}" alt="{url}" title="{url}">'.format(url=url))
 
+    def build_players(self, request, queryset):
+        for obj in queryset:
+            from csgomatches.utils.scrapers.hltv import build_players
+            build_players(team_mdl=obj)
+            self.message_user(
+                request,
+                "Build player for Team {}".format(obj.name),
+                level=messages.SUCCESS
+            )
+
 
 class LineupAdmin(admin.ModelAdmin):
     search_fields = ['team__name', 'team__name_long', 'team__name_alt']
     list_display = ['team', 'team_logo_url', 'active_from', 'get_is_active', 'is_active']
+    autocomplete_fields = ['team']
     list_filter = ['is_active']
     inlines = [LineupPlayerInline]
 
@@ -189,9 +202,9 @@ class MatchAdmin(admin.ModelAdmin):
 
 
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'ingame_name', 'ingame_name_long', 'real_name']
-    search_fields = ['ingame_name', 'ingame_name_long', 'real_name']
-    list_editable = ['ingame_name', 'ingame_name_long', 'real_name']
+    list_display = ['__str__', 'ingame_name', 'first_name', 'last_name']
+    search_fields = ['ingame_name', 'first_name', 'last_name']
+    list_editable = ['ingame_name', 'first_name', 'last_name']
 
 
 class LineupPlayerAdmin(admin.ModelAdmin):

@@ -32,10 +32,34 @@ class IndexView(generic.ListView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super(IndexView, self).get_context_data(*args, **kwargs)
+        big = models.Team.objects.get(name="BIG")
+        statistics = {
+            'last_sixteen_zero': models.MatchMap.objects.filter(
+                match__lineup_a__team=big,
+                rounds_won_team_a=16,
+                rounds_won_team_b=0
+            ).order_by('-starting_at').first(),
+            'last_zero_sixteen': models.MatchMap.objects.filter(
+                match__lineup_a__team=big,
+                rounds_won_team_a=0,
+                rounds_won_team_b=16
+            ).order_by('-starting_at').first(),
+            'last_sixteen_fourteen': models.MatchMap.objects.filter(
+                match__lineup_a__team=big,
+                rounds_won_team_a=16,
+                rounds_won_team_b=14
+            ).order_by('-starting_at').first(),
+            'last_fourteen_sixteen': models.MatchMap.objects.filter(
+                match__lineup_a__team=big,
+                rounds_won_team_a=14,
+                rounds_won_team_b=16
+            ).order_by('-starting_at').first(),
+        }
         ctx.update({
             'date_list': self.model.objects.all().dates('first_map_at', 'year', order='DESC'),
             'current_view': 'index',
-            'bg_url': get_random_background_image_url()
+            'bg_url': get_random_background_image_url(),
+            'statistics': statistics
         })
         return ctx
 

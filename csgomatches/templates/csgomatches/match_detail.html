@@ -16,7 +16,8 @@
             <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
             <span class="team_a">{{ match.lineup_a.team }}</span>
             {% if match.lineup_b %}
-                <span class="{% if match.team_a_won %}map_win{% elif match.team_b_won %}map_loss{% elif match.is_draw %}map_draw{% endif %}">{{ score.0 }}</span>:<span class="{% if match.team_a_won %}map_loss{% elif match.team_b_won %}map_win{% elif match.is_draw %}map_draw{% endif %}">{{ score.1 }}</span>
+                <span class="{% if match.team_a_won %}map_win{% elif match.team_b_won %}map_loss{% elif match.is_draw %}map_draw{% endif %}">{{ score.0 }}</span>:
+                <span class="{% if match.team_a_won %}map_loss{% elif match.team_b_won %}map_win{% elif match.is_draw %}map_draw{% endif %}">{{ score.1 }}</span>
                 <span class="team_b">{{ match.lineup_b.team }}</span>
             {% else %}
                 at {{ match.tournament.name }}
@@ -31,18 +32,44 @@
 
         {% include 'csgomatches/blocks/box_matchrow_detail.html' %}
 
+        {% if match.lineup_a and match.lineup_a.lineupplayer_set.exists %}
+            <div class="lineup_a_box">
+                <h4>Lineup {{ match.lineup_a }}</h4>
+                {% for lp in match.lineup_a.lineupplayer_set.all %}
+                    <code title="{{ lp.player.first_name }} {{ lp.player.last_name }}">{{ lp.player.ingame_name }}</code>
+                {% endfor %}
+            </div>
+
+        {% endif %}
+
+        {% if match.lineup_b and match.lineup_b.lineupplayer_set.exists %}
+            <div class="lineup_b_box">
+                <h4>Lineup {{ match.lineup_b }}</h4>
+                {% for lp in match.lineup_b.lineupplayer_set.all %}
+                    <code title="{{ lp.player.first_name }} {{ lp.player.last_name }}">{{ lp.player.ingame_name }}</code>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <div class="matchlinks-details">
             <h4>Links:</h4>
+            <dl>
             {% for link in match.externallink_set.visible %}
                 {% ifchanged link.link_flag %}
+                    <dt>
                     <img src="{% static link.get_flag_url %}" class="flag">
+                    </dt>
                 {% else %}
 
                 {% endifchanged %}
+                <dd>
                 <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}">
                     <code>{{ link.get_link_type_display }} ({{ link.title }})</code>
                 </a>
+                </dd>
+
             {% endfor %}
+            </dl>
         </div>
     </div>
     <p>&nbsp;</p>
