@@ -138,7 +138,9 @@ class Match(models.Model):
     def __str__(self):
         if self.lineup_a and self.lineup_b:
             return '{} vs {}'.format(self.lineup_a.team.name, self.lineup_b.team.name)
-        return '{} vs {}'.format('TBD', 'TBD')
+        elif self.lineup_a and not self.lineup_b:
+            return '{}'.format(self.lineup_a.team.name)
+        return '{} vs {}'.format('TBA', 'TBA')
 
     def get_first_matchmap(self):
         return self.matchmap_set.order_by('starting_at').first()
