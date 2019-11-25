@@ -1,20 +1,12 @@
-from django.db import models
 from django.contrib.sites.models import Site
-
+from django.db import models
 # Create your models here.
-from django.template import defaultfilters
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
+from . import managers
 
-class TeamManager(models.Manager):
-    def search_team(self, name):
-        return self.filter(
-            models.Q(name__iexact=name) |
-            models.Q(name_long__iexact=name) |
-            models.Q(name_alt__iexact=name)
-        ).first()
 
 class Team(models.Model):
     name = models.CharField(max_length=255)
@@ -22,7 +14,7 @@ class Team(models.Model):
     name_alt = models.CharField(max_length=255, null=True, blank=True)
     hltv_id = models.IntegerField(null=True, blank=True)
 
-    objects = TeamManager()
+    objects = managers.TeamManager()
 
     def __str__(self):
         return self.name
@@ -40,22 +32,12 @@ class Player(models.Model):
 
 class PlayerRole(models.Model):
     name = models.CharField(max_length=255)
+
     # i.e. Fragger, Support, Leader, AWPer, Lurker, Coach
 
     def __str__(self):
         return self.name
 
-class LineupManager(models.Manager):
-    def search_active_lineup(self, name, ref_dt=None):
-        qs = self.filter(
-            models.Q(team__name__iexact=name) |
-            models.Q(team__name_long__iexact=name) |
-            models.Q(team__name_alt__iexact=name)
-        )
-        if ref_dt and ref_dt < timezone.now():
-            # past matches with (maybe) older lineups
-            return self.filter(active_from__gt=ref_dt).order_by('active_from').first()
-        return qs.filter(is_active=True).first()
 
 class Lineup(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
@@ -63,13 +45,13 @@ class Lineup(models.Model):
     active_from = models.DateTimeField()
     is_active = models.BooleanField(default=True)
 
-    objects = LineupManager()
+    objects = managers.LineupQuerySet.as_manager()
 
     def get_previous_lineup(self):
         return self.team.lineup_set.filter(
             active_from__lt=self.active_from
         ).order_by('-active_from').first()
-    
+
     def get_next_lineup(self):
         return self.team.lineup_set.filter(
             active_from__gt=self.active_from
@@ -83,7 +65,7 @@ class Lineup(models.Model):
 
     def __str__(self):
         return '{}'.format(self.team.name)
-    
+
     def save(self, *args, **kwargs):
         next_lu = self.get_next_lineup()
         if next_lu:
@@ -113,7 +95,8 @@ class Tournament(models.Model):
     name_alt = models.CharField(max_length=255, null=True, blank=True)
     name_hltv = models.CharField(max_length=255, null=True, blank=True)
     name_99dmg = models.CharField(max_length=255, null=True, blank=True)
-    #mappool = models.ManyToManyField(Map)
+
+    # mappool = models.ManyToManyField(Map)
 
     def __str__(self):
         return self.name
@@ -172,7 +155,7 @@ class Match(models.Model):
         if last_map:
             if last_map.has_ended():
                 return True
-            #if last_map.starting_at
+                # if last_map.starting_at
         team_a, team_b = self.get_overall_score()
         if team_a > team_b or team_b > team_a:
             return True
@@ -204,7 +187,7 @@ class Match(models.Model):
     def is_draw(self):
         t_a, t_b = self.get_overall_score()
         return t_a == t_b
-    
+
     def save(self, *args, **kwargs):
         similar_matches_in_same_tournament = self.tournament.match_set.filter(
             lineup_a=self.lineup_a, lineup_b=self.lineup_b
@@ -244,8 +227,8 @@ class MatchMap(models.Model):
     map_nr = models.IntegerField(null=True)
     map_pick_of = models.ForeignKey(Lineup, null=True, blank=True, on_delete=models.CASCADE)
     unplayed = models.BooleanField(default=False)
-    #defwin_reason = models.CharField(max_length=255, null=True, blank=True)
-    #defwin = models.BooleanField(default=False)
+    # defwin_reason = models.CharField(max_length=255, null=True, blank=True)
+    # defwin = models.BooleanField(default=False)
     cancelled = models.BooleanField(default=False)
 
     def get_prev_map(self):
@@ -289,17 +272,6 @@ class MatchMap(models.Model):
     class Meta:
         ordering = ['starting_at']
 
-class ExternalLinkManager(models.Manager):
-    def visible(self):
-        all_links = self.all()
-        exclude_ids = []
-        for link in all_links:
-            if link.match.has_ended() and link.link_type == 'twitch_cast':
-                exclude_ids.append(link.pk)
-
-        if exclude_ids:
-            return all_links.exclude(id__in=exclude_ids)
-        return all_links
 
 class ExternalLink(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
@@ -314,7 +286,7 @@ class ExternalLink(models.Model):
     link_flag = models.CharField(max_length=3, default='en')
     title = models.CharField(max_length=255)
     url = models.URLField()
-    objects = ExternalLinkManager()
+    objects = managers.ExternalLinkManager()
 
     def get_flag_url(self):
         return 'csgomatches/flags/{}.png'.format(self.link_flag)
@@ -333,9 +305,3 @@ class CSGOSiteSetting(models.Model):
 
     class Meta:
         unique_together = ['site', 'main_team', 'second_team']
-
-
-
-
-
-

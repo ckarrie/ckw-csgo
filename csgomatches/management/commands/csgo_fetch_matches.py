@@ -1,4 +1,5 @@
 import asyncio
+from json import JSONDecodeError
 
 import dateutil.parser
 import requests
@@ -96,7 +97,14 @@ class Command(BaseCommand):
             ]
 
         for y_url in json_urls:
-            response_json = requests.get(y_url).json()
+            try:
+                response = requests.get(y_url)
+                response_json = response.json()
+            except JSONDecodeError as json_error:
+                print("[crawl_y0fl0w_de] ERROR reading {}, content={}".format(y_url, str(json_error)))
+                continue
+                # raise json_error
+
             for event_data in response_json:
                 event_name = event_data.get('event')
                 event_matches = event_data.get('matches', [])
@@ -124,8 +132,23 @@ class Command(BaseCommand):
                         first_match_start = dateutil.parser.parse(match_data.get('time'), dayfirst=True)
                     aware_first_match_start = timezone.make_aware(first_match_start)
 
-                    lineup_a = apps.get_model('csgomatches.Lineup').objects.search_active_lineup(name=match_data.get('t1'), ref_dt=aware_first_match_start)
-                    lineup_b = apps.get_model('csgomatches.Lineup').objects.search_active_lineup(name=match_data.get('t2'), ref_dt=aware_first_match_start)
+                    lineup_a = apps.get_model('csgomatches.Lineup').objects. \
+                        search_lineups(name=match_data.get('t1'), hltv_id=match_data.get('t1_hltvID')). \
+                        active_lineups(ref_dt=aware_first_match_start). \
+                        first()
+                    lineup_b = apps.get_model('csgomatches.Lineup').objects. \
+                        search_lineups(name=match_data.get('t2'), hltv_id=match_data.get('t2_hltvID')). \
+                        active_lineups(ref_dt=aware_first_match_start). \
+                        first()
+
+                    # lineup_b_qs1 = apps.get_model('csgomatches.Lineup').objects.search_lineups(name=match_data.get('t2'), hltv_id=match_data.get('t2_hltvID'))
+                    # print("lineup_b_qs1", lineup_b_qs1)
+                    # lineup_b_qs2 = lineup_b_qs1.active_lineups(ref_dt=aware_first_match_start)
+                    # print("lineup_b_qs2", lineup_b_qs2)
+
+
+                    print('LINEUP A="{}" orig_value="{}" hltv_id="{}"'.format(str(lineup_a), match_data.get('t1'), match_data.get('t1_hltvID')))
+                    print('LINEUP B="{}" orig_value="{}" hltv_id="{}"'.format(str(lineup_b), match_data.get('t2'), match_data.get('t2_hltvID')))
 
                     if not lineup_a:
                         team_lineup_a = apps.get_model('csgomatches.Team')(name=match_data.get('t1'))
@@ -160,7 +183,7 @@ class Command(BaseCommand):
                         swap_team_and_score = True
                         lineup_a, lineup_b = lineup_b, lineup_a
 
-                    print("[crawl_y0fl0w_de] first_match_start", lineup_a, lineup_b, tournament, first_match_start, aware_first_match_start)
+                    print("[crawl_y0fl0w_de] Current Match:", lineup_a, "vs", lineup_b, "@", tournament, aware_first_match_start)
 
                     bestof = 3
                     if "1" in match_data.get('mType', ''):
@@ -188,9 +211,9 @@ class Command(BaseCommand):
                         )
                         match.save()
 
-                    existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
-                        match=match
-                    )
+                    # existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                    #    match=match
+                    # )
 
                     maps_data = match_data.get('maps', [])
 
@@ -267,7 +290,7 @@ class Command(BaseCommand):
                         map_pick_team_text = map_data.get('pick')
                         starting_at = aware_first_match_start + timezone.timedelta(hours=i)
                         if map_pick_team_text:
-                            map_pick_lineup = apps.get_model('csgomatches.Lineup').objects.search_active_lineup(name=map_pick_team_text, ref_dt=starting_at)
+                            map_pick_lineup = apps.get_model('csgomatches.Lineup').objects.filter(id__in=[lineup_a.id, lineup_b.id]).search_lineups(name=map_pick_team_text).active_lineups(ref_dt=starting_at).first()
                         else:
                             map_pick_lineup = None
 
@@ -306,6 +329,7 @@ class Command(BaseCommand):
                                         livescore_by_team[team] = team_score
 
                                 if len(livescore_by_team) == 2:
+                                    print("[crawl_y0fl0w_de]  - livescore_by_team", livescore_by_team)
                                     t1_score = livescore_by_team[match.lineup_a.team]
                                     t2_score = livescore_by_team[match.lineup_b.team]
                                     if swap_team_and_score:
@@ -443,18 +467,18 @@ class Command(BaseCommand):
                     if swap_team_and_score:
                         team_logos.reverse()
 
-                    lineup_a = apps.get_model('csgomatches.Lineup').objects.search_active_lineup(name=team_left, ref_dt=m_datetime)
-                    lineup_b = apps.get_model('csgomatches.Lineup').objects.search_active_lineup(name=team_right, ref_dt=m_datetime)
+                    lineup_a = apps.get_model('csgomatches.Lineup').objects.search_lineups(name=team_left).active_lineups(ref_dt=m_datetime).first()
+                    lineup_b = apps.get_model('csgomatches.Lineup').objects.search_lineups(name=team_right).active_lineups(ref_dt=m_datetime).first()
 
                     if not lineup_b:
-                        team_b = apps.get_model('csgomatches.Team').objects.filter(
-                            Q(name__iexact=team_right) | Q(name_long__iexact=team_right) | Q(name_alt__iexact=team_right)
-                        ).first()
+                        team_b = apps.get_model('csgomatches.Team').objects.search_team(name=team_right)
                         if not team_b:
+                            print("[crawl_99damage_de] Team created:", team_b)
                             team_b = apps.get_model('csgomatches.Team')(name=team_right)
                             team_b.save()
                         lineup_b = apps.get_model('csgomatches.Lineup')(team=team_b, active_from=timezone.now(), team_logo_url=team_logos[1])
                         lineup_b.save()
+                        print('[crawl_99damage_de] Lineup created: "{}"'.format(str(lineup_b)))
 
                     match = apps.get_model('csgomatches.Match').objects.filter(
                         tournament=tournament,
