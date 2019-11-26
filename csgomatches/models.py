@@ -1,3 +1,4 @@
+import requests
 from django.contrib.sites.models import Site
 from django.db import models
 # Create your models here.
@@ -157,6 +158,12 @@ class Match(models.Model):
         return self.matchmap_set.order_by('starting_at').first()
 
     def is_live(self):
+
+        current_live_mms = []
+        for mmap in self.matchmap_set.order_by('map_nr'):
+            current_live_mms.append(mmap.is_live())
+        if current_live_mms:
+            return any(current_live_mms)
         if self.has_ended():
             return False
         return self.first_map_at < timezone.now()
@@ -173,6 +180,10 @@ class Match(models.Model):
         if team_a > team_b or team_b > team_a:
             return True
         return False
+
+    def is_upcoming(self):
+        if self.first_map_at:
+            return self.first_map_at > timezone.now()
 
     def get_overall_score(self):
         lineup_a_mapwins = 0
@@ -223,8 +234,38 @@ class Match(models.Model):
     def get_absolute_url(self):
         return reverse('match_details', kwargs={'slug': self.slug})
 
-    def get_livescore_url(self):
-        return
+    def get_livescore_url(self, request):
+        if self.hltv_match_id:
+            url = reverse('match_livescore-detail', kwargs={'pk': self.hltv_match_id})
+            return request.build_absolute_uri(url)
+
+
+    def update_hltv_livescore(self, request):
+        url = self.get_livescore_url(request=request)
+        if url:
+            response = requests.get(url=url, params={'format': 'json'}).json()
+            maps = response.get('maps', [])
+            for map_data in maps:
+                map_nr = map_data.get('map_nr')
+                mm_obj = self.matchmap_set.filter(map_nr=map_nr).first()
+                if mm_obj:
+                    mm_obj.played_map = Map.objects.filter(
+                        models.Q(name=map_data.get('map_name')) |
+                        models.Q(cs_name=map_data.get('map_name'))
+                    ).first()
+                    score_a, score_b = map_data.get('score_a'), map_data.get('score_b')
+                    swap_score = False
+                    team_a_hltv_id = response.get('team_a_id')
+                    if team_a_hltv_id != self.lineup_a.team.hltv_id:
+                        swap_score = True
+
+                    if swap_score:
+                        score_b, score_a  = score_a, score_b
+
+                    mm_obj.rounds_won_team_a = score_a
+                    mm_obj.rounds_won_team_b = score_b
+                    mm_obj.save()
+
 
     class Meta:
         ordering = ['-first_map_at']

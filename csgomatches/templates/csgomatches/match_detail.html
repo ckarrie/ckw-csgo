@@ -6,6 +6,16 @@
     {{ match }} - {{ match.first_map_at|date:"SHORT_DATE_FORMAT" }} - {{ match.tournament.name }} - Matchdetails - Wann spielt BIG?
 {% endblock %}
 
+{% block meta %}
+    {% if match.is_live %}
+        {% if update_seconds %}
+            <meta http-equiv="refresh" content="{{ update_seconds }}">
+        {% endif %}
+    {% elif match.is_upcoming %}
+        <meta http-equiv="refresh" content="60">
+    {% endif %}
+{% endblock %}
+
 {% block content_header_h1 %}
     <a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a>
 {% endblock %}
@@ -51,26 +61,31 @@
             </div>
         {% endif %}
 
-        <div class="matchlinks-details">
-            <h4>Links:</h4>
-            <dl>
-            {% for link in match.externallink_set.visible %}
-                {% ifchanged link.link_flag %}
-                    <dt>
-                    <img src="{% static link.get_flag_url %}" class="flag">
-                    </dt>
-                {% else %}
+        {% with matchlinks=match.externallink_set.visible %}
+            {% if matchlinks.exists %}
 
-                {% endifchanged %}
-                <dd>
-                <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}">
-                    <code>{{ link.get_link_type_display }} ({{ link.title }})</code>
-                </a>
-                </dd>
+                <div class="matchlinks-details">
+                    <h4>Links:</h4>
+                    <dl>
+                    {% for link in match.externallink_set.visible %}
+                        {% ifchanged link.link_flag %}
+                            <dt>
+                            <img src="{% static link.get_flag_url %}" class="flag">
+                            </dt>
+                        {% else %}
 
-            {% endfor %}
-            </dl>
-        </div>
+                        {% endifchanged %}
+                        <dd>
+                        <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}">
+                            <code>{{ link.get_link_type_display }} ({{ link.title }})</code>
+                        </a>
+                        </dd>
+
+                    {% endfor %}
+                    </dl>
+                </div>
+            {% endif %}
+        {% endwith %}
     </div>
     <p>&nbsp;</p>
 {% endblock %}
@@ -79,4 +94,14 @@
     <ul class="navigation">
         <li class="active"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
     </ul>
+{% endblock %}
+
+{% block footer_0 %}
+    <p style="font-size: small">
+        Update-Intervall:
+        {% for c in update_choices %}
+            <a href="{{ match.get_absolute_url }}?update={{ c }}" class="{% if update_seconds == c %}active{% endif %}">{{ c }}</a>
+            {% if not forloop.last %} | {% endif %}
+        {% endfor %}
+    </p>
 {% endblock %}

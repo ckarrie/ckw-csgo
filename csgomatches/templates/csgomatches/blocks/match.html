@@ -2,18 +2,18 @@
 
 {% with fmm=match.matchmap_set.first %}
     <h2>
-        <a class="matchdetail-link" href="{{ match.get_absolute_url }}" title="Match-Details {{ match }}">
+        <a class="matchdetail-link" href="{{ match.get_absolute_url }}" title="Match-Details {{ match }} @ {{ match.tournament.name }}">
             <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
             <span class="team_a">{{ match.lineup_a.team }}</span>
             {% if match.lineup_b %}
                 vs <span class="team_b">{{ match.lineup_b.team }}</span>
             {% else %}
-                at {{ match.tournament.name }}
+                <span class="hide-on-small">at {{ match.tournament.name|truncatewords:3 }}</span>
             {% endif %}
         </a>
 
-        <small class="hide-on-small">
-            {{ match.tournament.name }}
+        <small class="hide-on-small" title="{{ match.tournament.name }}">
+            {{ match.tournament.name|truncatewords:3 }}
         </small>
 
 
@@ -52,6 +52,8 @@
             {% endif %}
         {% endfor %}
     </div>
+
+
 
     {% include 'csgomatches/blocks/box_matchrow.html' %}
 {% endwith %}

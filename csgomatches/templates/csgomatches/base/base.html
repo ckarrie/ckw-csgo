@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block meta %}{% endblock %}
     <title>
         {% block page_title %}
             Wann spielt{% if current_view == 'index' %}{% else %}e{% endif %} BIG?
@@ -45,6 +46,11 @@
 
         a:hover {
             color: #1887d1;
+        }
+
+        a.active:visited, a.active:link, a.active:active {
+            color: white;
+            text-decoration: none;
         }
 
         h1 {
@@ -304,7 +310,7 @@
         @media only screen and (max-width: 1000px) {
 
             .hide-on-small {
-                display: none;
+                display: none !important;
             }
 
             body {
@@ -343,22 +349,29 @@
             }
 
             .matchmapbox {
-                width: 33%;
+                /*width: calc(33% - 41px);*/
+                padding: 5px;
+                margin: 5px;
             }
 
             .map_countdown {
-                font-size: 12pt;
+                font-size: 10pt;
+                text-align: center;
                 border-top: 2px solid #585858;
-                display: table-cell;
             }
 
             .matches h2 {
                 font-size: 14pt;
             }
 
+            .matches h3 {
+                font-size: 11pt;
+            }
+
             .matchlinks {
                 text-align: center;
                 font-size: 10pt;
+                margin: 10px 0 0 0;
             }
 
             .othermatchmap .map_countdown {
@@ -369,12 +382,63 @@
                 display: none;
             }
 
+            .col1 {
+                width: calc(100% - 20px);
+            }
+
+            .col2 {
+                width: calc(50% - 22px);
+            }
+
+            .col3 {
+                width: calc(33% - 21px);
+            }
+
+            .cancelled {
+                width: calc(100% - 21px);
+            }
+
+            .team_a_score {
+                    float: none;
+                    width: auto;
+                    font-size: 26pt;
+                    font-weight: 900;
+                    text-align: center;
+                    line-height: 1;
+                    margin-left: 0;
+                    letter-spacing: -0.1em;
+            }
+
+            .team_b_score {
+                float: none;
+                width: auto;
+                font-size: 26pt;
+                font-weight: 900;
+                text-align: center;
+                line-height: 1;
+                margin-right: 0;
+                letter-spacing: -0.1em;
+            }
+
+            img.teamlogo {
+                width: 27px;
+                height: 27px;
+            }
+
+            .row {
+                margin-top: 15px;
+            }
+
+            .matchlinks-details {
+                margin-top: 20px
+            }
+
         }
 
         /* Desktop Styles */
         @media only screen and (min-width: 1000px) {
             .hide-on-large {
-                display: none;
+                display: none !important;
             }
 
             body {
@@ -389,6 +453,10 @@
                 color: #c3c3c3;
                 background-color: #585858;
                 opacity: 0.99;
+            }
+
+            .col1 {
+                width: 760px; /* 800 - 4*10 */
             }
 
             h1 {
@@ -423,6 +491,10 @@
 
             .lineup_b_box {
                 margin: 20px 0 20px 10px;
+            }
+
+            .map_countdown {
+                margin-left: 10px;
             }
 
         }
@@ -492,17 +564,18 @@
     </p>
     -->
     <div class="footer">
-        {% if statistics %}
-            <p style="font-size: small">
-                Fun-Facts: </p>
-            <ul>
-                <li style="font-size: small"><a href="{{ statistics.last_sixteen_zero.match.get_absolute_url }}">letzte 16:0 Überfahrt</a> vor {{ statistics.last_sixteen_zero.starting_at|timesince }}</li>
-                <li style="font-size: small"><a href="{{ statistics.last_zero_sixteen.match.get_absolute_url }}">letzter 0:16 Throw</a> vor {{ statistics.last_zero_sixteen.starting_at|timesince }}</li>
-                <li style="font-size: small"><a href="{{ statistics.last_sixteen_fourteen.match.get_absolute_url }}">letzter knapper Sieg</a> 16:14 vor {{ statistics.last_sixteen_fourteen.starting_at|timesince }}</li>
-                <li style="font-size: small"><a href="{{ statistics.last_fourteen_sixteen.match.get_absolute_url }}">letzte knappe Niederlage</a> 14:16 vor {{ statistics.last_fourteen_sixteen.starting_at|timesince }}</li>
-            </ul>
-            <hr>
-        {% endif %}
+        {% block footer_0 %}
+            {% if statistics %}
+                <p style="font-size: small">Fun-Facts: </p>
+                <ul>
+                    <li style="font-size: small"><a href="{{ statistics.last_sixteen_zero.match.get_absolute_url }}">letzte 16:0 Überfahrt</a> vor {{ statistics.last_sixteen_zero.starting_at|timesince }}</li>
+                    <li style="font-size: small"><a href="{{ statistics.last_zero_sixteen.match.get_absolute_url }}">letzter 0:16 Throw</a> vor {{ statistics.last_zero_sixteen.starting_at|timesince }}</li>
+                    <li style="font-size: small"><a href="{{ statistics.last_sixteen_fourteen.match.get_absolute_url }}">letzter knapper Sieg</a> 16:14 vor {{ statistics.last_sixteen_fourteen.starting_at|timesince }}</li>
+                    <li style="font-size: small"><a href="{{ statistics.last_fourteen_sixteen.match.get_absolute_url }}">letzte knappe Niederlage</a> 14:16 vor {{ statistics.last_fourteen_sixteen.starting_at|timesince }}</li>
+                </ul>
+                <hr>
+            {% endif %}
+        {% endblock %}
         <p>
             <small>
                 Export kommende Matches [<code><a href="{% url 'ics_upcoming_big' %}">iCal</a></code>, <code><a href="https://big.y0fl0w.de">JSON</a></code>]

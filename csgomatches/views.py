@@ -86,8 +86,17 @@ class MatchDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super(MatchDetailView, self).get_context_data(**kwargs)
+        update = 0
+        update_choices = [0, 10, 30, 60]
+        if self.object.is_live():
+            update = int(self.request.GET.get('update') or update_choices[1])
+            self.object.update_hltv_livescore(request=self.request)
+        elif self.object.is_upcoming():
+            update = 60
         ctx.update({
             'score': self.object.get_overall_score(),
-            'bg_url': get_random_background_image_url()
+            'bg_url': get_random_background_image_url(),
+            'update_seconds': update,
+            'update_choices': update_choices
         })
         return ctx

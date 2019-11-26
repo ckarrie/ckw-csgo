@@ -13,9 +13,11 @@ from . import views
 
 if settings.DEBUG:
     CACHE_INDEX_TIME = 0
+    CACHE_MATCHDETAIL_TIME = 0
     CACHE_ARCHIVE_TIME = 0
 else:
     CACHE_INDEX_TIME = 1 * 60       # 1 Minute
+    CACHE_MATCHDETAIL_TIME = 10
     CACHE_ARCHIVE_TIME = 60 * 60    # 60 Minutes    1 Hour
 
 sitemaps = {
@@ -36,7 +38,7 @@ urlpatterns = [
     ),
     path(
         '<slug:slug>',
-        cache_page(timeout=CACHE_INDEX_TIME)(views.MatchDetailView.as_view()),
+        cache_page(timeout=CACHE_MATCHDETAIL_TIME)(views.MatchDetailView.as_view()),
         name="match_details"
     ),
     path(

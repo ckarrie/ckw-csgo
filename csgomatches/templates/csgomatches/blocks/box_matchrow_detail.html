@@ -1,3 +1,19 @@
+{% if match.is_upcoming %}
+    {% if match.lineup_b %}
+        <div class="map_countdown">in {{ match.first_map_at|timeuntil }}</div>
+    {% else %}
+        <div class="map_countdown">ab ca. {{ match.first_map_at|date:"SHORT_DATE_FORMAT" }}, {{ match.first_map_at|time }} Uhr (kann abweichen)</div>
+    {% endif %}
+{% elif match.is_live %}
+    <div class="map_countdown">
+        seit {{ match.first_map_at|timesince }}
+        {% if update_seconds %} | <a href="{% url 'match_details' slug=match.slug %}?update={{ update_choices.0 }}">Reload aus</a>
+        {% else %} | <a href="{% url 'match_details' slug=match.slug %}?update={{ update_choices.1 }}">Reload an</a>
+        {% endif %}
+    </div>
+
+{% endif %}
+
 <div class="row detail">
     {% if match.cancelled %}
         <div class="matchmapbox bo{{ match.bestof }} cancelled">

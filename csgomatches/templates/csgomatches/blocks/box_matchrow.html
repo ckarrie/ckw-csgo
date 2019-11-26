@@ -1,3 +1,15 @@
+
+{% if match.is_upcoming %}
+    {% if match.lineup_b %}
+        <div class="map_countdown">in {{ match.first_map_at|timeuntil }}</div>
+    {% else %}
+        <div class="map_countdown">ab ca. {{ match.first_map_at|date:"SHORT_DATE_FORMAT" }}, {{ match.first_map_at|time }} Uhr (kann abweichen)</div>
+    {% endif %}
+{% elif match.is_live %}
+    <div class="map_countdown">vor {{ match.first_map_at|timesince }}, <a href="{% url 'match_details' slug=match.slug %}">Spielstand aktualisieren</a></div>
+
+{% endif %}
+
 <div class="row">
     {% if match.cancelled %}
         <div class="matchmapbox bo{{ match.bestof }} cancelled">
@@ -12,11 +24,11 @@
             {% include 'csgomatches/blocks/box_matchmap.html' %}
         {% empty %}
             {% if not match.lineup_b %}
-                <div class="matchmapbox bo{{ match.bestof }} cancelled">
+                <div class="matchmapbox bo{{ match.bestof }} col1">
                     Gegner und/oder Termin steht noch nicht fest.
                 </div>
             {% else %}
-                <div class="matchmapbox bo{{ match.bestof }} cancelled">
+                <div class="matchmapbox bo{{ match.bestof }} cancelled col1">
                     Genauer Termin gegen <span class="team_b">{{ match.lineup_b.team.name }}</span> steht noch nicht fest.
                 </div>
             {% endif %}
