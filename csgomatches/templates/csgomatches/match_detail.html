@@ -100,7 +100,7 @@
     <p style="font-size: small">
         Update-Intervall:
         {% for c in update_choices %}
-            <a href="{{ match.get_absolute_url }}?update={{ c }}" class="{% if update_seconds == c %}active{% endif %}">{{ c }}</a>
+            <a href="{{ match.get_absolute_url }}?update={{ c }}" class="{% if update_seconds == c %}active{% endif %}">{% if c == 0 %}Aus{% else %}{{ c }}s{% endif %}</a>
             {% if not forloop.last %} | {% endif %}
         {% endfor %}
     </p>

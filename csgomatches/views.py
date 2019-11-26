@@ -90,9 +90,11 @@ class MatchDetailView(generic.DetailView):
         update_choices = [0, 10, 30, 60]
         if self.object.is_live():
             update = int(self.request.GET.get('update') or update_choices[1])
+            if update not in update_choices:
+                update = update_choices[0]
             self.object.update_hltv_livescore(request=self.request)
         elif self.object.is_upcoming():
-            update = 60
+            update = update_choices[-1]
         ctx.update({
             'score': self.object.get_overall_score(),
             'bg_url': get_random_background_image_url(),
