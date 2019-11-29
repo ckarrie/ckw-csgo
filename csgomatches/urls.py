@@ -64,7 +64,11 @@ urlpatterns = [
         name="robots_file"
     ),
     path('api/', include(router.urls), ),
-    path('bot/', include('permabots.urls_processing', namespace='permabots'), ),
 ]
+
+if 'permabots' in settings.INSTALLED_APPS:
+    urlpatterns +=[
+        path('bot/', include('permabots.urls_processing', namespace='permabots'), ),
+    ]
 
 #urlpatterns += api_urlpatterns
