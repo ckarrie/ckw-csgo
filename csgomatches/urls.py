@@ -63,7 +63,8 @@ urlpatterns = [
         TemplateView.as_view(template_name="csgomatches/feeds/robots.txt", content_type="text/plain"),
         name="robots_file"
     ),
-    path('api/', include(router.urls), )
+    path('api/', include(router.urls), ),
+    path('bot/', include('permabots.urls_processing', namespace='permabots'), ),
 ]
 
 #urlpatterns += api_urlpatterns
