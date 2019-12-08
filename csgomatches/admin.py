@@ -238,5 +238,6 @@ admin.site.register(models.MatchMap, MatchMapAdmin)
 admin.site.register(models.Player, PlayerAdmin)
 admin.site.register(models.PlayerRole)
 admin.site.register(models.Tournament, TournamentAdmin)
+admin.site.register(models.StaticPage)
 
 admin.site.add_action(save_global, 'save_selected')

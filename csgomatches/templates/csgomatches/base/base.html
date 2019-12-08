@@ -306,6 +306,17 @@
             /*font-size: medium;*/
         }
 
+        .impressum h1, .impressum h2, .impressum h3, .impressum p {
+            color: #fff;
+            margin: 1em 0;
+            text-align: left;
+        }
+
+        .impressum h3 {
+            font-size: large;
+            font-weight: 600;
+        }
+
         /* Mobile Styles */
         @media only screen and (max-width: 1000px) {
 
@@ -589,15 +600,15 @@
         <hr>
         <p>
             <small>
-                <a href="https://bitbucket.org/ckarrie/ckw-csgo">Source Code</a>
-                | <a href="https://bitbucket.org/ckarrie/ckw-csgo/issues">Bug Tracker</a>
+                <a href="https://bitbucket.org/ckarrie/ckw-csgo">Code</a>
+                | <a href="https://bitbucket.org/ckarrie/ckw-csgo/issues">Bugs</a>
                 | Datenquellen:
                 <a href="https://www.hltv.org/team/7532/big">HLTV.org</a> via <a href="https://big.y0fl0w.de">y0fl0w.de</a>,
                 <a href="https://csgo.99damage.de/de/edb/team/13782-big">99damage.de</a>
-                | <a href="mailto:ckarrie@gmail.com?subject=wannspieltbig.de Anfrage">Kontakt</a>
+                | <a href="{% url 'staticpage' slug='impressum' %}">Kontakt und Impressum</a>
 
                 <br>
-                Credits: <code>mightyrepooc</code> (Idee) <code>y0fl0w</code> (HLTV Crawler, VOD- und Streamlinks) <code>chrissiMZ</code> (Coding, Fotos) <code>Philian</code> (BIG-Logo)
+                Credits: <code>mightyrepooc</code> (Idee) <code>y0fl0w</code> (HLTV Crawler, VOD- und Streamlinks) <code>Philian</code> (BIG-Logo) <code>chrissiMZ</code> (Coding, Fotos)
 
             </small>
         </p>

@@ -359,3 +359,14 @@ class CSGOSiteSetting(models.Model):
 
     class Meta:
         unique_together = ['site', 'main_team', 'second_team']
+
+
+class StaticPage(models.Model):
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    slug = models.SlugField(unique=True, allow_unicode=False, max_length=255)
+    template_name = models.CharField(max_length=255, default='default.html')
+
+    def get_template_name(self):
+        return 'csgomatches/staticpages/{}'.format(self.template_name)
+
+

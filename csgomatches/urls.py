@@ -63,6 +63,11 @@ urlpatterns = [
         TemplateView.as_view(template_name="csgomatches/feeds/robots.txt", content_type="text/plain"),
         name="robots_file"
     ),
+    path(
+        's/<slug:slug>',
+        cache_page(timeout=CACHE_ARCHIVE_TIME)(views.StaticPageDetailView.as_view()),
+        name='staticpage'
+    ),
     path('api/', include(router.urls), ),
 ]
 

@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.templatetags.static import static
 from django.utils import timezone
 from django.views import generic
+from django.apps import apps
 
 import random
 import asyncio
@@ -102,3 +103,17 @@ class MatchDetailView(generic.DetailView):
             'update_choices': update_choices
         })
         return ctx
+
+
+class StaticPageDetailView(generic.DetailView):
+    model = models.StaticPage
+
+    def get_queryset(self):
+        qs = super(StaticPageDetailView, self).get_queryset()
+        qs = qs.filter(
+            site=apps.get_model('sites.Site').objects.get_current()
+        )
+        return qs
+
+    def get_template_names(self):
+        return [self.object.get_template_name()]
