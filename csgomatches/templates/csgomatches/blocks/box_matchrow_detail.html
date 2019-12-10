@@ -15,6 +15,12 @@
 {% endif %}
 
 <div class="row detail">
+    {% if match.description %}
+        <div class="matchmapbox bo{{ match.bestof }} col1">
+            {{ match.description|urlize }}
+        </div>
+    {% endif %}
+
     {% if match.cancelled %}
         <div class="matchmapbox bo{{ match.bestof }} cancelled">
             {% if match.cancelled == 1 %}

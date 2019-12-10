@@ -115,5 +115,12 @@ class StaticPageDetailView(generic.DetailView):
         )
         return qs
 
+    def get_context_data(self, *args, **kwargs):
+        ctx = super(StaticPageDetailView, self).get_context_data(*args, **kwargs)
+        ctx.update({
+            'bg_url': get_random_background_image_url()
+        })
+        return ctx
+
     def get_template_names(self):
         return [self.object.get_template_name()]

@@ -20,6 +20,11 @@
             {% endif %}
         </div>
     {% else %}
+        {% if match.description %}
+            <div class="matchmapbox bo{{ match.bestof }} col1">
+                {{ match.description|urlize }}
+            </div>
+        {% endif %}
         {% for mm in match.matchmap_set.all %}
             {% include 'csgomatches/blocks/box_matchmap.html' %}
         {% empty %}
