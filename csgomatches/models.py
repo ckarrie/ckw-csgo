@@ -332,6 +332,8 @@ class ExternalLink(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     link_type = models.CharField(max_length=255, choices=(
         ('hltv_match', 'HLTV'),
+        ('esea_match', 'ESEA Match'),
+        ('esea_event', 'ESEA Event'),
         ('hltv_demo', 'Demo'),
         ('99dmg_match', '99DMG'),
         ('twitch_cast', 'Cast'),
