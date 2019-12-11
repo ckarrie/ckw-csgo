@@ -1,3 +1,4 @@
+import os
 import requests
 from django.contrib.sites.models import Site
 from django.db import models
@@ -7,6 +8,18 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from . import managers
+
+
+def get_flags_choices():
+    choices = []
+    base_pth = os.path.dirname(os.path.abspath(__file__))
+    flags_pth = os.path.join(base_pth, 'static/csgomatches/flags')
+    for fn in os.listdir(flags_pth):
+        if fn.endswith('.png'):
+            short_fn = fn.replace('.png', '')
+            choices.append([short_fn, short_fn])
+    choices.sort(key=lambda x: x[0])
+    return choices
 
 
 class Team(models.Model):
@@ -340,7 +353,10 @@ class ExternalLink(models.Model):
         ('twitch_vod', 'VOD'),
         ('youtube_vod', 'VOD'),
     ))
-    link_flag = models.CharField(max_length=3, default='en', help_text='see ckw-csgo/csgomatches/static/csgomatches/flags')
+    link_flag = models.CharField(
+        max_length=50, default='en', help_text='see ckw-csgo/csgomatches/static/csgomatches/flags',
+        choices=get_flags_choices()
+    )
     title = models.CharField(max_length=255)
     url = models.URLField()
     objects = managers.ExternalLinkManager()
