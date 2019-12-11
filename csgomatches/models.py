@@ -340,7 +340,7 @@ class ExternalLink(models.Model):
         ('twitch_vod', 'VOD'),
         ('youtube_vod', 'VOD'),
     ))
-    link_flag = models.CharField(max_length=3, default='en')
+    link_flag = models.CharField(max_length=3, default='en', help_text='see ckw-csgo/csgomatches/static/csgomatches/flags')
     title = models.CharField(max_length=255)
     url = models.URLField()
     objects = managers.ExternalLinkManager()
