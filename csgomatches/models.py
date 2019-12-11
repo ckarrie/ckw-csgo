@@ -52,7 +52,7 @@ class PlayerRole(models.Model):
 class Lineup(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     team_logo_url = models.URLField(null=True, blank=True)
-    active_from = models.DateTimeField()
+    active_from = models.DateTimeField(help_text='Set -10 Days to avoid multiple Lineup creations')
     is_active = models.BooleanField(default=True)
 
     objects = managers.LineupQuerySet.as_manager()

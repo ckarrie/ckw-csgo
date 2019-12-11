@@ -4,6 +4,8 @@ import cfscrape
 import threading
 import time
 from django.apps import apps
+from django.core.exceptions import AppRegistryNotReady
+
 
 def get_bracket_match(bracket_id, match_id, update_id=None, reverse_score=False):
     esea_bracket_url = 'https://play.esea.net/index.php?s=events&d=brackets&id={}'.format(bracket_id)
@@ -31,7 +33,10 @@ def get_bracket_match(bracket_id, match_id, update_id=None, reverse_score=False)
 
 
         if update_id:
-            match = apps.get_model('csgomatches.Match').objects.filter(id=update_id).first()
+            try:
+                match = apps.get_model('csgomatches.Match').objects.filter(id=update_id).first()
+            except AppRegistryNotReady:
+                return
             if match:
                 map_1 = match.matchmap_set.filter(map_nr=1).first()
                 if map_1:
@@ -50,9 +55,9 @@ def get_bracket_match(bracket_id, match_id, update_id=None, reverse_score=False)
 def as_thread(bracket_id, match_id, update_id=None, reverse_score=False):
     while True:
         threading._start_new_thread(get_bracket_match, (bracket_id, match_id, update_id, reverse_score))
-        time.sleep(20)
+        time.sleep(120)
 
 
 ##get_bracket_match(bracket_id=532, match_id=33523)
 
-#as_thread(532, 33579, 1177, True)
+#as_thread(532, 33621, 1177, True)

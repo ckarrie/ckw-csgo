@@ -136,6 +136,7 @@ class Command(BaseCommand):
                         search_lineups(name=match_data.get('t1'), hltv_id=match_data.get('t1_hltvID')). \
                         active_lineups(ref_dt=aware_first_match_start). \
                         first()
+
                     lineup_b = apps.get_model('csgomatches.Lineup').objects. \
                         search_lineups(name=match_data.get('t2'), hltv_id=match_data.get('t2_hltvID')). \
                         active_lineups(ref_dt=aware_first_match_start). \
@@ -146,9 +147,9 @@ class Command(BaseCommand):
                     # lineup_b_qs2 = lineup_b_qs1.active_lineups(ref_dt=aware_first_match_start)
                     # print("lineup_b_qs2", lineup_b_qs2)
 
-
-                    print('LINEUP A="{}" orig_value="{}" hltv_id="{}"'.format(str(lineup_a), match_data.get('t1'), match_data.get('t1_hltvID')))
-                    print('LINEUP B="{}" orig_value="{}" hltv_id="{}"'.format(str(lineup_b), match_data.get('t2'), match_data.get('t2_hltvID')))
+                    #print("LINEUP A/B", lineup_a, lineup_b, aware_first_match_start)
+                    #print('LINEUP A="{}" orig_value="{}" hltv_id="{}"'.format(str(lineup_a), match_data.get('t1'), match_data.get('t1_hltvID')))
+                    #print('LINEUP B="{}" orig_value="{}" hltv_id="{}"'.format(str(lineup_b), match_data.get('t2'), match_data.get('t2_hltvID')))
 
                     if not lineup_a:
                         team_lineup_a = apps.get_model('csgomatches.Team')(name=match_data.get('t1'))
@@ -317,7 +318,7 @@ class Command(BaseCommand):
                             name = map_data.get('name')
 
                             if matchmap_created:
-                                print("[crawl_y0fl0w_de] created Matchmap map_data=", map_data, "matchmap.pk=", matchmap.pk, 'map_nr=', str(i + 1))
+                                print("[crawl_y0fl0w_de] + created Matchmap map_data=", map_data, "matchmap.pk=", matchmap.pk, 'map_nr=', str(i + 1))
 
                             livescore = convert_to_score(hltv_livescore_data, map_nr=i + 1)
                             if livescore:
@@ -473,12 +474,12 @@ class Command(BaseCommand):
                     if not lineup_b:
                         team_b = apps.get_model('csgomatches.Team').objects.search_team(name=team_right)
                         if not team_b:
-                            print("[crawl_99damage_de] Team created:", team_b)
+                            print("[crawl_99damage_de] + Team created:", team_b)
                             team_b = apps.get_model('csgomatches.Team')(name=team_right)
                             team_b.save()
                         lineup_b = apps.get_model('csgomatches.Lineup')(team=team_b, active_from=timezone.now(), team_logo_url=team_logos[1])
                         lineup_b.save()
-                        print('[crawl_99damage_de] Lineup created: "{}"'.format(str(lineup_b)))
+                        print('[crawl_99damage_de] + Lineup created: "{}"'.format(str(lineup_b)))
 
                     match = apps.get_model('csgomatches.Match').objects.filter(
                         tournament=tournament,
@@ -503,7 +504,7 @@ class Command(BaseCommand):
                             bestof=bestof
                         )
                         match.save()
-                        print("[crawl_99damage_de] created new Match", match)
+                        print("[crawl_99damage_de] + created new Match", match)
 
                     # Match Link
                     apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
@@ -581,7 +582,7 @@ class Command(BaseCommand):
 
                             )
                             matchmap.save()
-                            print("[crawl_99damage_de]  - created Matchmap mapinfos=", mapinfos, " matchmap.pk=", matchmap.pk, ' map_nr=', str(map_nr), sep='')
+                            print("[crawl_99damage_de]  + created Matchmap mapinfos=", mapinfos, " matchmap.pk=", matchmap.pk, ' map_nr=', str(map_nr), sep='')
 
                     existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
                         match=match,
