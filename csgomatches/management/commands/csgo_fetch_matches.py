@@ -89,7 +89,7 @@ class Command(BaseCommand):
             self.crawl_y0fl0w_de(include_archive_pages=True)
 
     def crawl_y0fl0w_de(self, include_archive_pages=True):
-        map_to_left = ['BIG', ]
+        map_to_left = ['BIG', 'BIG Academy']
         json_urls = ['https://big.y0fl0w.de', ]
         if include_archive_pages:
             json_urls += [
