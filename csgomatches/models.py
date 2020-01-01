@@ -150,7 +150,7 @@ class Match(models.Model):
         (5, 'BO5'),
     ))
     first_map_at = models.DateTimeField(null=True, blank=True)
-    description = models.TextField(null=True, blank=True, help_text='Text is urlized')
+    description = models.TextField(null=True, blank=True, help_text='Text is mark_safe')
     cancelled = models.IntegerField(
         default=0,
         choices=(

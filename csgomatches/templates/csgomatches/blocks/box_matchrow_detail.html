@@ -17,7 +17,7 @@
 <div class="row detail">
     {% if match.description %}
         <div class="matchmapbox bo{{ match.bestof }} col1">
-            {{ match.description|urlize }}
+            {{ match.description|safe }}
         </div>
     {% endif %}
 
