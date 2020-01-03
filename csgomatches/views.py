@@ -69,7 +69,7 @@ class YearArchiveView(generic.YearArchiveView):
     model = models.Match
     date_field = 'first_map_at'
     make_object_list = True
-    allow_future = False
+    allow_future = True
     date_list_period = 'year'
 
     def get_date_list(self, queryset, date_type=None, ordering='ASC'):
@@ -81,6 +81,7 @@ class YearArchiveView(generic.YearArchiveView):
             'bg_url': get_random_background_image_url()
         })
         return ctx
+
 
 class MatchDetailView(generic.DetailView):
     model = models.Match

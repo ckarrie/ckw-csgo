@@ -1,2 +1,6 @@
 
 .idea/
+
+ckw_csgomatches.egg-info/
+
+*.pyc
