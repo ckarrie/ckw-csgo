@@ -82,6 +82,12 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
         fields = ['tournament', 'lineup_a', 'lineup_b', 'slug', 'bestof', 'first_map_at', 'cancelled', 'hltv_match_id', 'livescore_url', 'html_detail_url', 'matchmaps']
 
 
+class CSGOMatchMapUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = apps.get_model('csgomatches.MatchMap')
+        fields = ['map_nr', 'rounds_won_team_a', 'rounds_won_team_b',]
+
+
 class HLTVMapSerializer(serializers.Serializer):
     hltv_match_id = serializers.IntegerField()
     team_a_name = serializers.CharField(max_length=256, read_only=True)

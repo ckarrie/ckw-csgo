@@ -4,3 +4,5 @@
 ckw_csgomatches.egg-info/
 
 *.pyc
+
+csgomatches/utils/scrapers/push_credentials.txt

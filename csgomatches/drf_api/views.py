@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
 from django.views.decorators.cache import cache_page
-from rest_framework import viewsets, mixins, pagination, views, routers, renderers
+from rest_framework import viewsets, mixins, pagination, views, routers, renderers, permissions, authentication
 from django.apps import apps
 
 from . import ser
@@ -14,8 +14,10 @@ class CSGOPagination(pagination.LimitOffsetPagination):
     max_limit = 50
     default_limit = 20
 
+
 class CSGOView(views.APIView):
     pagination_class = CSGOPagination
+
     def get_renderers(self):
         rend = super(CSGOView, self).get_renderers()
         for r in rend:
@@ -60,12 +62,14 @@ class TeamViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
     def get_view_name(self):
         return 'Teams'
 
+
 class TournamentViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.Tournament').objects.all()
     serializer_class = ser.CSGOTournamentSerializer
 
     def get_view_name(self):
         return 'Tournaments'
+
 
 class MatchViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.Match').objects.all()
@@ -77,7 +81,7 @@ class MatchViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
     @method_decorator(cache_page(60 * 5))
     def list(self, request, *args, **kwargs):
         return super(MatchViewSet, self).list(request, *args, **kwargs)
-        
+
 
 class MatchUpcomingViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.Match').objects.filter(first_map_at__gte=timezone.now())
@@ -89,6 +93,7 @@ class MatchUpcomingViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
     @method_decorator(cache_page(10))
     def list(self, request, *args, **kwargs):
         return super(MatchUpcomingViewSet, self).list(request, *args, **kwargs)
+
 
 class LineupViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.Lineup').objects.all()
@@ -106,6 +111,7 @@ class HLTVLiveScoreViewSet(CSGOView, mixins.RetrieveModelMixin, mixins.ListModel
     """
     Get HLTV Live Score from any Match
     """
+
     def get_view_name(self):
         return 'Matches (mit HLTV.org Scoreboard)'
 
@@ -138,5 +144,8 @@ class HLTVLiveScoreViewSet(CSGOView, mixins.RetrieveModelMixin, mixins.ListModel
         hltv_match_instance = ser_objects.HLTVMatch(hltv_match_id=hltv_match_id)
         return hltv_match_instance
 
-
-
+class MatchMapUpdateView(CSGOView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    permission_classes = (permissions.IsAdminUser, )
+    authentication_classes = (authentication.BasicAuthentication, )
+    queryset = apps.get_model('csgomatches.MatchMap').objects.all()
+    serializer_class = ser.CSGOMatchMapUpdateSerializer
