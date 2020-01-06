@@ -86,7 +86,7 @@ def get_bracket_match(bracket_id, match_id, update_id=None):
 
 
 def publish_results(matchmap, a, b, map_nr=1, map_name=""):
-    url = "http://0.0.0.0:8002/api/matchmap_update/{}/".format(matchmap)
+    url = "https://wannspieltbig.de/api/matchmap_update/{}/".format(matchmap)
     username = None
     password = None
     with open('push_credentials.txt', 'r') as cred_file:
@@ -114,10 +114,10 @@ def as_thread(bracket_id, match_id, update_id=None):
 
 ##get_bracket_match(bracket_id=532, match_id=33523)
 
-#as_thread(
-#    bracket_id=533,     # ESEA Bracket ID (siehe Link)
-#    match_id=None,          # ESEA Match ID (via Chrome DevTools)
-#    update_id=None,  # wsb.de pk of Matchmap (https://wannspieltbig.de/admin/csgomatches/matchmap/)
-#)
+as_thread(
+    bracket_id=532,     # ESEA Bracket ID (siehe Link)
+    match_id=33621,          # ESEA Match ID (via Chrome DevTools)
+    update_id=2421,  # wsb.de pk of Matchmap (https://wannspieltbig.de/admin/csgomatches/matchmap/)
+)
 
-publish_results(2421,2,3)
+#publish_results(2421,2,3)
