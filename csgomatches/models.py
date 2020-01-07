@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from . import managers
+from .utils.publishing import twitter_api
 
 
 def get_flags_choices():
@@ -331,11 +332,43 @@ class MatchMap(models.Model):
         return '{} - {} Map #{}'.format(self.match, self.starting_at.date(), self.map_nr)
 
     def save(self, *args, **kwargs):
+        prev_instance = None
+        if self.pk:
+            prev_instance = MatchMap.objects.get(pk=self.pk)
+
         super(MatchMap, self).save(*args, **kwargs)
         first_matchmap = self.match.get_first_matchmap()
         if first_matchmap:
             self.match.first_map_at = first_matchmap.starting_at
             self.match.save()
+
+        if prev_instance:
+            if prev_instance.rounds_won_team_a != self.rounds_won_team_a or prev_instance.rounds_won_team_b != self.rounds_won_team_b:
+                print("[MatchMap.save] Score changed {}:{} -> {}:{}".format(
+                    prev_instance.rounds_won_team_a,
+                    prev_instance.rounds_won_team_b,
+                    self.rounds_won_team_a,
+                    self.rounds_won_team_b
+                ))
+                tweet_dict = {
+                    'team_a': self.match.lineup_a.team.name,
+                    'team_b': self.match.lineup_b.team.name,
+                    'score_a': self.rounds_won_team_a,
+                    'score_b': self.rounds_won_team_b,
+                    'map_nr': self.map_nr,
+                    'map_name': self.played_map or 'unknown',
+                    'tournament': self.match.tournament.name,
+                    'slug': self.match.get_absolute_url()
+                }
+
+                tweet_text = "{team_a} {score_a}:{score_b} {team_b}\n" \
+                             "\n" \
+                             "Map #{map_nr} ({map_name})\n" \
+                             "{tournament}\n" \
+                             "\n" \
+                             "More at https://wannspieltbig.de{slug}".format(**tweet_dict)
+
+                twitter_api.api.PostUpdate(tweet_text)
 
     class Meta:
         ordering = ['starting_at']

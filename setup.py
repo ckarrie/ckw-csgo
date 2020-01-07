@@ -21,5 +21,6 @@ setup(
         'requests',
         'psycopg2-binary', 'bs4', 'python-dateutil', 'python-memcached',
         'django_ical', 'websocket_client', 'djangorestframework', 'websockets',
+        'python-twitter'
     ]
 )

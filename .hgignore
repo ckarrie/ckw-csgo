@@ -1,5 +1,0 @@
-syntax: glob
-.idea/*
-ckw_csgomatches.egg-info/*
-*/__pycache__/*
-*.pyc
