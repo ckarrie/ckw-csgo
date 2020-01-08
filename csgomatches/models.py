@@ -1,5 +1,6 @@
 import os
 import requests
+import twitter
 from django.contrib.sites.models import Site
 from django.db import models
 # Create your models here.
@@ -161,6 +162,9 @@ class Match(models.Model):
         )
     )
     hltv_match_id = models.CharField(max_length=20, null=True, blank=True)
+    esea_bracket_match_ids = models.CharField(max_length=20, null=True, blank=True, help_text='Comma separated')
+    enable_tweet = models.BooleanField(default=True)
+    last_tweet = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         if self.lineup_a and self.lineup_b:
@@ -331,18 +335,8 @@ class MatchMap(models.Model):
     def __str__(self):
         return '{} - {} Map #{}'.format(self.match, self.starting_at.date(), self.map_nr)
 
-    def save(self, *args, **kwargs):
-        prev_instance = None
-        if self.pk:
-            prev_instance = MatchMap.objects.get(pk=self.pk)
-
-        super(MatchMap, self).save(*args, **kwargs)
-        first_matchmap = self.match.get_first_matchmap()
-        if first_matchmap:
-            self.match.first_map_at = first_matchmap.starting_at
-            self.match.save()
-
-        if prev_instance:
+    def send_tweet(self, prev_instance=None, interval=180.):
+        if self.match.enable_tweet and prev_instance:
             if prev_instance.rounds_won_team_a != self.rounds_won_team_a or prev_instance.rounds_won_team_b != self.rounds_won_team_b:
                 print("[MatchMap.save] Score changed {}:{} -> {}:{}".format(
                     prev_instance.rounds_won_team_a,
@@ -356,19 +350,48 @@ class MatchMap(models.Model):
                     'score_a': self.rounds_won_team_a,
                     'score_b': self.rounds_won_team_b,
                     'map_nr': self.map_nr,
-                    'map_name': self.played_map or 'unknown',
+                    'map_name': self.played_map.name if self.played_map else "-",
                     'tournament': self.match.tournament.name,
                     'slug': self.match.get_absolute_url()
                 }
 
-                tweet_text = "{team_a} {score_a}:{score_b} {team_b}\n" \
-                             "\n" \
-                             "Map #{map_nr} ({map_name})\n" \
-                             "{tournament}\n" \
-                             "\n" \
-                             "More at https://wannspieltbig.de{slug}".format(**tweet_dict)
+                if not self.match.last_tweet:
+                    # set this after first round (first save)
+                    self.match.last_tweet = timezone.now()
+                    self.match.save()
 
-                twitter_api.api.PostUpdate(tweet_text)
+                if (timezone.now() - self.match.last_tweet).total_seconds() > interval:
+                    consumer_key, consumer_secret, access_token_key, access_token_secret = twitter_api.get_twitter_credentials()
+                    api = twitter.Api(consumer_key=consumer_key,
+                                      consumer_secret=consumer_secret,
+                                      access_token_key=access_token_key,
+                                      access_token_secret=access_token_secret)
+
+                    tweet_text = "{team_a} {score_a}:{score_b} {team_b}\n" \
+                                 "\n" \
+                                 "Map #{map_nr} ({map_name})\n" \
+                                 "{tournament}\n" \
+                                 "\n" \
+                                 "More at https://wannspieltbig.de{slug}".format(**tweet_dict)
+
+                    print("Posting to {} followers".format(len(api.GetFollowerIDs())))
+                    api.PostUpdate(tweet_text)
+
+                    self.match.last_tweet = timezone.now()
+                    self.match.save()
+
+
+    def save(self, *args, **kwargs):
+        prev_instance = None
+        if self.pk:
+            prev_instance = MatchMap.objects.get(pk=self.pk)
+
+        super(MatchMap, self).save(*args, **kwargs)
+        first_matchmap = self.match.get_first_matchmap()
+        if first_matchmap:
+            self.match.first_map_at = first_matchmap.starting_at
+            self.match.save()
+        self.send_tweet(prev_instance=prev_instance)
 
     class Meta:
         ordering = ['starting_at']
