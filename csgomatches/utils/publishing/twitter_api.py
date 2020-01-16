@@ -5,7 +5,7 @@ def get_twitter_credentials():
     consumer_key, consumer_secret, access_token_key, access_token_secret = "", "", "", ""
 
     with open(cred_file_path, 'r') as cred_file:
-        s = cred_file.read()
+        s = cred_file.read().splitlines()[0]
         consumer_key, consumer_secret, access_token_key, access_token_secret = s.split(",")
     return consumer_key, consumer_secret, access_token_key, access_token_secret
 
