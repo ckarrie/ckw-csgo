@@ -16,10 +16,10 @@
             {% endwith %}
         {% endblock %}
     </title>
-    <link href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,600,700&display=swap" rel="stylesheet">
-    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-32x32.png" sizes="32x32"/>
-    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-192x192.png" sizes="192x192"/>
-    <link rel="apple-touch-icon-precomposed" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-180x180.png"/>
+    <link media="screen" href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-32x32.png" sizes="32x32" />
+    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-192x192.png" sizes="192x192" />
+    <link rel="apple-touch-icon-precomposed" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-180x180.png" />
     <style type="text/css">
         * {
             padding: 0;
@@ -380,8 +380,7 @@
             }
 
             .logo img {
-                width: 115px;
-                margin: -12px 0 -10px 10px;
+                width: 107px;
             }
 
             h1 {
@@ -526,9 +525,11 @@
             }
 
             .logo img {
+                /*
                 width: 300px;
                 height: 203px;
                 margin: -39px 0 0 -6px;
+                */
             }
 
             .header {
@@ -589,7 +590,10 @@
     <div class="header">
         {% block content_header %}
             <div class="logo">
-                <a href="https://bigclan.gg" target="_blank" title="Zur Webseite bigclan.gg"><img src="{% static 'csgomatches/logos/BIGLOGO-04.png' %}"></a>
+                <a href="https://bigclan.gg" target="_blank" title="Zur Webseite bigclan.gg">
+                    <!--<img src="{% static 'csgomatches/logos/BIGLOGO-04.png' %}">-->
+                    <img src="{% static 'csgomatches/logos/big.webp' %}">
+                </a>
             </div>
 
             <h1>{% block content_header_h1 %}<a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a>{% endblock %}</h1>
