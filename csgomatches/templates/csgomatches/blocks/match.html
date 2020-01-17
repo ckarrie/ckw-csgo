@@ -33,16 +33,6 @@
             {% endfor %}
         </small>
 
-        {% if user.is_staff %}
-            <a class="admin-link" href="{% url 'admin:csgomatches_match_change' match.pk %}">&#x2744;</a>
-
-            {% if match.enable_tweet %}
-                <span class="tweet-enabled">&#128038;</span>
-            {% else %}
-                <span class="tweet-disabled">&#128038;</span>
-            {% endif %}
-        {% endif %}
-
     </h2>
 
     <h3 class="hide-on-large">{{ match.tournament.name }}</h3>

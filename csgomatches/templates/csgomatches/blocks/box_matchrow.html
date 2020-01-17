@@ -1,4 +1,17 @@
 
+
+{% if user.is_staff %}
+    <div class="map_admin">
+        <a class="admin-link" href="{% url 'admin:csgomatches_match_change' match.pk %}">&#x2744;</a>
+
+        {% if match.enable_tweet %}
+            <span class="tweet-enabled" title="Twitter Bot aktiv">&#128038;</span>
+        {% else %}
+            <span class="tweet-disabled">&#128038;</span>
+        {% endif %}
+    </div>
+{% endif %}
+
 {% if match.is_upcoming %}
     {% if match.lineup_b %}
         <div class="map_countdown">in {{ match.first_map_at|timeuntil }}</div>
@@ -9,6 +22,7 @@
     <div class="map_countdown">vor {{ match.first_map_at|timesince }}, <a href="{% url 'match_details' slug=match.slug %}">Spielstand aktualisieren</a></div>
 
 {% endif %}
+
 
 <div class="row">
     {% if match.cancelled %}
