@@ -2,9 +2,6 @@
 
 {% with fmm=match.matchmap_set.first %}
     <h2>
-
-
-
         <a class="matchdetail-link" href="{{ match.get_absolute_url }}" title="Match-Details {{ match }} @ {{ match.tournament.name }}">
             <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
             <span class="team_a">{{ match.lineup_a.team }}</span>
@@ -14,14 +11,9 @@
                 <span class="hide-on-small">at {{ match.tournament.name|truncatewords:3 }}</span>
             {% endif %}
         </a>
-
-
-
         <small class="hide-on-small" title="{{ match.tournament.name }}">
             {{ match.tournament.name|truncatewords:3 }}
         </small>
-
-
         <small style="margin-right: 10px;" class="hide-on-small">
             {% for link in match.externallink_set.visible %}
                 {% ifchanged link.link_flag %}
@@ -31,6 +23,14 @@
                 {% endifchanged %}
                 <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
             {% endfor %}
+            {% if user.is_staff %}
+                <a class="admin-link" href="{% url 'admin:csgomatches_match_change' match.pk %}">&#x2744;</a>
+                {% if match.enable_tweet %}
+                    <span class="tweet-enabled" title="Twitter Bot aktiv">&#128038;</span>
+                {% else %}
+                    <span class="tweet-disabled">&#128038;</span>
+                {% endif %}
+            {% endif %}
         </small>
 
     </h2>
