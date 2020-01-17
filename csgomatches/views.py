@@ -14,9 +14,9 @@ from . import models
 
 def get_random_background_image_url():
     images = [
-        static("csgomatches/backgrounds/IMG_6232.JPG"),
-        static("csgomatches/backgrounds/IMG_6239.JPG"),
-        static("csgomatches/backgrounds/IMG_6412.JPG"),
+        static("csgomatches/backgrounds/IMG_6232.webp"),
+        static("csgomatches/backgrounds/IMG_6239.webp"),
+        static("csgomatches/backgrounds/IMG_6412.webp"),
     ]
     return random.choice(images)
 
