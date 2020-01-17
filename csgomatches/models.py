@@ -165,6 +165,7 @@ class Match(models.Model):
     esea_bracket_match_ids = models.CharField(max_length=20, null=True, blank=True, help_text='Comma separated')
     enable_tweet = models.BooleanField(default=True)
     last_tweet = models.DateTimeField(null=True, blank=True)
+    last_tweet_id = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         if self.lineup_a and self.lineup_b:
@@ -375,8 +376,12 @@ class MatchMap(models.Model):
                                  "More at https://wannspieltbig.de{slug}".format(**tweet_dict)
 
                     print("Posting to {} followers".format(len(api.GetFollowerIDs())))
-                    api.PostUpdate(tweet_text)
-
+                    in_reply_to_status_id = self.match.last_tweet_id
+                    tw_status = api.PostUpdate(
+                        status=tweet_text,
+                        in_reply_to_status_id=in_reply_to_status_id
+                    )
+                    self.match.last_tweet_id = str(tw_status.id)
                     self.match.last_tweet = timezone.now()
                     self.match.save()
 
