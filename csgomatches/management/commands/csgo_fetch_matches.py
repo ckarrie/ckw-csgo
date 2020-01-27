@@ -125,6 +125,7 @@ class Command(BaseCommand):
                     tournament.save()
 
                 for match_data in event_matches:
+                    match_id = match_data.get('hltvMatchID')
                     if len(match_data.get('time')) >= 13 and match_data.get('time').isdigit():
                         first_match_timestamp = int(match_data.get('time')[:10])
                         first_match_start = timezone.datetime.fromtimestamp(first_match_timestamp)
@@ -196,11 +197,18 @@ class Command(BaseCommand):
                     elif "5" in match_data.get('mType', ''):
                         bestof = 5
 
-                    match = apps.get_model('csgomatches.Match').objects.filter(
-                        tournament=tournament,
-                        lineup_a=lineup_a,
-                        lineup_b=lineup_b,
-                    ).first()
+                    if match_id:
+                        match = apps.get_model('csgomatches.Match').objects.filter(
+                            hltv_match_id=match_id
+                        ).first()
+
+                    else:
+                        match = apps.get_model('csgomatches.Match').objects.filter(
+                            tournament=tournament,
+                            lineup_a=lineup_a,
+                            lineup_b=lineup_b,
+                            hltv_match_id=match_id
+                        ).order_by('-first_map_at').first()
 
                     if not match:
                         match = apps.get_model('csgomatches.Match')(
@@ -208,7 +216,7 @@ class Command(BaseCommand):
                             lineup_a=lineup_a,
                             lineup_b=lineup_b,
                             bestof=bestof,
-                            hltv_match_id=match_data.get('hltvMatchID', '')
+                            hltv_match_id=match_id
                         )
                         match.save()
 
@@ -223,7 +231,7 @@ class Command(BaseCommand):
                         # if existing_matchmaps.count() != len(maps_data):
 
                         # https://www.hltv.org/matches/2337711/match <- added match, strange hltv behaviour
-                        match_id = match_data.get('hltvMatchID')
+
                         hltv_livescore_data = None
                         if match_id:
                             hltv_url = 'https://www.hltv.org/matches/{}/match'.format(match_id)
