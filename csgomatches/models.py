@@ -161,11 +161,13 @@ class Match(models.Model):
             (2, 'Defwin in favour of team B'),
         )
     )
-    hltv_match_id = models.CharField(max_length=20, null=True, blank=True)
+    hltv_match_id = models.CharField(max_length=20, null=True, blank=True, help_text='For HLTV Livescore during match')
     esea_bracket_match_ids = models.CharField(max_length=20, null=True, blank=True, help_text='Comma separated')
     enable_tweet = models.BooleanField(default=True)
     last_tweet = models.DateTimeField(null=True, blank=True)
     last_tweet_id = models.CharField(max_length=255, null=True, blank=True)
+    enable_99dmg = models.BooleanField(default=False)
+    enable_hltv = models.BooleanField(default=True)
 
     def __str__(self):
         if self.lineup_a and self.lineup_b:
@@ -178,7 +180,6 @@ class Match(models.Model):
         return self.matchmap_set.order_by('starting_at').first()
 
     def is_live(self):
-
         current_live_mms = []
         for mmap in self.matchmap_set.order_by('map_nr'):
             current_live_mms.append(mmap.is_live())
@@ -259,7 +260,6 @@ class Match(models.Model):
             url = reverse('match_livescore-detail', kwargs={'pk': self.hltv_match_id})
             return request.build_absolute_uri(url)
 
-
     def update_hltv_livescore(self, request):
         url = self.get_livescore_url(request=request)
         if url:
@@ -280,12 +280,11 @@ class Match(models.Model):
                         swap_score = True
 
                     if swap_score:
-                        score_b, score_a  = score_a, score_b
+                        score_b, score_a = score_a, score_b
 
                     mm_obj.rounds_won_team_a = score_a
                     mm_obj.rounds_won_team_b = score_b
                     mm_obj.save()
-
 
     class Meta:
         ordering = ['-first_map_at']
@@ -385,7 +384,6 @@ class MatchMap(models.Model):
                     self.match.last_tweet = timezone.now()
                     self.match.save()
 
-
     def save(self, *args, **kwargs):
         prev_instance = None
         if self.pk:
@@ -413,6 +411,7 @@ class ExternalLink(models.Model):
         ('twitch_cast', 'Cast'),
         ('twitch_vod', 'VOD'),
         ('youtube_vod', 'VOD'),
+        ('link', 'Link'),
     ))
     link_flag = models.CharField(
         max_length=50, default='en', help_text='see ckw-csgo/csgomatches/static/csgomatches/flags',
@@ -448,5 +447,3 @@ class StaticPage(models.Model):
 
     def get_template_name(self):
         return 'csgomatches/staticpages/{}'.format(self.template_name)
-
-

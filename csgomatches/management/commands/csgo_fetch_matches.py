@@ -83,13 +83,13 @@ class Command(BaseCommand):
         #    print(teamrow)
 
         if options['dmg99']:
-            self.crawl_99damage_de(include_archive_pages=options['include_archive_pages'])
+            self.crawl_99damage_de(include_archive_pages=options['include_archive_pages'], fake=fake)
 
         if options['y0fl0w']:
-            self.crawl_y0fl0w_de(include_archive_pages=True)
+            self.crawl_y0fl0w_de(include_archive_pages=True, fake=fake)
 
-    def crawl_y0fl0w_de(self, include_archive_pages=True):
-        map_to_left = ['BIG', 'BIG Academy']
+    def crawl_y0fl0w_de(self, include_archive_pages=True, fake=False):
+        map_to_left = ['BIG', 'BIG Academy', 'BIG.A']
         json_urls = ['https://big.y0fl0w.de', ]
         if include_archive_pages:
             json_urls += [
@@ -212,164 +212,166 @@ class Command(BaseCommand):
                         )
                         match.save()
 
-                    # existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
-                    #    match=match
-                    # )
+                    if match.enable_hltv:
 
-                    maps_data = match_data.get('maps', [])
+                        # existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                        #    match=match
+                        # )
 
-                    # if existing_matchmaps.count() != len(maps_data):
+                        maps_data = match_data.get('maps', [])
 
-                    # https://www.hltv.org/matches/2337711/match <- added match, strange hltv behaviour
-                    match_id = match_data.get('hltvMatchID')
-                    hltv_livescore_data = None
-                    if match_id:
-                        hltv_url = 'https://www.hltv.org/matches/{}/match'.format(match_id)
-                        apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
-                            url=hltv_url,
-                            match=match,
-                            link_type='hltv_match',
-                            defaults={
-                                'title': str(match),
-                            }
-                        )
+                        # if existing_matchmaps.count() != len(maps_data):
 
-                        if not match.hltv_match_id:
-                            match.hltv_match_id = match_id
-                            match.save()
-
-                        # if match.is_live():
-                        hltv_livescore_data = asyncio.get_event_loop().run_until_complete(get_hlvt_score(int(match.hltv_match_id)))
-
-                    vods_data = match_data.get('vods', {})
-                    if isinstance(vods_data, dict):
-                        for vod_lang, vod_url in vods_data.items():
-                            link_type = 'twitch_vod'
-                            vod_title = str(match)
-                            mlang = ''
-                            if '_m' in vod_lang and 'https://twitch.tv/videos/' in vod_url:
-                                link_type = 'twitch_vod'
-                                mlang, mnr = vod_lang.split('_')
-                                vod_title = 'VOD #{} ({})'.format(mnr, mlang)
-                                if '/videos/v' in vod_url:
-                                    vod_url = vod_url.replace('/videos/v', '/videos/')
-                            if '_m' in vod_lang and 'youtube' in vod_url:
-                                link_type = 'youtube_vod'
-                                mlang, mnr = vod_lang.split('_')
-                                vod_title = 'VOD #{} ({})'.format(mnr, mlang)
-                            if vod_lang == 'demo':
-                                link_type = 'hltv_demo'
-                                mlang = 'eu'
-
+                        # https://www.hltv.org/matches/2337711/match <- added match, strange hltv behaviour
+                        match_id = match_data.get('hltvMatchID')
+                        hltv_livescore_data = None
+                        if match_id:
+                            hltv_url = 'https://www.hltv.org/matches/{}/match'.format(match_id)
                             apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
-                                url=vod_url,
+                                url=hltv_url,
                                 match=match,
-                                link_type=link_type,
-                                defaults={
-                                    'title': vod_title,
-                                    'link_flag': mlang
-                                }
-                            )
-
-                    streams_data = match_data.get('streams', {})
-                    if isinstance(vods_data, dict):
-                        for steam_lang, stream_url in streams_data.items():
-                            link_type = 'twitch_cast'
-
-                            apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
-                                url=stream_url,
-                                match=match,
-                                link_type=link_type,
+                                link_type='hltv_match',
                                 defaults={
                                     'title': str(match),
-                                    'link_flag': steam_lang
                                 }
                             )
 
-                    for i, map_data in enumerate(maps_data):
-                        results = map_data.get('result')
-                        map_pick_team_text = map_data.get('pick')
-                        starting_at = aware_first_match_start + timezone.timedelta(hours=i)
-                        if map_pick_team_text:
-                            map_pick_lineup = apps.get_model('csgomatches.Lineup').objects.filter(id__in=[lineup_a.id, lineup_b.id]).search_lineups(name=map_pick_team_text).active_lineups(ref_dt=starting_at).first()
-                        else:
-                            map_pick_lineup = None
+                            if not match.hltv_match_id:
+                                match.hltv_match_id = match_id
+                                match.save()
 
-                        if i >= 2 and starting_at < timezone.now() and results == '-':
-                            unplayed_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
-                                match=match,
-                                map_nr__gte=3,
-                                rounds_won_team_a=0,
-                                rounds_won_team_b=0,
-                                starting_at__lt=timezone.now()
-                            )
-                            if unplayed_matchmaps.exists():
-                                print("[crawl_y0fl0w_de] deleted unplayed Matchmap map_data=", map_data, "unplayed_matchmaps.pk=", unplayed_matchmaps.values_list('pk', flat=True))
-                                unplayed_matchmaps.delete()
+                            # if match.is_live():
+                            hltv_livescore_data = asyncio.get_event_loop().run_until_complete(get_hlvt_score(int(match.hltv_match_id)))
 
-                        else:
-                            matchmap, matchmap_created = apps.get_model('csgomatches.MatchMap').objects.get_or_create(
-                                match=match,
-                                map_nr=i + 1,
-                                defaults={
-                                    'starting_at': starting_at,
-                                }
-                            )
-                            name = map_data.get('name')
+                        vods_data = match_data.get('vods', {})
+                        if isinstance(vods_data, dict):
+                            for vod_lang, vod_url in vods_data.items():
+                                link_type = 'twitch_vod'
+                                vod_title = str(match)
+                                mlang = ''
+                                if '_m' in vod_lang and 'https://twitch.tv/videos/' in vod_url:
+                                    link_type = 'twitch_vod'
+                                    mlang, mnr = vod_lang.split('_')
+                                    vod_title = 'VOD #{} ({})'.format(mnr, mlang)
+                                    if '/videos/v' in vod_url:
+                                        vod_url = vod_url.replace('/videos/v', '/videos/')
+                                if '_m' in vod_lang and 'youtube' in vod_url:
+                                    link_type = 'youtube_vod'
+                                    mlang, mnr = vod_lang.split('_')
+                                    vod_title = 'VOD #{} ({})'.format(mnr, mlang)
+                                if vod_lang == 'demo':
+                                    link_type = 'hltv_demo'
+                                    mlang = 'eu'
 
-                            if matchmap_created:
-                                print("[crawl_y0fl0w_de] + created Matchmap map_data=", map_data, "matchmap.pk=", matchmap.pk, 'map_nr=', str(i + 1))
-
-                            livescore = convert_to_score(hltv_livescore_data, map_nr=i + 1)
-                            if livescore:
-                                livescore_by_team = {}
-
-                                for team_id, team_score in livescore.items():
-                                    team = apps.get_model('csgomatches.Team').objects.filter(hltv_id=int(team_id)).first()
-                                    if team:
-                                        livescore_by_team[team] = team_score
-
-                                if len(livescore_by_team) == 2:
-                                    print("[crawl_y0fl0w_de]  - livescore_by_team", livescore_by_team)
-                                    t1_score = livescore_by_team[match.lineup_a.team]
-                                    t2_score = livescore_by_team[match.lineup_b.team]
-                                    if swap_team_and_score:
-                                        # convert to 'incorrent' - will be later returned if swap_team_and_score is True
-                                        t1_score, t2_score = t2_score, t1_score
-                                    results = "{}:{}".format(t1_score, t2_score)
-                                    print("[crawl_y0fl0w_de]  - Results by WebSocket livescore", results)
-
-                            if results and ':' in results:
-                                t1_res, t2_res = results.split(":")
-                                t1_res, t2_res = int(t1_res), int(t2_res)
-
-                                if swap_team_and_score:
-                                    t1_res, t2_res = t2_res, t1_res
-
-                                if t1_res > matchmap.rounds_won_team_a or t2_res > matchmap.rounds_won_team_b:
-                                    matchmap.rounds_won_team_a = t1_res
-                                    matchmap.rounds_won_team_b = t2_res
-                                    matchmap.save()
-
-                            if name and 'TBA' not in name:
-                                # set map
-                                cs_name = HLTV_MAP_NAMES_TO_CS_NAME.get(name, 'de_' + name.lower())
-                                # not found in HLTV_MAP_NAMES_TO_CS_NAME
-                                played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
-                                    cs_name=cs_name,
+                                apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
+                                    url=vod_url,
+                                    match=match,
+                                    link_type=link_type,
                                     defaults={
-                                        'name': name
+                                        'title': vod_title,
+                                        'link_flag': mlang
                                     }
                                 )
-                                print("[crawl_y0fl0w_de]  - Setting Map name", name, match)
-                                matchmap.played_map = played_map
-                                matchmap.save()
 
-                            if map_pick_lineup and matchmap.map_pick_of is None:
-                                matchmap.map_pick_of = map_pick_lineup
-                                matchmap.save()
+                        streams_data = match_data.get('streams', {})
+                        if isinstance(vods_data, dict):
+                            for steam_lang, stream_url in streams_data.items():
+                                link_type = 'twitch_cast'
 
-    def crawl_99damage_de(self, include_archive_pages=False):
+                                apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
+                                    url=stream_url,
+                                    match=match,
+                                    link_type=link_type,
+                                    defaults={
+                                        'title': str(match),
+                                        'link_flag': steam_lang
+                                    }
+                                )
+
+                        for i, map_data in enumerate(maps_data):
+                            results = map_data.get('result')
+                            map_pick_team_text = map_data.get('pick')
+                            starting_at = aware_first_match_start + timezone.timedelta(hours=i)
+                            if map_pick_team_text:
+                                map_pick_lineup = apps.get_model('csgomatches.Lineup').objects.filter(id__in=[lineup_a.id, lineup_b.id]).search_lineups(name=map_pick_team_text).active_lineups(ref_dt=starting_at).first()
+                            else:
+                                map_pick_lineup = None
+
+                            if i >= 2 and starting_at < timezone.now() and results == '-':
+                                unplayed_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                                    match=match,
+                                    map_nr__gte=3,
+                                    rounds_won_team_a=0,
+                                    rounds_won_team_b=0,
+                                    starting_at__lt=timezone.now()
+                                )
+                                if unplayed_matchmaps.exists():
+                                    print("[crawl_y0fl0w_de] deleted unplayed Matchmap map_data=", map_data, "unplayed_matchmaps.pk=", unplayed_matchmaps.values_list('pk', flat=True))
+                                    unplayed_matchmaps.delete()
+
+                            else:
+                                matchmap, matchmap_created = apps.get_model('csgomatches.MatchMap').objects.get_or_create(
+                                    match=match,
+                                    map_nr=i + 1,
+                                    defaults={
+                                        'starting_at': starting_at,
+                                    }
+                                )
+                                name = map_data.get('name')
+
+                                if matchmap_created:
+                                    print("[crawl_y0fl0w_de] + created Matchmap map_data=", map_data, "matchmap.pk=", matchmap.pk, 'map_nr=', str(i + 1))
+
+                                livescore = convert_to_score(hltv_livescore_data, map_nr=i + 1)
+                                if livescore:
+                                    livescore_by_team = {}
+
+                                    for team_id, team_score in livescore.items():
+                                        team = apps.get_model('csgomatches.Team').objects.filter(hltv_id=int(team_id)).first()
+                                        if team:
+                                            livescore_by_team[team] = team_score
+
+                                    if len(livescore_by_team) == 2:
+                                        print("[crawl_y0fl0w_de]  - livescore_by_team", livescore_by_team)
+                                        t1_score = livescore_by_team[match.lineup_a.team]
+                                        t2_score = livescore_by_team[match.lineup_b.team]
+                                        if swap_team_and_score:
+                                            # convert to 'incorrent' - will be later returned if swap_team_and_score is True
+                                            t1_score, t2_score = t2_score, t1_score
+                                        results = "{}:{}".format(t1_score, t2_score)
+                                        print("[crawl_y0fl0w_de]  - Results by WebSocket livescore", results)
+
+                                if results and ':' in results:
+                                    t1_res, t2_res = results.split(":")
+                                    t1_res, t2_res = int(t1_res), int(t2_res)
+
+                                    if swap_team_and_score:
+                                        t1_res, t2_res = t2_res, t1_res
+
+                                    if t1_res > matchmap.rounds_won_team_a or t2_res > matchmap.rounds_won_team_b:
+                                        matchmap.rounds_won_team_a = t1_res
+                                        matchmap.rounds_won_team_b = t2_res
+                                        matchmap.save()
+
+                                if name and 'TBA' not in name:
+                                    # set map
+                                    cs_name = HLTV_MAP_NAMES_TO_CS_NAME.get(name, 'de_' + name.lower())
+                                    # not found in HLTV_MAP_NAMES_TO_CS_NAME
+                                    played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
+                                        cs_name=cs_name,
+                                        defaults={
+                                            'name': name
+                                        }
+                                    )
+                                    print("[crawl_y0fl0w_de]  - Setting Map name", name, match)
+                                    matchmap.played_map = played_map
+                                    matchmap.save()
+
+                                if map_pick_lineup and matchmap.map_pick_of is None:
+                                    matchmap.map_pick_of = map_pick_lineup
+                                    matchmap.save()
+
+    def crawl_99damage_de(self, include_archive_pages=False, fake=False):
         map_to_left = ['BIG', 'BIG.A']
         dmg_urls = [
             'https://csgo.99damage.de/de/matches&filter_team=13782',  # BIG
@@ -485,7 +487,7 @@ class Command(BaseCommand):
                         tournament=tournament,
                         lineup_a=lineup_a,
                         lineup_b=lineup_b,
-                    ).first()
+                    ).order_by('-first_map_at').first()
 
                     # Get or create Match
                     if not match:
@@ -506,98 +508,100 @@ class Command(BaseCommand):
                         match.save()
                         print("[crawl_99damage_de] + created new Match", match)
 
-                    # Match Link
-                    apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
-                        url=matches_url,
-                        match=match,
-                        link_type='99dmg_match',
-                        defaults={
-                            'title': str(match),
-                            'link_flag': 'de'
-                        }
-                    )
+                    if match.enable_99dmg:
 
-                    print("[crawl_99damage_de] Match ", match, " map_cnt=", map_cnt, " map_indexes=", map_indexes, sep='')
-                    existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
-                        match=match,
-                    )
-                    print("[crawl_99damage_de]  - existing MatchMaps (before)", existing_matchmaps)
-
-                    # Prepoulate Maps
-
-                    for i in range(map_cnt):
-                        map_nr = i + 1
-                        i_without_overtime = map_indexes[i]
-                        # print(map_cnt, overtime_counter, i, i_without_overtime)
-                        sum_divs = sub_soup.select('#content')[0].select('div.match_subs')[0].select('div.sum')
-                        if sum_divs:
-                            map_score = sum_divs[i].text.strip()
-                        else:
-                            map_score = score
-
-                        mapinfos = {
-                            'name': sub_soup.select('#content')[0].select('div.match_subs')[0].select('div.map')[i_without_overtime].attrs.get('title'),
-                            'score': map_score
-                        }
-                        if map_score and ':' in map_score and 'h' not in map_score:
-                            score_left, score_right = map_score.split(":")
-                            score_left, score_right = int(score_left), int(score_right)
-                            if swap_team_and_score:
-                                score_left, score_right = score_right, score_left
-                        print("[crawl_99damage_de]  - Matchmap data", m_tournament, team_left, team_right, score_left, score_right, date, "sub=", m_datetime, mapinfos)
-
-                        # get or create Maps
-                        if 'de_tba' in mapinfos.get('name'):
-                            played_map = None
-                        else:
-                            played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
-                                cs_name=mapinfos.get('name'),
-                                defaults={
-                                    'name': mapinfos.get('name')
-                                }
-                            )
-
-                        matchmap = apps.get_model('csgomatches.MatchMap').objects.filter(
+                        # Match Link
+                        apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
+                            url=matches_url,
                             match=match,
-                            map_nr=map_nr
-                        ).first()
-                        if matchmap:
-                            print("[crawl_99damage_de]    - found Matchmap #", matchmap.map_nr, matchmap, sep='')
+                            link_type='99dmg_match',
+                            defaults={
+                                'title': str(match),
+                                'link_flag': 'de'
+                            }
+                        )
 
-                        if matchmap:
-                            if score_left > matchmap.rounds_won_team_a or score_right > matchmap.rounds_won_team_b or played_map != matchmap.played_map:
-                                matchmap.played_map = played_map
-                                matchmap.rounds_won_team_a = score_left
-                                matchmap.rounds_won_team_b = score_right
+                        print("[crawl_99damage_de] Match ", match, " map_cnt=", map_cnt, " map_indexes=", map_indexes, sep='')
+                        existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                            match=match,
+                        )
+                        print("[crawl_99damage_de]  - existing MatchMaps (before)", existing_matchmaps)
+
+                        # Prepoulate Maps
+
+                        for i in range(map_cnt):
+                            map_nr = i + 1
+                            i_without_overtime = map_indexes[i]
+                            # print(map_cnt, overtime_counter, i, i_without_overtime)
+                            sum_divs = sub_soup.select('#content')[0].select('div.match_subs')[0].select('div.sum')
+                            if sum_divs:
+                                map_score = sum_divs[i].text.strip()
+                            else:
+                                map_score = score
+
+                            mapinfos = {
+                                'name': sub_soup.select('#content')[0].select('div.match_subs')[0].select('div.map')[i_without_overtime].attrs.get('title'),
+                                'score': map_score
+                            }
+                            if map_score and ':' in map_score and 'h' not in map_score:
+                                score_left, score_right = map_score.split(":")
+                                score_left, score_right = int(score_left), int(score_right)
+                                if swap_team_and_score:
+                                    score_left, score_right = score_right, score_left
+                            print("[crawl_99damage_de]  - Matchmap data", m_tournament, team_left, team_right, score_left, score_right, date, "sub=", m_datetime, mapinfos)
+
+                            # get or create Maps
+                            if 'de_tba' in mapinfos.get('name'):
+                                played_map = None
+                            else:
+                                played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
+                                    cs_name=mapinfos.get('name'),
+                                    defaults={
+                                        'name': mapinfos.get('name')
+                                    }
+                                )
+
+                            matchmap = apps.get_model('csgomatches.MatchMap').objects.filter(
+                                match=match,
+                                map_nr=map_nr
+                            ).first()
+                            if matchmap:
+                                print("[crawl_99damage_de]    - found Matchmap #", matchmap.map_nr, matchmap, sep='')
+
+                            if matchmap:
+                                if score_left > matchmap.rounds_won_team_a or score_right > matchmap.rounds_won_team_b or played_map != matchmap.played_map:
+                                    matchmap.played_map = played_map
+                                    matchmap.rounds_won_team_a = score_left
+                                    matchmap.rounds_won_team_b = score_right
+                                    matchmap.save()
+
+                            if not matchmap:
+                                matchmap = apps.get_model('csgomatches.MatchMap')(
+                                    match=match,
+                                    map_nr=map_nr,
+                                    played_map=played_map,
+                                    rounds_won_team_a=score_left,
+                                    rounds_won_team_b=score_right,
+                                    starting_at=m_datetime + timezone.timedelta(hours=map_nr),
+
+                                )
                                 matchmap.save()
+                                print("[crawl_99damage_de]  + created Matchmap mapinfos=", mapinfos, " matchmap.pk=", matchmap.pk, ' map_nr=', str(map_nr), sep='')
 
-                        if not matchmap:
-                            matchmap = apps.get_model('csgomatches.MatchMap')(
-                                match=match,
-                                map_nr=map_nr,
-                                played_map=played_map,
-                                rounds_won_team_a=score_left,
-                                rounds_won_team_b=score_right,
-                                starting_at=m_datetime + timezone.timedelta(hours=map_nr),
-
-                            )
-                            matchmap.save()
-                            print("[crawl_99damage_de]  + created Matchmap mapinfos=", mapinfos, " matchmap.pk=", matchmap.pk, ' map_nr=', str(map_nr), sep='')
-
-                    existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
-                        match=match,
-                    )
-                    print("[crawl_99damage_de]  - existing MatchMaps (after)", existing_matchmaps, existing_matchmaps.count(), map_cnt, "bo=", match.bestof)
-                    if existing_matchmaps.count() > map_cnt >= 2 and match.bestof == 3:
-                        if match.first_map_at < timezone.now():
-                            unplayed_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
-                                match=match,
-                                map_nr__gte=3,
-                                # rounds_won_team_a=0,
-                                # rounds_won_team_b=0,
-                                starting_at__lt=timezone.now()
-                            )
-                            if unplayed_matchmaps.exists():
-                                for unplayed_mm in unplayed_matchmaps:
-                                    print("[crawl_99damage_de]  - deleted unplayed Matchmap map_nr=", unplayed_mm.map_nr)
-                                    unplayed_mm.delete()
+                        existing_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                            match=match,
+                        )
+                        print("[crawl_99damage_de]  - existing MatchMaps (after)", existing_matchmaps, existing_matchmaps.count(), map_cnt, "bo=", match.bestof)
+                        if existing_matchmaps.count() > map_cnt >= 2 and match.bestof == 3:
+                            if match.first_map_at < timezone.now():
+                                unplayed_matchmaps = apps.get_model('csgomatches.MatchMap').objects.filter(
+                                    match=match,
+                                    map_nr__gte=3,
+                                    # rounds_won_team_a=0,
+                                    # rounds_won_team_b=0,
+                                    starting_at__lt=timezone.now()
+                                )
+                                if unplayed_matchmaps.exists():
+                                    for unplayed_mm in unplayed_matchmaps:
+                                        print("[crawl_99damage_de]  - deleted unplayed Matchmap map_nr=", unplayed_mm.map_nr)
+                                        unplayed_mm.delete()
