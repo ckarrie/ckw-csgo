@@ -343,7 +343,10 @@ class Command(BaseCommand):
 
                                 if results and ':' in results:
                                     t1_res, t2_res = results.split(":")
-                                    t1_res, t2_res = int(t1_res), int(t2_res)
+                                    try:
+                                        t1_res, t2_res = int(t1_res), int(t2_res)
+                                    except ValueError:
+                                        t1_res, t2_res = 0, 0
 
                                     if swap_team_and_score:
                                         t1_res, t2_res = t2_res, t1_res
