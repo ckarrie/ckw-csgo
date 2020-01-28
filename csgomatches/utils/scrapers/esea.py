@@ -1,3 +1,5 @@
+import json
+
 import requests
 from requests.auth import HTTPBasicAuth
 from bs4 import BeautifulSoup
@@ -8,6 +10,7 @@ from django.apps import apps
 from django.core.exceptions import AppRegistryNotReady
 import dateutil.parser
 from django.utils import timezone
+import os
 
 DEBUG = False
 
@@ -114,18 +117,25 @@ def publish_results(matchmap, a, b, map_nr=1, map_name=""):
 def as_thread(bracket_id, match_id, update_id=None):
     while run_thread:
         threading._start_new_thread(get_bracket_match, (bracket_id, match_id, update_id))
-        time.sleep(120)   #120 = default
+        time.sleep(120)  # 120 = default
 
 
 ##get_bracket_match(bracket_id=532, match_id=33523)
 
-#as_thread(
+# as_thread(
 #    bracket_id=575,  # ESEA Bracket ID (siehe Link)
 #    match_id=35760,  # ESEA Match ID (via Chrome DevTools)
 #    update_id=6508,  # wsb.de pk of Matchmap (https://wannspieltbig.de/admin/csgomatches/matchmap/)
-#)
+# )
 
 # publish_results(2421,2,3)
+
+def get_esea_proxies():
+    proxies_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'proxies.json')
+    proxies = {}
+    with open(proxies_file_path, 'r') as pfile:
+        proxies = json.loads(pfile.read().splitlines()[0])
+    return proxies
 
 def get_esea_team_schedule(team_id=8749575):
     MAP_LEFT_TEAMS = ['BIGCLAN', 'BIG OMEN Academy']
@@ -143,8 +153,11 @@ def get_esea_team_schedule(team_id=8749575):
 
     api_url = 'https://play.esea.net/api/teams/{}/matches?page_size=50'.format(team_id)
     scraper = cfscrape.CloudflareScraper()
-    print("ESEA", api_url)
-    response = scraper.get(api_url)
+    proxies = get_esea_proxies()
+
+    print("ESEA", api_url, proxies)
+
+    response = scraper.get(api_url, proxies=proxies)
     if response.status_code == 200:
         response_json = response.json()
         matches_data = response_json.get('data', [])
@@ -192,9 +205,9 @@ def get_esea_team_schedule(team_id=8749575):
                             name=t_name
                         )
 
-                    lineup_b = apps.get_model('csgomatches.Lineup').objects.\
-                        search_lineups(name=away_data.get('name')).\
-                        active_lineups(ref_dt=match_datetime).\
+                    lineup_b = apps.get_model('csgomatches.Lineup').objects. \
+                        search_lineups(name=away_data.get('name')). \
+                        active_lineups(ref_dt=match_datetime). \
                         first()
                     if not lineup_b:
                         team_b = apps.get_model('csgomatches.Team')(
@@ -242,9 +255,9 @@ def get_esea_team_schedule(team_id=8749575):
                         cs_name=map_name
                     ).first()
                     if team_a_score > first_matchmap.rounds_won_team_a or \
-                        team_b_score > first_matchmap.rounds_won_team_b or \
-                        first_map_at_changed or \
-                        first_matchmap.played_map != map_instance:
+                                    team_b_score > first_matchmap.rounds_won_team_b or \
+                            first_map_at_changed or \
+                                    first_matchmap.played_map != map_instance:
                         first_matchmap.played_map = map_instance
                         first_matchmap.rounds_won_team_a = team_a_score
                         first_matchmap.rounds_won_team_b = team_b_score
@@ -256,8 +269,6 @@ def get_esea_team_schedule(team_id=8749575):
         print("ERROR: ", response.content)
 
 
-
-
 def get_esea_match(match_id, update_id=None):
     MAP_LEFT_TEAMS = ['BIGCLAN', 'BIG OMEN Academy']
     swap_teams = False
@@ -266,7 +277,7 @@ def get_esea_match(match_id, update_id=None):
     response = scraper.get(api_url)
     if response.status_code == 200:
         response_json = response.json()
-        #print(response_json)
+        # print(response_json)
         data = response_json.get('data', {})
         started_at = data.get('started_at')
         map_name = data.get('map')
