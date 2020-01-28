@@ -8,3 +8,5 @@ ckw_csgomatches.egg-info/
 csgomatches/utils/scrapers/push_credentials.txt
 
 csgomatches/utils/publishing/twitter_credentials.txt
+
+csgomatches/utils/scrapers/proxies.json
