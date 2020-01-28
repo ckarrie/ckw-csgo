@@ -59,6 +59,14 @@ class Command(BaseCommand):
             help='Use 99dmg',
         )
 
+        parser.add_argument(
+            '--esea',
+            action='store_true',
+            dest='esea',
+            default=False,
+            help='Use esea',
+        )
+
     def handle(self, *args, **options):
         """
         usage:
@@ -87,6 +95,9 @@ class Command(BaseCommand):
 
         if options['y0fl0w']:
             self.crawl_y0fl0w_de(include_archive_pages=True, fake=fake)
+
+        if options['esea']:
+            self.crawl_esea()
 
     def crawl_y0fl0w_de(self, include_archive_pages=True, fake=False):
         map_to_left = ['BIG', 'BIG Academy', 'BIG.A']
@@ -616,3 +627,7 @@ class Command(BaseCommand):
                                     for unplayed_mm in unplayed_matchmaps:
                                         print("[crawl_99damage_de]  - deleted unplayed Matchmap map_nr=", unplayed_mm.map_nr)
                                         unplayed_mm.delete()
+
+    def crawl_esea(self):
+        from csgomatches.utils.scrapers.esea import get_esea_team_schedule
+        get_esea_team_schedule()

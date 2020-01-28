@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils import timezone
 
-from csgomatches.utils.scrapers.esea import get_bracket_match
+from csgomatches.utils.scrapers.esea import get_bracket_match, get_esea_match
 
 
 class Command(BaseCommand):
@@ -18,6 +18,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--esea_ids', nargs='+', type=int)
         parser.add_argument('--match_id', nargs='+', type=int)
+        parser.add_argument('--update_matchmap_id', nargs='+', type=int)
         parser.add_argument('--reverse_score', action='store_true', dest='reverse_score', default=False)
 
     def handle(self, *args, **options):
@@ -46,5 +47,12 @@ class Command(BaseCommand):
         update_id = options['match_id'][0]
         reverse_score = options['reverse_score']
 
-        get_bracket_match(bracket_id=bracket_id, match_id=match_id, update_id=update_id, reverse_score=reverse_score)
+        #print(options)
+
+        if bracket_id and match_id:
+            get_bracket_match(bracket_id=bracket_id, match_id=match_id, update_id=update_id)
+
+        elif match_id:
+            get_esea_match(match_id=match_id, update_id=update_id)
+
 

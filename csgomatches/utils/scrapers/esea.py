@@ -6,6 +6,10 @@ import threading
 import time
 from django.apps import apps
 from django.core.exceptions import AppRegistryNotReady
+import dateutil.parser
+from django.utils import timezone
+
+DEBUG = False
 
 """
 Run this local, not on a hosted server
@@ -16,6 +20,7 @@ Usage:
 """
 
 run_thread = True
+
 
 def get_bracket_match(bracket_id, match_id, update_id=None):
     MAP_LEFT_TEAMS = ['BIGCLAN']
@@ -84,7 +89,6 @@ def get_bracket_match(bracket_id, match_id, update_id=None):
             """
 
 
-
 def publish_results(matchmap, a, b, map_nr=1, map_name=""):
     url = "https://wannspieltbig.de/api/matchmap_update/{}/".format(matchmap)
     username = None
@@ -92,16 +96,17 @@ def publish_results(matchmap, a, b, map_nr=1, map_name=""):
     with open('push_credentials.txt', 'r') as cred_file:
         s = cred_file.read()
         username, password = s.split(",")
+    json = {
+        'rounds_won_team_a': a,
+        'rounds_won_team_b': b,
+    }
     resp = requests.put(
         url,
-        json={
-            'rounds_won_team_a': a,
-            'rounds_won_team_b': b,
-        },
+        json=json,
         auth=HTTPBasicAuth(username, password)
     )
     if resp.status_code == 200:
-        print(" - posted to", url)
+        print(" - posted to", url, json)
     else:
         print("Error:", resp.content)
 
@@ -109,15 +114,171 @@ def publish_results(matchmap, a, b, map_nr=1, map_name=""):
 def as_thread(bracket_id, match_id, update_id=None):
     while run_thread:
         threading._start_new_thread(get_bracket_match, (bracket_id, match_id, update_id))
-        time.sleep(600)
+        time.sleep(120)   #120 = default
 
 
 ##get_bracket_match(bracket_id=532, match_id=33523)
 
-as_thread(
-    bracket_id=532,     # ESEA Bracket ID (siehe Link)
-    match_id=33621,          # ESEA Match ID (via Chrome DevTools)
-    update_id=2421,  # wsb.de pk of Matchmap (https://wannspieltbig.de/admin/csgomatches/matchmap/)
-)
+#as_thread(
+#    bracket_id=575,  # ESEA Bracket ID (siehe Link)
+#    match_id=35760,  # ESEA Match ID (via Chrome DevTools)
+#    update_id=6508,  # wsb.de pk of Matchmap (https://wannspieltbig.de/admin/csgomatches/matchmap/)
+#)
 
-#publish_results(2421,2,3)
+# publish_results(2421,2,3)
+
+def get_esea_team_schedule(team_id=8749575):
+    MAP_LEFT_TEAMS = ['BIGCLAN', 'BIG OMEN Academy']
+    TEAM_ID_TOURNAMENT_MAPPING = {
+        8749575: 487  # BIG OMEN Academy : ESEA CS:GO Open EU
+    }
+    TEAM_A_MAPPINGS = {
+        # Academy:
+        # ESEA Team ID, WSB Team ID
+        8749575: 3,
+
+        # Main
+        0000000: 1
+    }
+
+    api_url = 'https://play.esea.net/api/teams/{}/matches?page_size=50'.format(team_id)
+    scraper = cfscrape.CloudflareScraper()
+    print("ESEA", api_url)
+    response = scraper.get(api_url)
+    if response.status_code == 200:
+        response_json = response.json()
+        matches_data = response_json.get('data', [])
+        for match_data in matches_data:
+            swap_teams = False
+            match_id = match_data.get('id')
+            home_data = match_data.get('home', {})
+            away_data = match_data.get('away', {})
+            match_datetime = match_data.get('date', {})
+            match_datetime = dateutil.parser.parse(match_datetime, dayfirst=False)
+            score_text = match_data.get('score')
+            map_name = match_data.get('map')
+            if not score_text:
+                score_text = "0-0"
+
+            team_a_score, team_b_score = [int(x) for x in score_text.split('-')]
+
+            if away_data.get('name') in MAP_LEFT_TEAMS:
+                swap_teams = True
+
+            if swap_teams:
+                home_data, away_data = away_data, home_data
+                team_a_score, team_b_score = team_b_score, team_a_score
+
+            lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(team__pk=TEAM_A_MAPPINGS.get(home_data.get('id'))).first()
+
+            print(match_id, home_data.get('name'), away_data.get('name'), team_a_score, team_b_score, match_datetime, match_data.get('date', {}))
+            print(" - timezone.is_aware", timezone.is_aware(match_datetime))
+
+            if not lineup_a:
+                print("Could not finde Team ID", TEAM_A_MAPPINGS.get(home_data.get('id')), home_data.get('name'))
+                continue
+
+            if match_id and match_datetime:
+                match = apps.get_model('csgomatches.Match').objects.filter(esea_match_id=match_id).order_by('-first_map_at').first()
+                if not match:
+
+                    tournament = apps.get_model('csgomatches.Tournament').objects.filter(
+                        pk=TEAM_ID_TOURNAMENT_MAPPING.get(home_data.get('id'))
+                    ).first()
+
+                    if not tournament:
+                        t_name = 'Unknown ESEA Tournament'
+                        tournament, tournament_created = apps.get_model('csgomatches.Tournament').objects.get_or_create(
+                            name=t_name
+                        )
+
+                    lineup_b = apps.get_model('csgomatches.Lineup').objects.\
+                        search_lineups(name=away_data.get('name')).\
+                        active_lineups(ref_dt=match_datetime).\
+                        first()
+                    if not lineup_b:
+                        team_b = apps.get_model('csgomatches.Team')(
+                            name=away_data.get('name')
+                        )
+                        team_b.save()
+                        lineup_b = apps.get_model('csgomatches.Lineup')(
+                            team=team_b,
+                            active_from=timezone.now() - timezone.timedelta(days=10)
+                        )
+                        lineup_b.save()
+                    match = apps.get_model('csgomatches.Match')(
+                        tournament=tournament,
+                        lineup_a=lineup_a,
+                        lineup_b=lineup_b,
+                        bestof=1,
+                        first_map_at=match_datetime,
+                        esea_match_id=match_id,
+                        enable_tweet=False
+                    )
+                    match.save()
+
+                first_map_at_changed = False
+
+                if match_datetime != match.first_map_at:
+                    print(" - Different Match Datetime", match_datetime, match.first_map_at)
+                    match.first_map_at = match_datetime
+                    match.save()
+                    first_map_at_changed = True
+
+                map_pending_veto = map_name == 'Pending Veto'
+
+                first_matchmap = match.get_first_matchmap()
+                if not first_matchmap:
+                    matchmap = apps.get_model('csgomatches.MatchMap')(
+                        match=match,
+                        starting_at=match.first_map_at,
+                        map_nr=1
+                    )
+                    matchmap.save()
+                    first_matchmap = matchmap
+
+                if not map_pending_veto:
+                    map_instance = apps.get_model('csgomatches.Map').objects.filter(
+                        cs_name=map_name
+                    ).first()
+                    if team_a_score > first_matchmap.rounds_won_team_a or \
+                        team_b_score > first_matchmap.rounds_won_team_b or \
+                        first_map_at_changed or \
+                        first_matchmap.played_map != map_instance:
+                        first_matchmap.played_map = map_instance
+                        first_matchmap.rounds_won_team_a = team_a_score
+                        first_matchmap.rounds_won_team_b = team_b_score
+                        first_matchmap.starting_at = match.first_map_at
+
+                        first_matchmap.save()
+
+
+
+
+
+
+def get_esea_match(match_id, update_id=None):
+    MAP_LEFT_TEAMS = ['BIGCLAN', 'BIG OMEN Academy']
+    swap_teams = False
+    api_url = 'https://play.esea.net/api/match/{}'.format(match_id)
+    scraper = cfscrape.CloudflareScraper()
+    response = scraper.get(api_url)
+    if response.status_code == 200:
+        response_json = response.json()
+        #print(response_json)
+        data = response_json.get('data', {})
+        started_at = data.get('started_at')
+        map_name = data.get('map')
+        team_1 = data.get('team_1', {})
+        team_2 = data.get('team_2', {})
+        if team_2.get('name') in MAP_LEFT_TEAMS:
+            swap_teams = True
+
+        if swap_teams:
+            team_1, team_2 = team_2, team_1
+
+        team_1_name = team_1.get('name')
+        team_2_name = team_2.get('name')
+        team_1_score = team_1.get('score')
+        team_2_score = team_2.get('score')
+        print("Match {} vs {}: {}:{} Map: {}".format(team_1_name, team_2_name, team_1_score, team_2_score, map_name))
