@@ -252,7 +252,8 @@ def get_esea_team_schedule(team_id=8749575):
 
                         first_matchmap.save()
 
-
+    else:
+        print("ERROR: ", response.content)
 
 
 
