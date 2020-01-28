@@ -155,7 +155,10 @@ def get_esea_team_schedule(team_id=8749575):
     scraper = cfscrape.CloudflareScraper()
     proxies = get_esea_proxies()
 
-    print("ESEA", api_url, proxies)
+    print("ESEA URL={} Proxies={}".format(
+        api_url,
+        ','.join(list(proxies.keys()))
+    ))
 
     response = scraper.get(api_url, proxies=proxies)
     if response.status_code == 200:
