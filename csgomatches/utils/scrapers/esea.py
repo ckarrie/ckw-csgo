@@ -134,7 +134,7 @@ def get_esea_team_schedule(team_id=8749575):
     }
     TEAM_A_MAPPINGS = {
         # Academy:
-        # ESEA Team ID, WSB Team ID
+        # ESEA Team ID, WSB _Team_ ID
         8749575: 3,
 
         # Main
@@ -169,13 +169,13 @@ def get_esea_team_schedule(team_id=8749575):
                 home_data, away_data = away_data, home_data
                 team_a_score, team_b_score = team_b_score, team_a_score
 
-            lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(team__pk=TEAM_A_MAPPINGS.get(home_data.get('id'))).first()
+            lineup_a = apps.get_model('csgomatches.Lineup').objects.filter(team__pk=TEAM_A_MAPPINGS.get(home_data.get('id')), is_active=True).first()
 
             print(match_id, home_data.get('name'), away_data.get('name'), team_a_score, team_b_score, match_datetime, match_data.get('date', {}))
             print(" - timezone.is_aware", timezone.is_aware(match_datetime))
 
             if not lineup_a:
-                print("Could not finde Team ID", TEAM_A_MAPPINGS.get(home_data.get('id')), home_data.get('name'))
+                print("Could not find Team ID", TEAM_A_MAPPINGS.get(home_data.get('id')), home_data.get('name'))
                 continue
 
             if match_id and match_datetime:
