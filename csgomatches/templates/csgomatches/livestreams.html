@@ -1,0 +1,48 @@
+{% extends 'csgomatches/base/base.html' %}
+
+{% load static %}
+
+{% block page_title %}
+    BIG Livestreams
+{% endblock %}
+
+{% block content_header_h1 %}
+    <a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a>
+{% endblock %}
+
+{% block content %}
+    <div class="matches">
+        <h2><span style="color: #dc7282">BETA</span> Faceit Livestreams <small>FPL EU, FPL NA, UK Invite, UKPL, GPL, GCS, LEGENDS</small></h2>
+
+        {% for match_dict in livestreams_list %}
+            <div class="row">
+                <div class="matchmapbox">
+                    <img style="width: 100%" src="{{ match_dict.avatar }}" />
+                    <p>Players: {% for player in match_dict.players %}{{ player }}{% endfor %}</p>
+                    <p>Streams:
+                        {% for twl in match_dict.streams %}
+                            <a class="twitch_cast" href="https://twitch.tv/{{ twl }}">{{ twl }}</a>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        Room: <a href="https://www.faceit.com/en/csgo/room/{{ match_dict.faceit_room_id }}">Faceit.com</a>
+                    </p>
+                </div>
+            </div>
+
+        {% empty %}
+            <div class="row">
+                <p>Keine Livestreams zurzeit</p>
+            </div>
+        {% endfor %}
+        <p>Work in progress :-)</p>
+        <p>&nbsp;</p>
+
+    </div>
+{% endblock %}
+
+{% block navigation %}
+    <ul class="navigation">
+        <li class="active"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
+    </ul>
+{% endblock %}

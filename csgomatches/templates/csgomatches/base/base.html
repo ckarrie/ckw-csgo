@@ -270,6 +270,10 @@
             margin-left: 5px;
         }
 
+        a.livestream:link, a.livestream:visited {
+            color: #dc7282;
+        }
+
         a.admin-link:hover {
             color: #1887d1;
         }
@@ -638,6 +642,7 @@
             <small>
                 Export kommende Matches [<code><a href="{% url 'ics_upcoming_big' %}">iCal</a></code>, <code><a href="https://big.y0fl0w.de">JSON</a></code>]
                 [<code><a href="{% url 'api-root' %}" target="_blank">API</a></code>]
+                [<code><a href="{% url 'livestreams' %}" target="" class="livestream">Faceit Livestreams</a></code>]
             </small>
         </p>
         <hr>

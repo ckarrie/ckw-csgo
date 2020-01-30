@@ -125,7 +125,15 @@ class HLTVMatchSerializer(serializers.Serializer):
         return inst
 
 
-
+class FaceitProLeagueMatchesSerializer(serializers.Serializer):
+    nr = serializers.IntegerField()
+    players = serializers.ListField()
+    streams = serializers.ListField()
+    faceit_room_id = serializers.CharField()
+    looked_up_nicknames = serializers.ListField()
+    avatar = serializers.URLField()
+    #roster1 = serializers.DictField()
+    #roster2 = serializers.DictField()
 
 
 

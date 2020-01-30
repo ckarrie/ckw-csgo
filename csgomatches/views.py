@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+import requests
 from django.db.models import Q
 from django.shortcuts import render
 from django.templatetags.static import static
@@ -106,6 +107,22 @@ class MatchDetailView(generic.DetailView):
         return ctx
 
 
+class LiveStreamsView(generic.TemplateView):
+    template_name = 'csgomatches/livestreams.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super(LiveStreamsView, self).get_context_data(*args, **kwargs)
+        drf_api_url = models.reverse('fpl-list')
+        full_drf_api_url = self.request.build_absolute_uri(drf_api_url)
+        resp = requests.get(full_drf_api_url).json()
+        ctx.update(**{
+            #'url': drf_api_url,
+            'livestreams_list': resp,
+            'bg_url': get_random_background_image_url()
+        })
+        return ctx
+
+
 class StaticPageDetailView(generic.DetailView):
     model = models.StaticPage
 
@@ -125,3 +142,6 @@ class StaticPageDetailView(generic.DetailView):
 
     def get_template_names(self):
         return [self.object.get_template_name()]
+
+
+

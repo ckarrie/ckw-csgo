@@ -17,7 +17,7 @@ if settings.DEBUG:
     CACHE_ARCHIVE_TIME = 0
 else:
     CACHE_INDEX_TIME = 1 * 60       # 1 Minute
-    CACHE_MATCHDETAIL_TIME = 10
+    CACHE_MATCHDETAIL_TIME = 10     # 10 Seconds
     CACHE_ARCHIVE_TIME = 60 * 60    # 60 Minutes    1 Hour
 
 sitemaps = {
@@ -30,6 +30,11 @@ urlpatterns = [
         '',
         cache_page(timeout=CACHE_INDEX_TIME)(views.IndexView.as_view()),
         name="match_upcoming"
+    ),
+    path(
+        'live/',
+        cache_page(timeout=CACHE_INDEX_TIME)(views.LiveStreamsView.as_view()),
+        name="livestreams"
     ),
     path(
         'archive/<int:year>/',

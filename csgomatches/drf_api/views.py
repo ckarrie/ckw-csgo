@@ -4,10 +4,13 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.cache import cache_page
 from rest_framework import viewsets, mixins, pagination, views, routers, renderers, permissions, authentication
 from django.apps import apps
+from rest_framework.response import Response
 
 from . import ser
 from . import ser_objects
 from . import renderer as cs_renderer
+
+from csgomatches.utils.scrapers.faceit import check_hubs_for_matches
 
 
 class CSGOPagination(pagination.LimitOffsetPagination):
@@ -149,3 +152,24 @@ class MatchMapUpdateView(CSGOView, mixins.RetrieveModelMixin, mixins.UpdateModel
     authentication_classes = (authentication.BasicAuthentication, )
     queryset = apps.get_model('csgomatches.MatchMap').objects.all()
     serializer_class = ser.CSGOMatchMapUpdateSerializer
+
+class FaceitProLeagueMatchesView(CSGOView, viewsets.ViewSet):
+    serializer_class = ser.FaceitProLeagueMatchesSerializer
+
+    def get_instances(self):
+        m_instances = []
+        faceit_dict = check_hubs_for_matches()
+        looked_up_nicknames = faceit_dict.get('looked_up_nicknames', [])
+        matches_dict = faceit_dict.get('matches', [])
+        for match_nr, match_data in matches_dict.items():
+            if match_data.get('players', []):
+                faceit_match = ser_objects.FPLMatch(nr=match_nr, match_data=match_data, looked_up_nicknames=looked_up_nicknames)
+                m_instances.append(faceit_match)
+        return m_instances
+
+    def list(self, request):
+        serializer = ser.FaceitProLeagueMatchesSerializer(
+            instance=self.get_instances(),
+            many=True
+        )
+        return Response(serializer.data)

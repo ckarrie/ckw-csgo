@@ -280,7 +280,7 @@ def get_esea_match(match_id, update_id=None):
     response = scraper.get(api_url)
     if response.status_code == 200:
         response_json = response.json()
-        # print(response_json)
+        #print(response_json)
         data = response_json.get('data', {})
         started_at = data.get('started_at')
         map_name = data.get('map')

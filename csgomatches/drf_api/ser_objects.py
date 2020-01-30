@@ -84,3 +84,15 @@ class HLTVMatch(object):
 
         self.team_id_to_name = team_id_to_name
         self.name_to_team_id = name_to_team_id
+
+
+class FPLMatch(object):
+    def __init__(self, nr, match_data, looked_up_nicknames=[]):
+        self.nr = nr
+        self.players = match_data.get('players', [])
+        self.streams = match_data.get('streams', [])
+        self.faceit_room_id = match_data.get('faceit_room_id', None)
+        self.looked_up_nicknames = looked_up_nicknames
+        self.avatar = match_data.get('first_avatar')
+        #self.roster1 = match_data.get('roster1', {})
+        #self.roster2 = match_data.get('roster2', {})
