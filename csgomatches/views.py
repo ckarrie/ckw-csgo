@@ -13,6 +13,8 @@ import asyncio
 
 from . import models
 
+from csgomatches.utils.scrapers import faceit
+
 def get_random_background_image_url():
     images = [
         static("csgomatches/backgrounds/IMG_6232.webp"),
@@ -118,7 +120,9 @@ class LiveStreamsView(generic.TemplateView):
         ctx.update(**{
             #'url': drf_api_url,
             'livestreams_list': resp,
-            'bg_url': get_random_background_image_url()
+            'bg_url': get_random_background_image_url(),
+            'nicknames': faceit.get_nicknames(),
+            'hubs': faceit.get_hubs(),
         })
         return ctx
 

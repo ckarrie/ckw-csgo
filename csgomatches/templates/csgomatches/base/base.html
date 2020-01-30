@@ -17,9 +17,9 @@
         {% endblock %}
     </title>
     <link media="screen" href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,600,700&display=swap" rel="stylesheet">
-    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-32x32.png" sizes="32x32" />
-    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-192x192.png" sizes="192x192" />
-    <link rel="apple-touch-icon-precomposed" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-180x180.png" />
+    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-32x32.png" sizes="32x32"/>
+    <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-192x192.png" sizes="192x192"/>
+    <link rel="apple-touch-icon-precomposed" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-180x180.png"/>
     <style type="text/css">
         * {
             padding: 0;
@@ -315,6 +315,31 @@
         .map_pick {
             font-size: small;
             cursor: pointer;
+        }
+
+        dl {
+
+            padding: 0.5em;
+        }
+
+        dt {
+            float: left;
+            clear: left;
+            width: 140px;
+            text-align: right;
+            font-weight: 500;
+            color: white;
+            background-color: #505050;
+            padding-right: 5px;
+        }
+
+        dt::after {
+            /*content: ":";*/
+        }
+
+        dd {
+            margin: 0 0 0 153px;
+            padding: 0 0 0.5em 0;
         }
 
         .matchlinks-details {

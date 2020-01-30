@@ -94,5 +94,8 @@ class FPLMatch(object):
         self.faceit_room_id = match_data.get('faceit_room_id', None)
         self.looked_up_nicknames = looked_up_nicknames
         self.avatar = match_data.get('first_avatar')
+        self.hub_name = match_data.get('hub_name')
+        self.hub_id = match_data.get('hub_id')
+        self.map = match_data.get('map')
         #self.roster1 = match_data.get('roster1', {})
         #self.roster2 = match_data.get('roster2', {})

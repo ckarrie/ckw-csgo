@@ -132,6 +132,9 @@ class FaceitProLeagueMatchesSerializer(serializers.Serializer):
     faceit_room_id = serializers.CharField()
     looked_up_nicknames = serializers.ListField()
     avatar = serializers.URLField()
+    hub_name = serializers.CharField()
+    hub_id = serializers.CharField()
+    map = serializers.CharField()
     #roster1 = serializers.DictField()
     #roster2 = serializers.DictField()
 

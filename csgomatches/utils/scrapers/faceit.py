@@ -1,24 +1,27 @@
 import requests
 
-def check_hubs_for_matches():
-    # FPL Hubs:
-    hub_ids = [
-        '74caad23-077b-4ef3-8b1d-c6a2254dfa75', # FPL CSGO Europe
-        '748cf78c-be73-4eb9-b131-21552f2f8b75', # FPL CSGO North America
-        'ea898dde-51e9-4631-a630-a994f9cb4825', # UK Invite Gathers
-        'ac41cb6c-df11-4597-8391-9b79a0cdfff6', # UKPL
-        '86108299-a413-4d45-95dd-20a638e91c03', # GPL Ersatz Div 1
-        '7167749f-a7de-4db6-828c-839b339c000e', # German Championship Series Pro
-        'fd5780d5-dd2f-4479-906c-57b8e41ae9d7', # FPL CSGO Challenger Europe
-        'e655b953-4ef1-4993-965b-b9e9e83df6e7', # German Pro League
-        '6f63b115-f45e-42b7-88ef-2a96714cd5e1', # LEGENDS - 2700 ELO TO ENTER [nooky]
-    ]
+def get_hubs():
+    # Faceit Hubs
+    hub_ids = {
+        '74caad23-077b-4ef3-8b1d-c6a2254dfa75': 'FPL CSGO Europe',
+        '748cf78c-be73-4eb9-b131-21552f2f8b75': 'FPL CSGO North America',
+        'ea898dde-51e9-4631-a630-a994f9cb4825': 'UK Invite Gathers',
+        'ac41cb6c-df11-4597-8391-9b79a0cdfff6': 'UKPL',
+        '86108299-a413-4d45-95dd-20a638e91c03': 'GPL Ersatz Div 1',
+        '7167749f-a7de-4db6-828c-839b339c000e': 'German Championship Series Pro',
+        'fd5780d5-dd2f-4479-906c-57b8e41ae9d7': 'FPL CSGO Challenger Europe',
+        'e655b953-4ef1-4993-965b-b9e9e83df6e7': 'German Pro League',
+        '6f63b115-f45e-42b7-88ef-2a96714cd5e1': 'LEGENDS - 2700 ELO TO ENTER',
+    }
+    return hub_ids
 
+def get_nicknames():
+    # Faceit Player Nicknames
     nicknames_main = ['tabseN', 'k1to', 'syrsoN', 'XANTARES', 'tiziaN', ]
     nicknames_academy = ['PANIX_', 'Anhuin', 'HadeZ_', 'prosus', 'krimb0b', ]
 
     nicknames_other = [
-        'y00000000', # zonixx
+        'y00000000',  # zonixx
         'gobb',
         'nex---',
         'LEGIJA',
@@ -26,14 +29,20 @@ def check_hubs_for_matches():
         'nooky',
         'headshinsky',
         'smooya',
+        'roxi'
     ]
-
     nicknames = nicknames_main + nicknames_academy + nicknames_other
+    return nicknames
+
+
+def check_hubs_for_matches():
+    hub_ids = get_hubs()
+    nicknames = get_nicknames()
 
     match_nr = 0
     infos_by_match = {}
 
-    for hid in hub_ids:
+    for hid, hub_name in hub_ids.items():
         params = {
             'entityId': hid,
             'entityType': 'hub',
@@ -55,7 +64,9 @@ def check_hubs_for_matches():
                     'roster1': [],
                     'roster2': [],
                     'faceit_room_id': match.get('id'),
-                    'first_avatar': None
+                    'first_avatar': None,
+                    'hub_name': hub_name,
+                    'hub_id': hid
                 }
 
                 roster1 = match.get('teams', {}).get('faction1', {}).get('roster', [])
