@@ -123,6 +123,7 @@ class LiveStreamsView(generic.TemplateView):
             'bg_url': get_random_background_image_url(),
             'nicknames': faceit.get_nicknames(),
             'hubs': faceit.get_hubs(),
+            'update_seconds': 30
         })
         return ctx
 

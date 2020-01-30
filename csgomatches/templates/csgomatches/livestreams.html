@@ -6,6 +6,12 @@
     BIG Livestreams
 {% endblock %}
 
+{% block meta %}
+    {% if update_seconds %}
+        <meta http-equiv="refresh" content="{{ update_seconds }}">
+    {% endif %}
+{% endblock %}
+
 {% block content_header_h1 %}
     <a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a>
 {% endblock %}
