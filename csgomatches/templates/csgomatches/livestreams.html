@@ -22,8 +22,10 @@
             <small>FPL EU, FPL NA, UK Invite, UKPL, GPL, GCS, LEGENDS</small>
         </h2>
 
-        {% for match_dict in livestreams_list %}
-            <div class="row">
+        <div class="row">
+
+            {% for match_dict in livestreams_list %}
+
                 <div class="matchmapbox live">
                     <img style="width: 100%" src="{{ match_dict.avatar }}"/>
                     <p>Players: {% for player in match_dict.players %}{{ player }}{% endfor %}</p>
@@ -39,16 +41,16 @@
                         <small>Hub: <a href="https://www.faceit.com/en/hub/{{ match_dict.hub_id }}/">{{ match_dict.hub_name|truncatechars:25 }}</a></small>
                     </p>
                     <p>
-                        <small>Map: {{ match_dict.map }}</small>
+                        <small>Map: {{ match_dict.map|default:"Map-Veto ausstehend" }}</small>
                     </p>
                 </div>
-            </div>
 
-        {% empty %}
-            <div class="row">
+
+            {% empty %}
                 <p>Keine Livestreams zurzeit</p>
-            </div>
-        {% endfor %}
+            {% endfor %}
+
+        </div>
 
         <div class="matchlinks-details">
             <h4>Links</h4>
