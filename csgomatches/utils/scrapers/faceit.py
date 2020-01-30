@@ -24,7 +24,8 @@ def check_hubs_for_matches():
         'LEGIJA',
         'keev',
         'nooky',
-        'headshinsky'
+        'headshinsky',
+        'smooya',
     ]
 
     nicknames = nicknames_main + nicknames_academy + nicknames_other
