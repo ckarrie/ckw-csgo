@@ -1,4 +1,7 @@
 import requests
+from django.core.cache import cache
+
+FACEIT_NICK_TO_TWITCH_ID_CACHE = {}
 
 def get_hubs():
     # Faceit Hubs
@@ -117,12 +120,22 @@ def faceit2twitch_id(nickname):
     if nickname in bypasses:
         return bypasses[nickname]
 
+    #if nickname in FACEIT_NICK_TO_TWITCH_ID_CACHE:
+        #return FACEIT_NICK_TO_TWITCH_ID_CACHE[nickname]
+
+    cache_key = 'faceit_twitch_id_' + nickname
+    cached_twitch_id = cache.get(cache_key)
+    if cached_twitch_id:
+        cache.touch(cache_key)
+        return cached_twitch_id
+
+
     api_url = 'https://api.faceit.com/core/v1/nicknames/{}'.format(nickname)
     resp = requests.get(api_url)
     resp_json = resp.json()
     twitch_id = resp_json.get('payload', {}).get('streaming', {}).get('twitch_id', None)
-    is_streaming = resp_json.get('payload', {}).get('streaming', {}).get('is_streaming', None)
-    #print(" - Stream:", nickname, twitch_id, is_streaming)
+    #is_streaming = resp_json.get('payload', {}).get('streaming', {}).get('is_streaming', None)
+    cache.set(cache_key, twitch_id, timeout=None)
 
     return twitch_id
 

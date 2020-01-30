@@ -27,7 +27,9 @@
             {% for match_dict in livestreams_list %}
 
                 <div class="matchmapbox live">
-                    <img style="width: 100%" src="{{ match_dict.avatar }}"/>
+                    {% if match_dict.avatar %}
+                        <img style="width: 100%" src="{{ match_dict.avatar }}"/>
+                    {% endif %}
                     <p>Players: {% for player in match_dict.players %}{{ player }}{% endfor %}</p>
                     <p>Streams:
                         {% for twl in match_dict.streams %}
