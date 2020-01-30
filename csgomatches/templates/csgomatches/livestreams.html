@@ -30,12 +30,20 @@
                     {% if match_dict.avatar %}
                         <img style="width: 100%" src="{{ match_dict.avatar }}"/>
                     {% endif %}
-                    <p>Players: {% for player in match_dict.players %}{{ player }}{% endfor %}</p>
-                    <p>Streams:
+                    <p>Player{% if match_dict.players|length > 1 %}s{% endif %}: {% for player in match_dict.players %}{% if player in nicknames %}<strong>{% endif %}{{ player }}{% if player in nicknames %}</strong>{% endif %}{% endfor %}</p>
+                    <p>Stream{% if match_dict.streams|length > 1 %}s{% endif %}:</p>
+                    <ul>
                         {% for twl in match_dict.streams %}
-                            <a class="twitch_cast" href="https://twitch.tv/{{ twl }}">{{ twl }}</a>
+                            <li>
+                                <small><a class="twitch_cast" href="https://twitch.tv/{{ twl }}">{{ twl }}</a></small>
+                            </li>
+                        {% empty %}
+                            <li>
+                                <small>Keine Streams gefunden</small>
+                            </li>
                         {% endfor %}
-                    </p>
+                    </ul>
+
                     <p>
                         <small><a href="https://www.faceit.com/en/csgo/room/{{ match_dict.faceit_room_id }}">Faceit room</a></small>
                     </p>

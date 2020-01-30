@@ -1,7 +1,6 @@
 import requests
 from django.core.cache import cache
 
-FACEIT_NICK_TO_TWITCH_ID_CACHE = {}
 
 def get_hubs():
     # Faceit Hubs
@@ -57,7 +56,6 @@ def check_hubs_for_matches():
         resp = requests.get(api_url, params=params)
         resp_json = resp.json()
         match_payloads = resp_json.get('payload', [])
-        #print(api_url, params['entityId'])
         if match_payloads:
             for match in match_payloads:
                 infos_by_match[match_nr] = {
@@ -74,8 +72,6 @@ def check_hubs_for_matches():
 
                 roster1 = match.get('teams', {}).get('faction1', {}).get('roster', [])
                 roster2 = match.get('teams', {}).get('faction2', {}).get('roster', [])
-                #infos_by_match[match_nr]['roster1'] = roster1
-                #infos_by_match[match_nr]['roster2'] = roster2
 
                 map_pick = match.get('voting', {}).get('map', {}).get('pick', [])
                 if map_pick:
@@ -87,8 +83,12 @@ def check_hubs_for_matches():
                 for r in roster1 + roster2:
                     nickname = r.get('nickname')
                     if nickname in nicknames:
+                        avatar = r.get('avatar')
+                        if nickname == 'tabseN' and not avatar:
+                            avatar = 'https://pbs.twimg.com/profile_images/1120709174449639429/3sFmH2Qf_400x400.jpg'
+
                         infos_by_match[match_nr]['players'].append(nickname)
-                        infos_by_match[match_nr]['first_avatar'] = r.get('avatar')
+                        infos_by_match[match_nr]['first_avatar'] = avatar
 
                         print("Found", nickname)
 
@@ -119,9 +119,6 @@ def faceit2twitch_id(nickname):
 
     if nickname in bypasses:
         return bypasses[nickname]
-
-    #if nickname in FACEIT_NICK_TO_TWITCH_ID_CACHE:
-        #return FACEIT_NICK_TO_TWITCH_ID_CACHE[nickname]
 
     cache_key = 'faceit_twitch_id_' + nickname
     cached_twitch_id = cache.get(cache_key)
