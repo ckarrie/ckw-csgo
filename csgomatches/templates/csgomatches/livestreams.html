@@ -72,10 +72,19 @@
                         <a href="https://www.faceit.com/en/hub/{{ hid }}/"><code>{{ hub_name }}</code></a>
                     </dd>
                 {% endfor %}
-                <dt>Faceit Players</dt>
-                {% for nn in nicknames %}
+                <dt>Twitch</dt>
+                {% for nn, twitch_data in nicknames_with_streams.items %}
                     <dd>
                         <a href="https://www.faceit.com/en/players-modal/{{ nn }}"><code>{{ nn }}</code></a>
+
+                        {% if twitch_data.link %}
+                            {% if twitch_data.live %}
+                                <a class="livestream-live" href="{{ twitch_data.link }}" target="_blank">LIVE</a>
+                            {% else %}
+                                <a class="livestream-offline" href="{{ twitch_data.link }}" target="_blank">OFF</a>
+                            {% endif %}
+                        {% endif %}
+
                     </dd>
                 {% endfor %}
             </dl>

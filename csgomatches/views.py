@@ -117,13 +117,26 @@ class LiveStreamsView(generic.TemplateView):
         drf_api_url = models.reverse('fpl-list')
         full_drf_api_url = self.request.build_absolute_uri(drf_api_url)
         resp = requests.get(full_drf_api_url).json()
+        faceit_nicknames = faceit.get_nicknames()
+        nicknames_with_streams = OrderedDict()
+        for nn in faceit_nicknames:
+            twitch_id = faceit.faceit2twitch_id(nn)
+            if twitch_id:
+                nicknames_with_streams[nn] = {
+                    'link': 'https://twitch.tv/{}'.format(twitch_id),
+                    'live': len(faceit.get_twitch_stream_status(nicknames=[twitch_id])) > 0
+                }
+            else:
+                nicknames_with_streams[nn] = {}
+
         ctx.update(**{
             #'url': drf_api_url,
             'livestreams_list': resp,
             'bg_url': get_random_background_image_url(),
-            'nicknames': faceit.get_nicknames(),
+            'nicknames': faceit_nicknames,
             'hubs': faceit.get_hubs(),
-            'update_seconds': 30
+            'update_seconds': 30,
+            'nicknames_with_streams': nicknames_with_streams
         })
         return ctx
 

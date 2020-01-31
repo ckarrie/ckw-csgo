@@ -270,7 +270,7 @@
             margin-left: 5px;
         }
 
-        a.livestream:link, a.livestream:visited {
+        a.livestream:link, a.livestream:visited, .navigation a.livestream:link, .navigation a.livestream:visited {
             color: #dc7282;
         }
 
@@ -389,6 +389,35 @@
             margin-left: 20px;
         }
 
+        a.livestream-live:link, a.livestream-live:visited, a.livestream-offline:link, a.livestream-offline:visited{
+            color: white;
+            text-decoration: none;
+        }
+
+        a.livestream-live:hover {
+            border-color: #1887d1;
+        }
+
+        a.livestream-offline:hover {
+            background-color: #1887d1;
+        }
+
+        .livestream-live {
+            background: red;
+            border: 1px solid white;
+            font-size: 9px;
+            padding: 4px;
+            border-radius: 8px;
+            font-weight: 900;
+        }
+
+        .livestream-offline {
+            background: #555555;
+            font-size: 9px;
+            padding: 4px;
+            border-radius: 8px;
+            font-weight: 900;
+        }
 
         /* Mobile Styles */
         @media only screen and (max-width: 1000px) {
@@ -643,6 +672,7 @@
 
         <ul class="navigation">
             <li class="{% if current_view == 'index' %}active{% endif %}"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
+            <!--<li class=""><a class="livestream" href="sdf">Live</a> </li>-->
             {% for date in date_list %}
                 <li class="{% if year.year == date.year %}active{% endif %}"><a href="{% url 'match_history' year=date.year %}">{{ date|date:"Y" }}</a></li>
             {% endfor %}
@@ -672,6 +702,7 @@
             <small>
                 Export kommende Matches [<code><a href="{% url 'ics_upcoming_big' %}">iCal</a></code>, <code><a href="https://big.y0fl0w.de">JSON</a></code>]
                 [<code><a href="{% url 'api-root' %}" target="_blank">API</a></code>]
+                Beta:
                 [<code><a href="{% url 'livestreams' %}" target="" class="livestream">Faceit Livestreams</a></code>]
             </small>
         </p>

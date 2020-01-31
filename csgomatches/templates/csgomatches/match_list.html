@@ -30,6 +30,7 @@
 {% block navigation %}
     <ul class="navigation">
         <li class="active"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
+        <!--<li class=""><a class="livestream" href="sdf">Live</a> </li>-->
         {% for date in date_list %}
             <li class="{% if year.year == date.year %}active{% endif %}"><a href="{% url 'match_history' year=date.year %}">{{ date|date:"Y" }}</a></li>
         {% endfor %}

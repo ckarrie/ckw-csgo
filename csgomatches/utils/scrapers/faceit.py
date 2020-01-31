@@ -24,14 +24,16 @@ def get_nicknames():
 
     nicknames_other = [
         'y00000000',  # zonixx
+        'KukiiPupii',
         'gobb',
         'nex---',
         'LEGIJA',
         'keev',
-        'nooky',
-        'headshinsky',
+        #'nooky',
+        #'headshinsky',
         'smooya',
-        'roxi'
+        'roxi',
+
     ]
     nicknames = nicknames_main + nicknames_academy + nicknames_other
     return nicknames
@@ -114,7 +116,13 @@ def check_hubs_for_matches():
 def faceit2twitch_id(nickname):
     bypasses = {
         # old twitch name: new twitch name
-        's1mple': 's1mple'
+        's1mple': 's1mple',
+        'prosus': 'prosus_cs',
+        'krimb0b': 'krimbocsgo',
+        'y00000000': 'zonixxcs',
+        'gobb': 'gobbtv',
+        'roxi': 'roxi',
+        'KukiiPupii': 'kikii_cs',
     }
 
     if nickname in bypasses:
