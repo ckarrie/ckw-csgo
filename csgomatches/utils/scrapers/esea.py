@@ -302,6 +302,18 @@ def process_api_match_data(matches_data):
 
                     first_matchmap.save()
 
+            # esea page
+            esea_match_link = 'https://play.esea.net/match/{}'.format(match_id)
+            match_link, match_link_created = apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
+                match=match,
+                link_type='esea_match',
+                link_flag='en',
+                url=esea_match_link,
+                defaults={
+                    'title': 'ESEA Match'
+                }
+            )
+
 
 def get_esea_team_schedule():
     # craws team pages
