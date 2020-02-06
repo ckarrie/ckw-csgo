@@ -30,7 +30,8 @@ MAP_LEFT_TEAMS = [
 ]
 
 TEAM_ID_TOURNAMENT_MAPPING = {
-    8749575: 487  # BIG OMEN Academy : ESEA CS:GO Open EU
+    8749575: 487,  # BIG OMEN Academy : ESEA CS:GO Open EU
+    156214: 490, # BIG : ESEA MDL S33 EU Premier
 }
 TEAM_A_MAPPINGS = {
     # Academy:
