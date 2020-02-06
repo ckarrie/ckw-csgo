@@ -29,6 +29,7 @@ class Team(models.Model):
     name_long = models.CharField(max_length=255, null=True, blank=True)
     name_alt = models.CharField(max_length=255, null=True, blank=True)
     hltv_id = models.IntegerField(null=True, blank=True)
+    esea_team_id = models.IntegerField(null=True, blank=True)
 
     objects = managers.TeamManager()
 
@@ -50,6 +51,7 @@ class Player(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     hltv_id = models.IntegerField(null=True, blank=True)
+    esea_user_id = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return '{} "{}" {}'.format(self.first_name, self.ingame_name, self.last_name)
@@ -123,6 +125,7 @@ class Tournament(models.Model):
     name_hltv = models.CharField(max_length=255, null=True, blank=True)
     name_99dmg = models.CharField(max_length=255, null=True, blank=True)
     esea_bracket_id = models.IntegerField(null=True, blank=True)
+    esea_bracket_team_ids = models.CharField(max_length=255, null=True, blank=True, help_text='Comma Separated')
 
     # mappool = models.ManyToManyField(Map)
 
@@ -163,7 +166,7 @@ class Match(models.Model):
         )
     )
     hltv_match_id = models.CharField(max_length=20, null=True, blank=True, help_text='For HLTV Livescore during match')
-    esea_match_id = models.IntegerField(null=True, blank=True)
+    esea_match_id = models.CharField(max_length=255, null=True, blank=True)
     enable_tweet = models.BooleanField(default=True)
     last_tweet = models.DateTimeField(null=True, blank=True)
     last_tweet_id = models.CharField(max_length=255, null=True, blank=True)

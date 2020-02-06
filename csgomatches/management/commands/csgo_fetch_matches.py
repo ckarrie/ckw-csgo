@@ -309,6 +309,7 @@ class Command(BaseCommand):
 
                         for i, map_data in enumerate(maps_data):
                             results = map_data.get('result')
+                            livescore_results = None
                             map_pick_team_text = map_data.get('pick')
                             starting_at = aware_first_match_start + timezone.timedelta(hours=i)
                             if map_pick_team_text:
@@ -357,8 +358,14 @@ class Command(BaseCommand):
                                         if swap_team_and_score:
                                             # convert to 'incorrent' - will be later returned if swap_team_and_score is True
                                             t1_score, t2_score = t2_score, t1_score
+
+                                        if results:
+                                            print("[crawl_y0fl0w_de]  - Results by y0fl0w-API", results)
+
+                                        # Overwriting results
                                         results = "{}:{}".format(t1_score, t2_score)
                                         print("[crawl_y0fl0w_de]  - Results by WebSocket livescore", results)
+
 
                                 if results and ':' in results:
                                     t1_res, t2_res = results.split(":")
