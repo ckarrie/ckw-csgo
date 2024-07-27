@@ -4,16 +4,22 @@
     <h2>
         <a class="matchdetail-link" href="{{ match.get_absolute_url }}" title="Match-Details {{ match }} @ {{ match.tournament.name }}">
             <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
-            <span class="team_a">{{ match.lineup_a.team }}</span>
+            <span class="team_a">{{ match.lineup_a.team }}</span> 
+            {% if match.lineup_a.game.team_logo_url %}
+                <img src="{{ match.lineup_a.game.team_logo_url }}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" style="width: {{ match.lineup_a.game.team_logo_width|default:45 }}px" />
+            {% endif %}
+
             {% if match.lineup_b %}
                 vs <span class="team_b">{{ match.lineup_b.team }}</span>
             {% else %}
-                <span class="hide-on-small">at {{ match.tournament.name|truncatewords:3 }}</span>
+                <span class="hide-on-small">@ {{ match.tournament.name|truncatewords:3 }}</span>
             {% endif %}
         </a>
-        <small class="hide-on-small" title="{{ match.tournament.name }}">
-            {{ match.tournament.name|truncatewords:3 }}
-        </small>
+        {% if match.lineup_b %}
+            <small class="hide-on-small" title="{{ match.tournament.name }}">
+                {{ match.tournament.name|truncatewords:3 }}
+            </small>
+        {% endif %}
         <small style="margin-right: 10px;" class="hide-on-small">
             {% for link in match.externallink_set.visible %}
                 {% ifchanged link.link_flag %}
@@ -48,10 +54,7 @@
             {% else %}
 
                 {% if link.link_type != 'twitch_cast' %}
-                    {% ifchanged link.link_flag %}
-                        <img src="{% static link.get_flag_url %}" class="flag">
-                    {% else %}
-                    {% endifchanged %}
+                    <img src="{% static link.get_flag_url %}" class="flag">
                     <a href="{{ link.url }}" target="_blank" title="{{ link.title }} ({{ link.url }})">{{ link.get_link_type_display }}</a>
 
                 {% endif %}

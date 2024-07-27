@@ -179,9 +179,9 @@ class TeamAdmin(admin.ModelAdmin):
 
 class LineupAdmin(admin.ModelAdmin):
     search_fields = ['team__name', 'team__name_long', 'team__name_alt']
-    list_display = ['team', 'team_logo_url', 'active_from', 'get_is_active', 'is_active']
+    list_display = ['team', 'game', 'team_logo_url', 'active_from', 'get_is_active', 'is_active']
     autocomplete_fields = ['team']
-    list_filter = ['is_active']
+    list_filter = ['game', 'is_active']
     inlines = [LineupPlayerInline]
 
     def get_is_active(self, obj):
@@ -223,6 +223,12 @@ class ExternalLinkAdmin(admin.ModelAdmin):
     # autocomplete_fields = ['match']
 
 
+class GameAdmin(admin.ModelAdmin):
+    list_display = ['name', 'name_short', 'slug']
+    search_fields = ['name', 'name_short']
+    prepopulated_fields = {'slug': ('name_short',), }
+
+
 def save_global(modeladmin, request, queryset):
     for obj in queryset:
         obj.save()
@@ -238,6 +244,7 @@ admin.site.register(models.MatchMap, MatchMapAdmin)
 admin.site.register(models.Player, PlayerAdmin)
 admin.site.register(models.PlayerRole)
 admin.site.register(models.Tournament, TournamentAdmin)
+admin.site.register(models.Game, GameAdmin)
 admin.site.register(models.StaticPage)
 
 admin.site.add_action(save_global, 'save_selected')

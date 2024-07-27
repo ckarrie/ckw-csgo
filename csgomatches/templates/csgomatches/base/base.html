@@ -661,7 +661,7 @@
             </div>
 
             <h1>{% block content_header_h1 %}<a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a>{% endblock %}</h1>
-            <p>Eine Fanseite des <a href="https://bigclan.gg">BIG-Clans</a> - von und für die Community.</p>
+            <p>Eine Fanseite für den <a href="https://bigclan.gg">BIG-Clan</a> - von und für die Community.</p>
         {% endblock %}
     </div>
 
@@ -701,22 +701,22 @@
         {% endblock %}
         <p>
             <small>
-                Export kommende Matches [<code><a href="{% url 'ics_upcoming_big' %}">iCal</a></code>, <code><a href="https://big.y0fl0w.de">JSON</a></code>]
+                Export kommende Matches [<code><a href="{% url 'ics_upcoming_big' %}">iCal</a></code>, <code><a href="https://wannspieltbig.de/api/match_upcoming/">JSON</a></code>]
                 [<code><a href="{% url 'api-root' %}" target="_blank">API</a></code>]
-                Beta:
-                [<code><a href="{% url 'livestreams' %}" target="" class="livestream">Faceit Livestreams</a></code>]
+                
+                <!-- Beta:
+                [<code><a href="{% url 'livestreams' %}" target="" class="livestream">Faceit Livestreams</a></code>] -->
             </small>
         </p>
         <hr>
         <p>
             <small>
-                <a class="twitch_cast" href="https://discord.gg/GaqAKcE" target="_blank" title="BIG Fanclub Discord">BIG Fanclub</a> |
+                <a class="twitch_cast" href="https://discord.gg/roaringbears" target="_blank" title="Fanclub RoaringBears e.V. Discord">BIG Fanclub RoaringBears e.V.</a> |
                 <a class="twitter_link" href="https://twitter.com/wannspieltbig" target="_blank" title="wannspieltbig.de auf Twitter">@wannspieltbig</a> |
                 <a href="https://github.com/ckarrie/ckw-csgo">Code</a>
                 | <a href="https://github.com/ckarrie/ckw-csgo/issues">Bugs</a>
                 | Datenquellen:
-                <a href="https://www.hltv.org/team/7532/big">HLTV.org</a> via <a href="https://big.y0fl0w.de">y0fl0w.de</a>,
-                <a href="https://csgo.99damage.de/de/edb/team/13782-big">99damage.de</a>
+                <a href="https://www.hltv.org/team/7532/big">HLTV.org</a>,
                 | <a href="{% url 'staticpage' slug='impressum' %}">Kontakt und Impressum</a>
 
                 <br>

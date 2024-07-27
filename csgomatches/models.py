@@ -24,7 +24,19 @@ def get_flags_choices():
     return choices
 
 
+class Game(models.Model):
+    name = models.CharField(max_length=255, help_text='i.e. "TrackMania" or "Counter-Strike"')
+    name_short = models.CharField(max_length=4, help_text='i.e. "tm", "cs"')
+    team_logo_url = models.URLField(null=True, blank=True)
+    team_logo_width = models.IntegerField(null=True, blank=True, help_text="i.e. 50 for 50px")
+    slug = models.SlugField()
+
+    def __str__(self):
+        return self.name
+
+
 class Team(models.Model):
+    #game = models.ForeignKey(Game, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=255)
     name_long = models.CharField(max_length=255, null=True, blank=True)
     name_alt = models.CharField(max_length=255, null=True, blank=True)
@@ -42,6 +54,8 @@ class Team(models.Model):
             return 'https://www.hltv.org/team/{}/team'.format(self.hltv_id)
 
     def __str__(self):
+        #if self.game:
+        #    return '[{game}] {name}'.format(game=self.game, name=self.name)
         return self.name
 
 
@@ -67,6 +81,7 @@ class PlayerRole(models.Model):
 
 
 class Lineup(models.Model):
+    game = models.ForeignKey(Game, null=True, on_delete=models.SET_NULL)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     team_logo_url = models.URLField(null=True, blank=True)
     active_from = models.DateTimeField(help_text='Set -10 Days to avoid multiple Lineup creations')
@@ -91,6 +106,8 @@ class Lineup(models.Model):
         return True
 
     def __str__(self):
+        if self.game:
+            return '[{game}] {team}'.format(game=self.game.name, team=self.team.name)
         return '{}'.format(self.team.name)
 
     def save(self, *args, **kwargs):
@@ -413,8 +430,8 @@ class ExternalLink(models.Model):
         ('hltv_demo', 'Demo'),
         ('99dmg_match', '99DMG'),
         ('twitch_cast', 'Cast'),
-        ('twitch_vod', 'VOD'),
-        ('youtube_vod', 'VOD'),
+        ('twitch_vod', 'Twitch VOD'),
+        ('youtube_vod', 'YouTube VOD'),
         ('link', 'Link'),
     ))
     link_flag = models.CharField(
@@ -439,6 +456,7 @@ class CSGOSiteSetting(models.Model):
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
     main_team = models.ForeignKey('csgomatches.Team', on_delete=models.CASCADE, related_name='main_team_settings')
     second_team = models.ForeignKey('csgomatches.Team', on_delete=models.CASCADE, related_name='sec_team_settings')
+    site_teams = models.ManyToManyField('csgomatches.Team', null=True)
 
     class Meta:
         unique_together = ['site', 'main_team', 'second_team']

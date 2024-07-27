@@ -28,15 +28,17 @@
         {% for mm in match.matchmap_set.all %}
             {% include 'csgomatches/blocks/box_matchmap.html' %}
         {% empty %}
-            {% if not match.lineup_b %}
-                <div class="matchmapbox bo{{ match.bestof }} col1">
-                    Gegner und/oder Termin steht noch nicht fest.
-                </div>
-            {% else %}
-                <div class="matchmapbox bo{{ match.bestof }} cancelled col1">
-                    Genauer Termin gegen <span class="team_b">{{ match.lineup_b.team.name }}</span> steht noch nicht fest.
-                </div>
-            {% endif %}
+            {% if not match.description %}
+                {% if not match.lineup_b %}
+                    <div class="matchmapbox bo{{ match.bestof }} col1">
+                        Gegner und/oder Termin steht noch nicht fest.
+                    </div>
+                {% else %}
+                    <div class="matchmapbox bo{{ match.bestof }} cancelled col1">
+                        Genauer Termin gegen <span class="team_b">{{ match.lineup_b.team.name }}</span> steht noch nicht fest.
+                    </div>
+                {% endif %}
+             {% endif %}
         {% endfor %}
     {% endif %}
 </div>

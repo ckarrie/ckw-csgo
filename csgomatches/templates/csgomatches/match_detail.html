@@ -44,7 +44,7 @@
 
         {% if match.lineup_a and match.lineup_a.lineupplayer_set.exists %}
             <div class="lineup_a_box">
-                <h4>Lineup {{ match.lineup_a }}</h4>
+                <h4>{% if match.lineup_a.game %}{{ match.lineup_a.game.name }}-{% endif %}Lineup {{ match.lineup_a.team.name }}</h4>
                 {% for lp in match.lineup_a.lineupplayer_set.all %}
                     <code title="{{ lp.player.first_name }} {{ lp.player.last_name }}">{{ lp.player.ingame_name }}</code>
                 {% endfor %}
@@ -54,7 +54,7 @@
 
         {% if match.lineup_b and match.lineup_b.lineupplayer_set.exists %}
             <div class="lineup_b_box">
-                <h4>Lineup {{ match.lineup_b }}</h4>
+                <h4>Lineup {{ match.lineup_b.team.name }}</h4>
                 {% for lp in match.lineup_b.lineupplayer_set.all %}
                     <code title="{{ lp.player.first_name }} {{ lp.player.last_name }}">{{ lp.player.ingame_name }}</code>
                 {% endfor %}
