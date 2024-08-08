@@ -51,6 +51,12 @@ urlpatterns = [
         cache_page(timeout=CACHE_INDEX_TIME)(feeds.UpcomingEventsFeed()),
         name='ics_upcoming_big'
     ),
+    # FilteredUpcomingEventsFeed
+    path(
+        'feeds/big_upcoming_cs.ics',
+        cache_page(timeout=CACHE_INDEX_TIME)(feeds.FilteredUpcomingEventsFeed()),
+        name='ics_upcoming_big_cs'
+    ),
     path(
         'admin/',
         admin.site.urls

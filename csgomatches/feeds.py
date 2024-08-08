@@ -35,6 +35,13 @@ class UpcomingEventsFeed(ICalFeed):
         return item.get_absolute_url()
 
 
+class FilteredUpcomingEventsFeed(UpcomingEventsFeed):
+     def items(self):
+         qs = super(FilteredUpcomingEventsFeed, self).items()
+         qs = qs.filter(lineup_a__game__slug='cs')
+         return qs
+
+
 class UpcomingMatchesSitemap(Sitemap):
     changefreq = "hourly"
     priority = 1.0
