@@ -37,10 +37,10 @@ class CSGOView(views.APIView):
 class CSGOAPIRootView(CSGOView, routers.APIRootView):
     def get_view_description(self, html=False):
         if html:
-            return mark_safe('Willkommen! API made by <a href="https://xn--karri-fsa.de">'
-                             'karri&eacute;.de</a> with the power of '
+            return mark_safe('<p>Willkommen! API made by <a href="https://karrie.software" target="_blank">'
+                             'karrie.software</a> with the power of '
                              '<a href="https://www.django-rest-framework.org/">'
-                             'django-rest-framework.org</a>')
+                             'django-rest-framework.org</a><p>')
         return "Willkommen"
 
     def get_view_name(self):

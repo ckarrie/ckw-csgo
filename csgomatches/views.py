@@ -97,7 +97,7 @@ class MatchDetailView(generic.DetailView):
             update = int(self.request.GET.get('update') or update_choices[1])
             if update not in update_choices:
                 update = update_choices[0]
-            self.object.update_hltv_livescore(request=self.request)
+            #self.object.update_hltv_livescore(request=self.request)
         elif self.object.is_upcoming():
             update = update_choices[-1]
         ctx.update({

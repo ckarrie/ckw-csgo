@@ -332,7 +332,7 @@ class MatchMap(models.Model):
         return self.match.matchmap_set.filter(map_nr__gt=self.map_nr).order_by('map_nr').first()
 
     def has_ended(self):
-        return (self.rounds_won_team_a >= 16 or self.rounds_won_team_b >= 16) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2
+        return (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2
 
     def is_live(self):
         prev = self.get_prev_map()
@@ -345,13 +345,13 @@ class MatchMap(models.Model):
         return self.starting_at < timezone.now() < calc_end
 
     def team_a_won(self):
-        return (self.rounds_won_team_a > self.rounds_won_team_b) and (self.rounds_won_team_a >= 16 or self.rounds_won_team_b >= 16)
+        return (self.rounds_won_team_a > self.rounds_won_team_b) and (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13)
 
     def is_draw(self):
         return self.rounds_won_team_a == self.rounds_won_team_b
 
     def team_b_won(self):
-        return (self.rounds_won_team_a < self.rounds_won_team_b) and (self.rounds_won_team_a >= 16 or self.rounds_won_team_b >= 16)
+        return (self.rounds_won_team_a < self.rounds_won_team_b) and (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13)
 
     def __str__(self):
         return '{} - {} Map #{} (ID = {})'.format(self.match, self.starting_at.date(), self.map_nr, self.pk if self.pk else '-')

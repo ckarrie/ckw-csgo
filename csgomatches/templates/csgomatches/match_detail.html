@@ -23,7 +23,7 @@
 {% block content %}
     <div class="matches">
         <h2>
-            <span class="bo">{{ match.first_map_at|date:'d.m.Y H:i' }}</span>
+            <span class="bo">{{ match.first_map_at|date:'d.m.y H:i' }}</span>
             <span class="team_a">{{ match.lineup_a.team }}</span>
             {% if match.lineup_b %}
                 <span class="{% if match.team_a_won %}map_win{% elif match.team_b_won %}map_loss{% elif match.is_draw %}map_draw{% endif %}">{{ score.0 }}</span>:
