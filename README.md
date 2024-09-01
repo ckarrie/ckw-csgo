@@ -110,6 +110,8 @@ User.objects.create_superuser(username="devuser", password="devuser", email="exa
 ```shell
 python wsb/manage.py runserver 0.0.0.0:9001
 ```
-Open Browser: http://127.0.0.1:9001
+Open Browser: 
+- Frontend: http://127.0.0.1:9001
+- Django-Admin: http:///127.0.0.1:9001/admin/
 
 
