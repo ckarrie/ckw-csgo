@@ -1,6 +1,10 @@
 # Contribution
 Feel free to hack around and create pull requests.
 
+# Contributors
+Many thanks to
+- iaN [@ifalatik](https://github.com/ifalatik) for keeping the code up-to-date
+
 ## Developement
 
 ### 1. Create and activate Python 3.6 or greater virtual environment
