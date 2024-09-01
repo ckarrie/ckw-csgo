@@ -121,3 +121,11 @@ pip install Django==5.1
 pip install djangorestframework==3.15.2
 python wsb/manage.py migrate
 ```
+- don't forget to switch your local branch to django-5.1
+
+```shell
+cd src/ckw-csgo
+git fetch
+git branch -v -a
+git switch django-5.1
+```
