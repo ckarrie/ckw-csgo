@@ -57,7 +57,7 @@ class Team(models.Model):
 
     def get_hltv_team_link(self):
         if self.hltv_id:
-            return 'https://www.hltv.org/team/{}/team'.format(self.hltv_id)
+            return f'https://www.hltv.org/team/{self.hltv_id}/team'
 
     def __str__(self):
         #if self.game:
@@ -74,7 +74,7 @@ class Player(models.Model):
     esea_user_id = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return '{} "{}" {}'.format(self.first_name, self.ingame_name, self.last_name)
+        return f'{self.first_name} "{self.ingame_name}" {self.last_name}'
 
 
 class PlayerRole(models.Model):
@@ -113,8 +113,8 @@ class Lineup(models.Model):
 
     def __str__(self):
         if self.game:
-            return '[{game}] {team}'.format(game=self.game.name, team=self.team.name)
-        return '{}'.format(self.team.name)
+            return f'[{self.game.name}] {self.team.name}'
+        return f'{self.team.name}'
 
     def save(self, *args, **kwargs):
         next_lu = self.get_next_lineup()
@@ -138,8 +138,8 @@ class LineupPlayer(models.Model):
 
     def __str__(self):
         if self.role:
-            return '{} ({})'.format(self.player.ingame_name, self.role.name)
-        return '{} @ {}'.format(self.player.ingame_name, self.lineup.team.name)
+            return f'{self.player.ingame_name} ({self.role.name})'
+        return f'{self.player.ingame_name} @ {self.lineup.team.name}'
 
 
 class Tournament(models.Model):
@@ -277,14 +277,14 @@ class Match(models.Model):
                 idx = list(similar_matches_in_same_tournament).index(self)
             except ValueError:
                 # object was moved
-                self.slug = slugify("id-{}".format(self.pk))
+                self.slug = slugify(f"id-{self.pk}")
             else:
-                self.slug = slugify("{}-{}-{}".format(self.tournament.name, self, idx))
+                self.slug = slugify(f"{self.tournament.name}-{self}-{idx}")
         else:
-            self.slug = slugify("{}-{}".format(self.tournament.name, self))
+            self.slug = slugify(f"{self.tournament.name}-{self}")
         existing_slugs = Match.objects.filter(slug=self.slug).exclude(pk=self.pk)
         if existing_slugs.exists():
-            self.slug = slugify("id-{}".format(self.pk))
+            self.slug = slugify(f"id-{self.pk}")
         super(Match, self).save(*args, **kwargs)
 
     def get_absolute_url(self) -> str:
@@ -381,12 +381,8 @@ class MatchMap(models.Model):
 
         if self.match.enable_tweet and prev_instance:
             if prev_instance.rounds_won_team_a != self.rounds_won_team_a or prev_instance.rounds_won_team_b != self.rounds_won_team_b:
-                print("[MatchMap.save] Score changed {}:{} -> {}:{}".format(
-                    prev_instance.rounds_won_team_a,
-                    prev_instance.rounds_won_team_b,
-                    self.rounds_won_team_a,
-                    self.rounds_won_team_b
-                ))
+                print(f"[MatchMap.save] Score changed {prev_instance.rounds_won_team_a}:{prev_instance.rounds_won_team_b}"
+                      " -> {self.rounds_won_team_a}:{self.rounds_won_team_b}")
                 tweet_dict = {
                     'team_a': self.match.lineup_a.team.name,
                     'team_b': self.match.lineup_b.team.name,
@@ -417,7 +413,7 @@ class MatchMap(models.Model):
                                  "\n" \
                                  "More at https://wannspieltbig.de{slug}".format(**tweet_dict)
 
-                    print("Posting to {} followers".format(len(api.GetFollowerIDs())))
+                    print(f"Posting to {len(api.GetFollowerIDs())} followers")
                     in_reply_to_status_id = self.match.last_tweet_id
                     tw_status: twitter.Status = api.PostUpdate(
                         status=tweet_text,
@@ -464,11 +460,11 @@ class ExternalLink(models.Model):
     url = models.URLField()
     objects = managers.ExternalLinkManager()
 
-    def get_flag_url(self):
-        return 'csgomatches/flags/{}.png'.format(self.link_flag)
+    def get_flag_url(self) -> str:
+        return f'csgomatches/flags/{self.link_flag}.png'
 
     def __str__(self):
-        return '{}: {}'.format(self.title, self.match)
+        return '{self.title}: {self.match}'
 
     class Meta:
         ordering = ['match', 'link_flag', 'link_type']
@@ -489,5 +485,5 @@ class StaticPage(models.Model):
     slug = models.SlugField(unique=True, allow_unicode=False, max_length=255)
     template_name = models.CharField(max_length=255, default='default.html')
 
-    def get_template_name(self):
-        return 'csgomatches/staticpages/{}'.format(self.template_name)
+    def get_template_name(self) -> str:
+        return f'csgomatches/staticpages/{self.template_name}'

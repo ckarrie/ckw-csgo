@@ -123,7 +123,7 @@ class LiveStreamsView(generic.TemplateView):
             twitch_id = faceit.faceit2twitch_id(nn)
             if twitch_id:
                 nicknames_with_streams[nn] = {
-                    'link': 'https://twitch.tv/{}'.format(twitch_id),
+                    f'link': 'https://twitch.tv/{twitch_id}',
                     'live': len(faceit.get_twitch_stream_status(nicknames=[twitch_id])) > 0
                 }
             else:

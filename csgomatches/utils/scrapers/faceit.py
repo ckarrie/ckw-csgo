@@ -135,7 +135,7 @@ def faceit2twitch_id(nickname):
         return cached_twitch_id
 
 
-    api_url = 'https://api.faceit.com/core/v1/nicknames/{}'.format(nickname)
+    api_url = f'https://api.faceit.com/core/v1/nicknames/{nickname}'
     resp = requests.get(api_url)
     resp_json = resp.json()
     twitch_id = resp_json.get('payload', {}).get('streaming', {}).get('twitch_id', None)
