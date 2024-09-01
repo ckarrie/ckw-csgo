@@ -3,6 +3,7 @@ import requests
 import twitter
 from django.contrib.sites.models import Site
 from django.db import models
+from django.db.models import QuerySet
 # Create your models here.
 from django.urls import reverse
 from django.utils import timezone
@@ -12,14 +13,17 @@ from . import managers
 from .utils.publishing import twitter_api
 
 
-def get_flags_choices():
-    choices = []
+def get_flags_choices()-> list[tuple[str, str]]:
+    """
+    returns a list of tuples of all available flags by looking at png files in 'static/csgomatches/flags'
+    """
+    choices: list[tuple[str, str]] = []
     base_pth = os.path.dirname(os.path.abspath(__file__))
     flags_pth = os.path.join(base_pth, 'static/csgomatches/flags')
     for fn in os.listdir(flags_pth):
         if fn.endswith('.png'):
             short_fn = fn.replace('.png', '')
-            choices.append([short_fn, short_fn])
+            choices.append((short_fn, short_fn))
     choices.sort(key=lambda x: x[0])
     return choices
 
@@ -42,6 +46,8 @@ class Team(models.Model):
     name_alt = models.CharField(max_length=255, null=True, blank=True)
     hltv_id = models.IntegerField(null=True, blank=True)
     esea_team_id = models.IntegerField(null=True, blank=True)
+
+    lineup_set: QuerySet['Lineup']
 
     objects = managers.TeamManager()
 
@@ -89,12 +95,12 @@ class Lineup(models.Model):
 
     objects = managers.LineupQuerySet.as_manager()
 
-    def get_previous_lineup(self):
+    def get_previous_lineup(self) -> 'Lineup | None':
         return self.team.lineup_set.filter(
             active_from__lt=self.active_from
         ).order_by('-active_from').first()
 
-    def get_next_lineup(self):
+    def get_next_lineup(self) -> 'Lineup | None':
         return self.team.lineup_set.filter(
             active_from__gt=self.active_from
         ).order_by('active_from').first()
@@ -144,6 +150,8 @@ class Tournament(models.Model):
     esea_bracket_id = models.IntegerField(null=True, blank=True)
     esea_bracket_team_ids = models.CharField(max_length=255, null=True, blank=True, help_text='Comma Separated')
 
+    match_set: QuerySet['Match']
+
     # mappool = models.ManyToManyField(Map)
 
     def __str__(self):
@@ -190,27 +198,33 @@ class Match(models.Model):
     enable_99dmg = models.BooleanField(default=False)
     enable_hltv = models.BooleanField(default=True)
 
-    def __str__(self):
-        if self.lineup_a and self.lineup_b:
-            return '{} vs {}'.format(self.lineup_a.team.name, self.lineup_b.team.name)
-        elif self.lineup_a and not self.lineup_b:
-            return '{}'.format(self.lineup_a.team.name)
-        return '{} vs {}'.format('TBA', 'TBA')
+    matchmap_set: QuerySet['MatchMap']
 
-    def get_first_matchmap(self):
+    def __str__(self) -> str:
+        if self.lineup_a and self.lineup_b:
+            return f'{self.lineup_a.team.name} vs {self.lineup_b.team.name}'
+        elif self.lineup_a and not self.lineup_b:
+            return f'{self.lineup_a.team.name}'
+        return 'TBA vs TBA'
+
+    def get_first_matchmap(self) -> 'MatchMap | None':
         return self.matchmap_set.order_by('starting_at').first()
 
-    def is_live(self):
+    def is_live(self) -> bool | None:
+        if self.has_ended():
+            return False
+        if not self.first_map_at:
+            return None
+
         current_live_mms = []
         for mmap in self.matchmap_set.order_by('map_nr'):
             current_live_mms.append(mmap.is_live())
         if current_live_mms:
             return any(current_live_mms)
-        if self.has_ended():
-            return False
+
         return self.first_map_at < timezone.now()
 
-    def has_ended(self):
+    def has_ended(self) -> bool:
         if self.cancelled > 0:
             return True
         last_map = self.matchmap_set.order_by('map_nr').last()
@@ -223,11 +237,11 @@ class Match(models.Model):
             return True
         return False
 
-    def is_upcoming(self):
+    def is_upcoming(self) -> bool | None:
         if self.first_map_at:
             return self.first_map_at > timezone.now()
 
-    def get_overall_score(self):
+    def get_overall_score(self) -> tuple[int, int]:
         lineup_a_mapwins = 0
         lineup_b_mapwins = 0
         for mm in self.matchmap_set.all():
@@ -236,21 +250,21 @@ class Match(models.Model):
                     lineup_a_mapwins += 1
                 if mm.team_b_won():
                     lineup_b_mapwins += 1
-        return (lineup_a_mapwins, lineup_b_mapwins)
+        return lineup_a_mapwins, lineup_b_mapwins
 
-    def team_a_won(self):
+    def team_a_won(self) -> bool:
         if self.cancelled == 1:
             return True
         t_a, t_b = self.get_overall_score()
         return t_a > t_b
 
-    def team_b_won(self):
+    def team_b_won(self) -> bool:
         if self.cancelled == 2:
             return True
         t_a, t_b = self.get_overall_score()
         return t_a < t_b
 
-    def is_draw(self):
+    def is_draw(self) -> bool:
         t_a, t_b = self.get_overall_score()
         return t_a == t_b
 
@@ -273,7 +287,7 @@ class Match(models.Model):
             self.slug = slugify("id-{}".format(self.pk))
         super(Match, self).save(*args, **kwargs)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse('match_details', kwargs={'slug': self.slug})
 
     def get_livescore_url(self, request):
@@ -281,7 +295,11 @@ class Match(models.Model):
             url = reverse('match_livescore-detail', kwargs={'pk': self.hltv_match_id})
             return request.build_absolute_uri(url)
 
-    def update_hltv_livescore(self, request):
+    def update_hltv_livescore(self, request) -> None:
+        # Guard clause in case lineup_a is None
+        if not self.lineup_a:
+            return
+
         url = self.get_livescore_url(request=request)
         if url:
             response = requests.get(url=url, params={'format': 'json'}).json()
@@ -325,13 +343,13 @@ class MatchMap(models.Model):
     # defwin = models.BooleanField(default=False)
     cancelled = models.BooleanField(default=False)
 
-    def get_prev_map(self):
+    def get_prev_map(self) -> 'MatchMap | None':
         return self.match.matchmap_set.filter(map_nr__lt=self.map_nr).order_by('map_nr').last()
 
-    def get_next_map(self):
+    def get_next_map(self) -> 'MatchMap | None':
         return self.match.matchmap_set.filter(map_nr__gt=self.map_nr).order_by('map_nr').first()
 
-    def has_ended(self):
+    def has_ended(self) -> bool:
         return (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2
 
     def is_live(self):
@@ -344,19 +362,23 @@ class MatchMap(models.Model):
         calc_end = self.starting_at + timezone.timedelta(minutes=100)
         return self.starting_at < timezone.now() < calc_end
 
-    def team_a_won(self):
+    def team_a_won(self) -> bool:
         return (self.rounds_won_team_a > self.rounds_won_team_b) and (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13)
 
-    def is_draw(self):
+    def is_draw(self) -> bool:
         return self.rounds_won_team_a == self.rounds_won_team_b
 
-    def team_b_won(self):
+    def team_b_won(self) -> bool:
         return (self.rounds_won_team_a < self.rounds_won_team_b) and (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13)
 
     def __str__(self):
-        return '{} - {} Map #{} (ID = {})'.format(self.match, self.starting_at.date(), self.map_nr, self.pk if self.pk else '-')
+        return f'{self.match} - {self.starting_at.date()} Map #{self.map_nr} (ID = {self.pk if self.pk else "-"})'
 
-    def send_tweet(self, prev_instance=None, interval=180.):
+    def send_tweet(self, prev_instance=None, interval=180.) -> None:
+        # Guard clause in case either lineup_a or lineup_b are None
+        if not self.match.lineup_a or not self.match.lineup_b:
+            return
+
         if self.match.enable_tweet and prev_instance:
             if prev_instance.rounds_won_team_a != self.rounds_won_team_a or prev_instance.rounds_won_team_b != self.rounds_won_team_b:
                 print("[MatchMap.save] Score changed {}:{} -> {}:{}".format(
@@ -397,11 +419,11 @@ class MatchMap(models.Model):
 
                     print("Posting to {} followers".format(len(api.GetFollowerIDs())))
                     in_reply_to_status_id = self.match.last_tweet_id
-                    tw_status = api.PostUpdate(
+                    tw_status: twitter.Status = api.PostUpdate(
                         status=tweet_text,
                         in_reply_to_status_id=in_reply_to_status_id
                     )
-                    self.match.last_tweet_id = str(tw_status.id)
+                    self.match.last_tweet_id = str(tw_status.id) # type: ignore
                     self.match.last_tweet = timezone.now()
                     self.match.save()
 
@@ -456,7 +478,7 @@ class CSGOSiteSetting(models.Model):
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
     main_team = models.ForeignKey('csgomatches.Team', on_delete=models.CASCADE, related_name='main_team_settings')
     second_team = models.ForeignKey('csgomatches.Team', on_delete=models.CASCADE, related_name='sec_team_settings')
-    site_teams = models.ManyToManyField('csgomatches.Team', null=True)
+    site_teams = models.ManyToManyField('csgomatches.Team')
 
     class Meta:
         unique_together = ['site', 'main_team', 'second_team']
