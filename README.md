@@ -129,3 +129,14 @@ git fetch
 git branch -v -a
 git switch django-5.1
 ```
+
+- change setting.py, add line
+```python
+...
+USE_L10N = True
+USE_TZ = True
+...
+
+# Add
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+```
