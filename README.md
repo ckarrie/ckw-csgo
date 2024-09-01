@@ -112,6 +112,6 @@ python wsb/manage.py runserver 0.0.0.0:9001
 ```
 Open Browser: 
 - Frontend: http://127.0.0.1:9001
-- Django-Admin: http:///127.0.0.1:9001/admin/
+- Django-Admin: http://127.0.0.1:9001/admin/
 
 
