@@ -114,4 +114,10 @@ Open Browser:
 - Frontend: http://127.0.0.1:9001
 - Django-Admin: http://127.0.0.1:9001/admin/
 
+## Using branch `django-5.1`
 
+```shell
+pip install Django==5.1
+pip install djangorestframework==3.15.2
+python wsb/manage.py migrate
+```
