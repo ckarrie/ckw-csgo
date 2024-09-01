@@ -3,7 +3,7 @@ Feel free to hack around and create pull requests.
 
 ## Developement
 
-### 1. Create and activate Python 3.5.x virtual environment
+### 1. Create and activate Python 3.6 or greater virtual environment
 ```shell
 python3 -m venv wannspieltbig_dev
 cd wannspieltbig_dev
@@ -11,38 +11,19 @@ source bin/activate
 ```
 
 ### 2. Install requirements
-```
-beautifulsoup4==4.8.1
-bs4==0.0.1
-Django==2.2.7
-django-ical==1.7.0
-django-recurrence==1.10.1
-djangorestframework==3.10.3
-icalendar==4.0.4
-python-dateutil==2.8.1
-python-memcached==1.59
-python-telegram-bot==12.2.0
-python-twitter==3.5
-requests==2.22.0
-```
-
-### 3. Create your local Django project
-```shell
-django-admin startproject wsb
-```
-
-### 4. Install csgo-App
 ```shell
 mkdir src
 cd src
 git clone https://github.com/ckarrie/ckw-csgo/
+pip install -r ckw-csgo/requirements.txt
+# install csgo app in editable mode
 pip install -e ckw-csgo
 ```
 
-### 5. Edit `settings.py` / add to `INSTALLED_APPS`
-
+### 3. Set up local Django project
 ```shell
-cd wannspieltbig_dev/
+django-admin startproject wsb
+cd wsb/
 mkdir wsb/static
 nano wsb/wsb/settings.py
 ```
@@ -79,14 +60,14 @@ STATIC_URL = '/static/'
 STATIC_ROOT = '/home/christian/workspace/venvs/wannspieltbig_dev/wsb/static'  # CHANGE TO YOUR LOCAL FOLDER
 ```
 
-### 6. Setup Database and symlink static files
+### 4. Setup Database and symlink static files
 
 ```shell
 python wsb/manage.py migrate
 python wsb/manage.py collectstatic -l
 ```
 
-### 7. Add initial data
+### 5. Add initial data
 
 ```shell
 python wsb/manage.py shell
@@ -106,31 +87,10 @@ from django.contrib.auth.models import User
 User.objects.create_superuser(username="devuser", password="devuser", email="example@example.com")
 ```
 
-### 7. Run Dev Server
+### 6. Run Dev Server
 ```shell
 python wsb/manage.py runserver 0.0.0.0:9001
 ```
 Open Browser: 
 - Frontend: http://127.0.0.1:9001
 - Django-Admin: http://127.0.0.1:9001/admin/
-
-## Using branch `django-5.1`
-
-```shell
-pip install Django==5.1
-pip install djangorestframework==3.15.2
-python wsb/manage.py migrate
-```
-- don't forget to switch your local branch to `django-5.1`
-
-```shell
-cd src/ckw-csgo
-git fetch
-git branch -v -a
-git switch django-5.1
-```
-
-- add `DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'` to `setting.py`:
-```python
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-```
