@@ -28,10 +28,10 @@ class HLTVMap(object):
         self.map_nr = map_nr
 
     def __str__(self):
-        return "{} {} {}:{} {}".format(self.map_name, self.team_a_id, self.score_a, self.score_b, self.team_b_id)
+        return f"{self.map_name} {self.team_a_id} {self.score_a}:{self.score_b} {self.team_b_id}"
 
     def __repr__(self):
-        return "<Map #{} - {}>".format(self.map_nr, self.map_name)
+        return f"<Map #{self.map_nr} - {self.map_name}>"
 
 
 class HLTVMatch(object):

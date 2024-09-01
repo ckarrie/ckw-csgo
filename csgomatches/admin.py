@@ -144,14 +144,14 @@ class TeamAdmin(admin.ModelAdmin):
                 obj.save()
                 self.message_user(
                     request,
-                    "Found HLTV ID {} for {}".format(obj.hltv_id, obj.name),
+                    f"Found HLTV ID {obj.hltv_id} for {obj.name}",
                     level=messages.SUCCESS
                 )
 
     def hltv_link(self, obj):
         url = obj.get_hltv_team_link()
         if url:
-            return mark_safe('<a href="{}" target="_blank">{}</a>'.format(url, obj.name))
+            return mark_safe(f'<a href="{url}" target="_blank">{obj.name}</a>')
         return ''
 
     def lineup_logo(self, obj):
@@ -172,7 +172,7 @@ class TeamAdmin(admin.ModelAdmin):
             build_players(team_mdl=obj)
             self.message_user(
                 request,
-                "Build player for Team {}".format(obj.name),
+                f"Build player for Team {obj.name}",
                 level=messages.SUCCESS
             )
 

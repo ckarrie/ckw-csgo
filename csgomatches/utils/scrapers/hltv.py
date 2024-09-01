@@ -17,7 +17,7 @@ def get_hltv_team_name_from_id(hltv_id: int):
     :param hltv_id:
     :return:
     """
-    url = 'https://www.hltv.org/team/{}/team'.format(hltv_id)
+    url = f'https://www.hltv.org/team/{hltv_id}/team'
     response = requests.get(url=url)
     soup = BeautifulSoup(response.text, "html.parser")
     title_tag = soup.select('title')[0]
@@ -35,13 +35,13 @@ def get_hltv_id_from_team_name(team_mdl: models.Team, return_team_json=False):
             db_names.append(team_mdl.name_alt)
     db_names_lower = [n.lower() for n in db_names]
     for name in db_names:
-        url = 'https://www.hltv.org/search?term={}'.format(name)
+        url = f'https://www.hltv.org/search?term={name}'
         response = requests.get(url=url)
         response_json = response.json()
         teams = response_json[0].get("teams")
         for team in teams:
             hltv_name = team['name']
-            print("[get_hltv_id_from_team_name] checking if hltv_name={} in db_names={}".format(hltv_name, db_names))
+            print(f"[get_hltv_id_from_team_name] checking if hltv_name={hltv_name} in db_names={db_names}")
             if hltv_name in db_names:
                 if return_team_json:
                     return team
@@ -116,7 +116,7 @@ def build_players(team_mdl: models.Team):
                     player__id__in=player_instances_ids
                 )
                 for mo_lp in moved_out_lps:
-                    print(" - Player {} left the Lineup".format(mo_lp.player))
+                    print(f" - Player {mo_lp.player} left the Lineup")
 
 
 
