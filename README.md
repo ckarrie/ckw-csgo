@@ -39,7 +39,7 @@ git clone https://github.com/ckarrie/ckw-csgo/
 pip install -e ckw-csgo
 ```
 
-### 5. Edit settings.py / add to INSTALLED_APPS
+### 5. Edit `settings.py` / add to `INSTALLED_APPS`
 
 ```shell
 cd wannspieltbig_dev/
@@ -121,7 +121,7 @@ pip install Django==5.1
 pip install djangorestframework==3.15.2
 python wsb/manage.py migrate
 ```
-- don't forget to switch your local branch to django-5.1
+- don't forget to switch your local branch to `django-5.1`
 
 ```shell
 cd src/ckw-csgo
@@ -130,13 +130,7 @@ git branch -v -a
 git switch django-5.1
 ```
 
-- change setting.py, add line
+- add `DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'` to `setting.py`:
 ```python
-...
-USE_L10N = True
-USE_TZ = True
-...
-
-# Add
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ```
