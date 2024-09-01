@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import requests
 from django.core.cache import cache
 
@@ -148,7 +150,6 @@ def get_twitch_stream_status(nicknames=[]):
     online_streams = []
     params = {
         'user_login': [nn.lower() for nn in nicknames],
-        #'client_id': 'w7skd7sc9mop0p60bnqe0ukc2qj8ht'
     }
     headers = {'Client-ID': 'w7skd7sc9mop0p60bnqe0ukc2qj8ht', 'Accept': 'application/vnd.twitchtv.v5+json'}
     api_url = 'https://api.twitch.tv/helix/streams'
@@ -179,3 +180,45 @@ def loop_check_hubs_for_matches():
 
 #loop_check_hubs_for_matches()
 
+def get_teams_from_championsship(championship_id):
+    api_url = 'https://api.faceit.com/championships/v1/championship/54605276-8b4d-4481-959a-f3ced4d8a1f9/subscription'
+    teams_data = OrderedDict()
+    has_data = True
+    offset = 0
+
+    def _fetch_data(_offset):
+        _query_params = {
+            'limit': 20,
+            'offset': _offset
+        }
+        resp = requests.get(api_url, params=_query_params)
+        print("  -- ", api_url, _query_params)
+        resp_json = resp.json()
+        _teams_data = OrderedDict()
+
+        for team_data in resp_json.get('payload', {}).get('items', []):
+            #tid = team_data.get('id')
+            tid = team_data.get('team', {}).get('id')
+            _teams_data[tid] = {
+                'name': team_data.get('team', {}).get('name'),
+                'approved': team_data.get('approved'),
+                'status': team_data.get('status'),
+            }
+
+        return _teams_data
+
+    while has_data:
+        _fetch_r = _fetch_data(offset)
+        offset += 20
+        if _fetch_r:
+            teams_data.update(**_fetch_r)
+        else:
+            has_data = False
+    #import pprint
+    #pprint.pprint(teams_data)
+
+    for t, td in teams_data.items():
+        print(" - ", td.get('name'))
+
+
+get_teams_from_championsship(championship_id="54605276-8b4d-4481-959a-f3ced4d8a1f9")

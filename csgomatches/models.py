@@ -201,9 +201,31 @@ class Match(models.Model):
             if last_map.has_ended():
                 return True
                 # if last_map.starting_at
+
         team_a, team_b = self.get_overall_score()
-        if team_a > team_b or team_b > team_a:
-            return True
+        if self.bestof == 1:
+            if team_a > team_b or team_b > team_a:
+                return True
+        elif self.bestof == 2:
+            if (team_a, team_b) in [
+                (2, 0), (0, 2),
+                (1, 1)
+            ]:
+                return True
+        elif self.bestof == 3:
+            if (team_a, team_b) in [
+                (2, 0), (0, 2),
+                (2, 1), (1, 2)
+            ]:
+                return True
+        elif self.bestof == 5:
+            if (team_a, team_b) in [
+                (3, 0), (0, 3),
+                (3, 2), (2, 3),
+                (3, 1), (1, 3)
+            ]:
+                return True
+
         return False
 
     def is_upcoming(self):
@@ -315,6 +337,7 @@ class MatchMap(models.Model):
         return self.match.matchmap_set.filter(map_nr__gt=self.map_nr).order_by('map_nr').first()
 
     def has_ended(self):
+
         return (self.rounds_won_team_a >= 16 or self.rounds_won_team_b >= 16) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2
 
     def is_live(self):

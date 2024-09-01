@@ -1,6 +1,6 @@
 User-agent: *
 Disallow:
-Sitemap: https://wannspieltbig.de/sitemap.xml.
+Sitemap: https://wannspieltbig.de/sitemap.xml
 
 # too many repeated hits, too quick
 User-agent: litefinder

@@ -52,7 +52,6 @@ def get_hltv_id_from_team_name(team_mdl: models.Team, return_team_json=False):
                 return team['id']
 
 
-
 def build_players(team_mdl: models.Team):
     """
     Player-Dict:
@@ -117,10 +116,11 @@ def build_players(team_mdl: models.Team):
                 )
                 for mo_lp in moved_out_lps:
                     print(" - Player {} left the Lineup".format(mo_lp.player))
+        else:
+            print("Found {} Players for Team {}, ignoring".format(len(players), team))
 
 
-
-DEBUGGING = False
+DEBUGGING = True
 if DEBUGGING:
     import logging
 
