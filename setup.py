@@ -19,7 +19,7 @@ setup(
     install_requires=[
         'django',
         'requests',
-        'psycopg2-binary', 'bs4', 'python-dateutil', 'python-memcached',
+        'psycopg2-binary', 'bs4', 'python-dateutil', 'pymemcache',
         'django_ical', 'websocket_client', 'djangorestframework', 'websockets',
         'python-twitter'
     ]
