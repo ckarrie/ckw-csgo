@@ -27,8 +27,8 @@ def get_flags_choices():
 class Game(models.Model):
     name = models.CharField(max_length=255, help_text='i.e. "TrackMania" or "Counter-Strike"')
     name_short = models.CharField(max_length=4, help_text='i.e. "tm", "cs"')
-    team_logo_url = models.URLField(null=True, blank=True)
-    team_logo_width = models.IntegerField(null=True, blank=True, help_text="i.e. 50 for 50px")
+    game_logo_url = models.URLField(null=True, blank=True)
+    game_logo_width = models.IntegerField(null=True, blank=True, help_text="i.e. 50 for 50px")
     slug = models.SlugField()
 
     def __str__(self):
