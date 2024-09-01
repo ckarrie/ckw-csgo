@@ -57,9 +57,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
-    'rest_framework',  # Add
-    'csgomatches',     # Add
+    'django.contrib.sites',  # Add
+    'rest_framework',        # Add
+    'csgomatches',           # Add
 ]
 
 ROOT_URLCONF = 'csgomatches.urls'
