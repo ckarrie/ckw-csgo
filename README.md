@@ -12,6 +12,7 @@ source bin/activate
 
 ### 2. Install requirements
 ```shell
+sudo apt-get install memcached
 mkdir src
 cd src
 git clone https://github.com/ckarrie/ckw-csgo/
@@ -31,6 +32,13 @@ nano wsb/wsb/settings.py
 ```python
 # Change
 ALLOWED_HOSTS = ['*']
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": "127.0.0.1:11211",
+    }
+}
 
 INSTALLED_APPS = [
     'django.contrib.admin',
