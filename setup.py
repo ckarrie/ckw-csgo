@@ -17,10 +17,10 @@ setup(
     url='http://ccm.app/',
     packages=['csgomatches'],
     install_requires=[
-        'django',
+        'django>=5.1',
         'requests',
         'psycopg2-binary', 'bs4', 'python-dateutil', 'python-memcached',
-        'django_ical', 'websocket_client', 'djangorestframework', 'websockets',
+        'django_ical', 'websocket_client', 'djangorestframework>=3.15.2', 'websockets',
         'python-twitter'
     ]
 )
