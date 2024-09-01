@@ -28,6 +28,53 @@ requests==2.22.0
 
 ### 3. Create your local Django project
 ```shell
-django-admin createproject wsb
+django-admin startproject wsb
+```
+
+### 4. Install csgo-App
+```shell
+mkdir src
+cd src
+git clone https://github.com/ckarrie/ckw-csgo/
+pip install -e ckw-csgo
+```
+
+### 5. Edit settings.py / add to INSTALLED_APPS
+
+```shell
+cd wannspieltbig_dev/
+nano wsb/wsb/settings.py
+```
+
+```python
+# Change
+ALLOWED_HOSTS = ['*']
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'rest_framework',  # Add
+    'csgomatches',     # Add
+]
+
+ROOT_URLCONF = 'csgomatches.urls'
+
+LANGUAGE_CODE = 'de'
+
+TIME_ZONE = 'Europe/Berlin'
+
+USE_I18N = True
+
+USE_L10N = True
+
+USE_TZ = True
+
+STATIC_URL = '/static/'
+STATIC_ROOT = '/home/user/venvs/wannspieltbig_dev/wsb/static'  # CHANGE TO YOUR LOCAL FOLDER
 
 ```
