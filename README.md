@@ -43,6 +43,7 @@ pip install -e ckw-csgo
 
 ```shell
 cd wannspieltbig_dev/
+mkdir wsb/static
 nano wsb/wsb/settings.py
 ```
 
@@ -75,6 +76,40 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/home/user/venvs/wannspieltbig_dev/wsb/static'  # CHANGE TO YOUR LOCAL FOLDER
-
+STATIC_ROOT = '/home/christian/workspace/venvs/wannspieltbig_dev/wsb/static'  # CHANGE TO YOUR LOCAL FOLDER
 ```
+
+### 6. Setup Database and symlink static files
+
+```shell
+python wsb/manage.py migrate
+python wsb/manage.py collectstatic -l
+```
+
+### 7. Add initial data
+
+```shell
+python wsb/manage.py shell
+```
+
+```python
+# current Site
+from django.contrib.sites.models import Site
+Site.objects.filter(pk=1).update(domain='0.0.0.0', name='Local Dev')
+
+# Add Team BIG
+from csgomatches.models import Team
+Team(name='BIG').save()
+
+# Add Admin User
+from django.contrib.auth.models import User
+User.objects.create_superuser(username="devuser", password="devuser", email="example@example.com")
+```
+
+### 7. Run Dev Server
+```shell
+python wsb/manage.py runserver 0.0.0.0:9001
+```
+Open Browser: http://127.0.0.1:9001
+
+
