@@ -200,6 +200,10 @@ class Match(models.Model):
 
     matchmap_set: QuerySet['MatchMap']
 
+    class Meta:
+        ordering = ['-first_map_at']
+        verbose_name_plural = "matches"
+
     def __str__(self) -> str:
         if self.lineup_a and self.lineup_b:
             return f'{self.lineup_a.team.name} vs {self.lineup_b.team.name}'
@@ -324,9 +328,6 @@ class Match(models.Model):
                     mm_obj.rounds_won_team_a = score_a
                     mm_obj.rounds_won_team_b = score_b
                     mm_obj.save()
-
-    class Meta:
-        ordering = ['-first_map_at']
 
 
 class MatchMap(models.Model):
