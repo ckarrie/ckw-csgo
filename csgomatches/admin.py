@@ -195,6 +195,9 @@ class MatchAdmin(admin.ModelAdmin):
     search_fields = ['lineup_b__team__name', 'lineup_b__team__name_long', 'tournament__name']
     autocomplete_fields = ['lineup_a', 'lineup_b', 'tournament']
     inlines = [MatchMapInline, ExternalLinkInline]
+    # replace "Save and add another" button with "Save as new" to use previous matches as template
+    # https://docs.djangoproject.com/en/5.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.save_as
+    save_as = True
 
     def overall_score(self, obj):
         score = obj.get_overall_score()
