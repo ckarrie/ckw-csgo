@@ -22,7 +22,7 @@ class UpcomingEventsFeed(ICalFeed):
     def item_title(self, item):
         if item.is_live() or item.has_ended():
             score_a, score_b = item.get_overall_score()
-            return "{} - {}:{}".format(item, score_a, score_b)
+            return f"{item} - {score_a}:{score_b}"
         return str(item)
 
     def item_description(self, item):

@@ -45,7 +45,7 @@ TEAM_A_MAPPINGS = {
 
 def get_bracket_match(bracket_id, match_id, update_id=None):
     swap_score = False
-    esea_bracket_url = 'https://play.esea.net/index.php?s=events&d=brackets&id={}'.format(bracket_id)
+    esea_bracket_url = f'https://play.esea.net/index.php?s=events&d=brackets&id={bracket_id}'
     scraper = cfscrape.CloudflareScraper()
     response = scraper.get(
         esea_bracket_url,
@@ -54,7 +54,7 @@ def get_bracket_match(bracket_id, match_id, update_id=None):
     print("Got page from", esea_bracket_url, response.status_code)
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, "html.parser")
-        match_div = soup.find('div', {'id': 'match-modal-{}'.format(match_id)})
+        match_div = soup.find('div', {f'id': 'match-modal-{match_id}'})
         map_name = match_div.find("table", {'class': 'match-meta'}).select("td")[1].text
         print("Map", map_name)
         scores_table = match_div.find("table", {'class': 'scores'})
@@ -110,7 +110,7 @@ def get_bracket_match(bracket_id, match_id, update_id=None):
 
 
 def publish_results(matchmap, a, b, map_nr=1, map_name=""):
-    url = "https://wannspieltbig.de/api/matchmap_update/{}/".format(matchmap)
+    url = f"https://wannspieltbig.de/api/matchmap_update/{matchmap}/"
     username = None
     password = None
     cred_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'push_credentials.txt')
@@ -303,7 +303,7 @@ def process_api_match_data(matches_data):
                     first_matchmap.save()
 
             # esea page
-            esea_match_link = 'https://play.esea.net/match/{}'.format(match_id)
+            esea_match_link = f'https://play.esea.net/match/{match_id}'
             match_link, match_link_created = apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
                 match=match,
                 link_type='esea_match',
@@ -318,14 +318,11 @@ def process_api_match_data(matches_data):
 def get_esea_team_schedule():
     # craws team pages
     for esea_team_id, wsb_team_id in TEAM_A_MAPPINGS.items():
-        api_url = 'https://play.esea.net/api/teams/{}/matches?page_size=50'.format(esea_team_id)
+        api_url = f'https://play.esea.net/api/teams/{esea_team_id}/matches?page_size=50'
         scraper = cfscrape.CloudflareScraper()
         proxies = get_esea_proxies()
 
-        print("ESEA URL={} Proxies={}".format(
-            api_url,
-            ','.join(list(proxies.keys()))
-        ))
+        print(f"ESEA URL={api_url} Proxies={','.join(list(proxies.keys()))}")
 
         response = scraper.get(api_url, proxies=proxies)
         if response.status_code == 200:
@@ -345,14 +342,11 @@ def get_esea_team_schedule():
         ).first()
         if first_player_with_esea_user_id:
             print(first_player_with_esea_user_id)
-            api_url = 'https://play.esea.net/api/users/{}/matches?page_size=50'.format(first_player_with_esea_user_id.esea_user_id)
+            api_url = f'https://play.esea.net/api/users/{first_player_with_esea_user_id.esea_user_id}/matches?page_size=50'
             scraper = cfscrape.CloudflareScraper()
             proxies = get_esea_proxies()
 
-            print("ESEA URL={} Proxies={}".format(
-                api_url,
-                ','.join(list(proxies.keys()))
-            ))
+            print(f"ESEA URL={api_url} Proxies={','.join(list(proxies.keys()))}")
 
             response = scraper.get(api_url, proxies=proxies)
             if response.status_code == 200:
@@ -365,7 +359,7 @@ def get_esea_team_schedule():
 def get_esea_match(match_id, update_id=None):
     MAP_LEFT_TEAMS = ['BIGCLAN', 'BIG OMEN Academy']
     swap_teams = False
-    api_url = 'https://play.esea.net/api/match/{}'.format(match_id)
+    api_url = f'https://play.esea.net/api/match/{match_id}'
     scraper = cfscrape.CloudflareScraper()
     response = scraper.get(api_url)
     if response.status_code == 200:
@@ -386,4 +380,4 @@ def get_esea_match(match_id, update_id=None):
         team_2_name = team_2.get('name')
         team_1_score = team_1.get('score')
         team_2_score = team_2.get('score')
-        print("Match {} vs {}: {}:{} Map: {}".format(team_1_name, team_2_name, team_1_score, team_2_score, map_name))
+        print(f"Match {team_1_name} vs {team_2_name}: {team_1_score}:{team_2_score} Map: {map_name}")

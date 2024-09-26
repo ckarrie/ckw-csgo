@@ -112,7 +112,7 @@ class Command(BaseCommand):
                 response = requests.get(y_url)
                 response_json = response.json()
             except JSONDecodeError as json_error:
-                print("[crawl_y0fl0w_de] ERROR reading {}, content={}".format(y_url, str(json_error)))
+                print(f"[crawl_y0fl0w_de] ERROR reading {y_url}, content={str(json_error}"))
                 continue
                 # raise json_error
 
@@ -245,7 +245,7 @@ class Command(BaseCommand):
 
                         hltv_livescore_data = None
                         if match_id:
-                            hltv_url = 'https://www.hltv.org/matches/{}/match'.format(match_id)
+                            hltv_url = f'https://www.hltv.org/matches/{match_id}/match'
                             apps.get_model('csgomatches.ExternalLink').objects.get_or_create(
                                 url=hltv_url,
                                 match=match,
@@ -271,13 +271,13 @@ class Command(BaseCommand):
                                 if '_m' in vod_lang and 'https://twitch.tv/videos/' in vod_url:
                                     link_type = 'twitch_vod'
                                     mlang, mnr = vod_lang.split('_')
-                                    vod_title = 'VOD #{} ({})'.format(mnr, mlang)
+                                    vod_title = f'VOD #{mnr} ({mlang})'
                                     if '/videos/v' in vod_url:
                                         vod_url = vod_url.replace('/videos/v', '/videos/')
                                 if '_m' in vod_lang and 'youtube' in vod_url:
                                     link_type = 'youtube_vod'
                                     mlang, mnr = vod_lang.split('_')
-                                    vod_title = 'VOD #{} ({})'.format(mnr, mlang)
+                                    vod_title = f'VOD #{mnr} ({mlang})'
                                 if vod_lang == 'demo':
                                     link_type = 'hltv_demo'
                                     mlang = 'eu'
@@ -363,7 +363,7 @@ class Command(BaseCommand):
                                             print("[crawl_y0fl0w_de]  - Results by y0fl0w-API", results)
 
                                         # Overwriting results
-                                        results = "{}:{}".format(t1_score, t2_score)
+                                        results = f"{t1_score}:{t2_score}"
                                         print("[crawl_y0fl0w_de]  - Results by WebSocket livescore", results)
 
 
@@ -510,7 +510,7 @@ class Command(BaseCommand):
                             team_b.save()
                         lineup_b = apps.get_model('csgomatches.Lineup')(team=team_b, active_from=timezone.now(), team_logo_url=team_logos[1])
                         lineup_b.save()
-                        print('[crawl_99damage_de] + Lineup created: "{}"'.format(str(lineup_b)))
+                        print(f'[crawl_99damage_de] + Lineup created: "{lineup_b}"')
 
                     match = apps.get_model('csgomatches.Match').objects.filter(
                         tournament=tournament,

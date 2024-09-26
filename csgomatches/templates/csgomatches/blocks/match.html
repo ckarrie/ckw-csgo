@@ -4,8 +4,8 @@
     <h2>
         <a class="matchdetail-link" href="{{ match.get_absolute_url }}" title="Match-Details {{ match }} @ {{ match.tournament.name }}">
             <span class="bo">{% if current_view == 'index' %}{{ match.first_map_at|date:'d.m.' }}<span style="color: #959595">{{ match.first_map_at|date:'y' }}</span> {{ match.first_map_at|date:'H:i' }}{% else %}{{ match.first_map_at|date:'d.m.y H:i' }}{% endif %}</span>
-            {% if match.lineup_a.game.team_logo_url %}
-                <img src="{{ match.lineup_a.game.team_logo_url }}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" style="width: {{ match.lineup_a.game.team_logo_width|default:45 }}px" />
+            {% if match.lineup_a.game.game_logo_url %}
+                <img src="{{ match.lineup_a.game.game_logo_url }}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" style="width: {{ match.lineup_a.game.team_logo_width|default:45 }}px" />
             {% endif %}
             <span class="team_a">{{ match.lineup_a.team }}</span>
             {% if match.lineup_b %}

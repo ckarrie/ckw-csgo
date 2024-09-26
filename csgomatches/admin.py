@@ -144,14 +144,14 @@ class TeamAdmin(admin.ModelAdmin):
                 obj.save()
                 self.message_user(
                     request,
-                    "Found HLTV ID {} for {}".format(obj.hltv_id, obj.name),
+                    f"Found HLTV ID {obj.hltv_id} for {obj.name}",
                     level=messages.SUCCESS
                 )
 
     def hltv_link(self, obj):
         url = obj.get_hltv_team_link()
         if url:
-            return mark_safe('<a href="{}" target="_blank">{}</a>'.format(url, obj.name))
+            return mark_safe(f'<a href="{url}" target="_blank">{obj.name}</a>')
         return ''
 
     def lineup_logo(self, obj):
@@ -172,7 +172,7 @@ class TeamAdmin(admin.ModelAdmin):
             build_players(team_mdl=obj)
             self.message_user(
                 request,
-                "Build player for Team {}".format(obj.name),
+                f"Build player for Team {obj.name}",
                 level=messages.SUCCESS
             )
 
@@ -195,6 +195,9 @@ class MatchAdmin(admin.ModelAdmin):
     search_fields = ['lineup_b__team__name', 'lineup_b__team__name_long', 'tournament__name']
     autocomplete_fields = ['lineup_a', 'lineup_b', 'tournament']
     inlines = [MatchMapInline, ExternalLinkInline]
+    # replace "Save and add another" button with "Save as new" to use previous matches as template
+    # https://docs.djangoproject.com/en/5.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.save_as
+    save_as = True
 
     def overall_score(self, obj):
         score = obj.get_overall_score()
