@@ -3,9 +3,10 @@ import json
 
 import requests
 import websockets
+import websockets.asyncio.client
 from bs4 import BeautifulSoup
 
-from ... import models
+from csgomatches.models import Lineup, LineupPlayer, Player, Team
 
 
 def get_hltv_team_name_from_id(hltv_id: int):
@@ -25,7 +26,7 @@ def get_hltv_team_name_from_id(hltv_id: int):
     return team_name
 
 
-def get_hltv_id_from_team_name(team_mdl: models.Team, return_team_json=False):
+def get_hltv_id_from_team_name(team_mdl: Team, return_team_json=False):
     db_names = []
     if team_mdl:
         db_names.append(team_mdl.name)
@@ -39,21 +40,21 @@ def get_hltv_id_from_team_name(team_mdl: models.Team, return_team_json=False):
         response = requests.get(url=url)
         response_json = response.json()
         teams = response_json[0].get("teams")
-        for team in teams:
-            hltv_name = team['name']
+        for team_dict in teams:
+            hltv_name = team_dict['name']
             print(f"[get_hltv_id_from_team_name] checking if hltv_name={hltv_name} in db_names={db_names}")
             if hltv_name in db_names:
                 if return_team_json:
-                    return team
-                return team['id']
+                    return team_dict
+                return team_dict['id']
             if hltv_name.lower() in db_names_lower:
                 if return_team_json:
-                    return team
-                return team['id']
+                    return team_dict
+                return team_dict['id']
 
 
 
-def build_players(team_mdl: models.Team):
+def build_players(team_mdl: Team):
     """
     Player-Dict:
     {
@@ -67,6 +68,9 @@ def build_players(team_mdl: models.Team):
     :return:
     """
     current_lineup = team_mdl.lineup_set.active_lineups().first()
+    if not isinstance(current_lineup, Lineup):
+        raise ValueError(f"current_lineup returned by team.lineup_set.active_lineups().first() is not a Lineup instance: {current_lineup}")
+
     if team_mdl.hltv_id:
         team_dict = get_hltv_id_from_team_name(team_mdl=team_mdl, return_team_json=True)
         if not team_dict:
@@ -82,7 +86,7 @@ def build_players(team_mdl: models.Team):
                 ingame_name = player_data.get('nickName')
                 hltv_id_url = player_data.get('location')
                 hltv_id = int(hltv_id_url.split("/")[2])
-                player, player_created = models.Player.objects.get_or_create(
+                player, player_created = Player.objects.get_or_create(
                     ingame_name=ingame_name,
                     defaults={
                         'first_name': first_name,
@@ -105,7 +109,7 @@ def build_players(team_mdl: models.Team):
             print("existing_lineup_players", existing_lineup_players)
             if existing_lineup_players.count() == 0:
                 for player in player_instances:
-                    lu_player = models.LineupPlayer(
+                    lu_player = LineupPlayer(
                         player=player,
                         lineup=current_lineup
                     )
@@ -137,7 +141,7 @@ async def get_hlvt_score(match_id: int = 2338003):
     ws_str2 = '61:42["readyForMatch","{\\"token\\":\\"\\",\\"listID\\":\\"' + str(match_id) + '"\\}"]'
     ws_str2 = '61:42["readyForScores","{\\"token\\":\\"\\",\\"listIds\\":[' + str(match_id) + ']}"]'
     results = {}
-    async with websockets.connect(uri) as websocket:
+    async with websockets.asyncio.client.connect(uri) as websocket:
 
         ret = await websocket.recv()
         if DEBUGGING:
@@ -151,7 +155,8 @@ async def get_hlvt_score(match_id: int = 2338003):
         if DEBUGGING:
             print(5, "Send", s)
             print("Waiting for data")
-        ret = await asyncio.wait_for(websocket.recv(), timeout=1)
+        ret = await asyncio.wait_for(websocket.recv(decode=True), timeout=1)
+        ret = str(ret)
         if ret.startswith("42["):
             ret = ret.replace("42[", "[")
             results = json.loads(ret)
@@ -176,8 +181,8 @@ def get_map_name(json_result_list: list = [], map_nr: int = 1):
 if __name__ == '__main__':
     r = asyncio.get_event_loop().run_until_complete(get_hlvt_score(2337996))
     if not DEBUGGING:
-        print("Map #1", convert_to_score(r, map_nr=1))
-        print("Map #2", convert_to_score(r, map_nr=2))
-        print("Map #3", convert_to_score(r, map_nr=3))
+        print("Map #1", convert_to_score(r, map_nr=1)) # type: ignore
+        print("Map #2", convert_to_score(r, map_nr=2)) # type: ignore
+        print("Map #3", convert_to_score(r, map_nr=3)) # type: ignore
     else:
         print("HLTV-Score", r)
