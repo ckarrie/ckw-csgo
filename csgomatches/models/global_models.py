@@ -1,9 +1,8 @@
 from abc import abstractmethod
 import os
+import requests
 import importlib.resources
 import twitter
-
-from typing import TYPE_CHECKING, Self
 
 from django.contrib.sites.models import Site
 from django.db import models

@@ -6,7 +6,7 @@ import websockets
 import websockets.asyncio.client
 from bs4 import BeautifulSoup
 
-from csgomatches.models import Lineup, LineupPlayer, CsPlayer, Team
+from csgomatches.models import Lineup, LineupPlayer, Player, Team
 
 
 def get_hltv_team_name_from_id(hltv_id: int):
@@ -86,7 +86,7 @@ def build_players(team_mdl: Team):
                 ingame_name = player_data.get('nickName')
                 hltv_id_url = player_data.get('location')
                 hltv_id = int(hltv_id_url.split("/")[2])
-                player, player_created = CsPlayer.objects.get_or_create(
+                player, player_created = Player.objects.get_or_create(
                     ingame_name=ingame_name,
                     defaults={
                         'first_name': first_name,
