@@ -159,9 +159,11 @@ class Tournament(models.Model):
         return self.name
 
 
-
 class Map(models.Model):
     name = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return self.name
@@ -301,7 +303,7 @@ class OneOnOneMatch(Match):
 
 
 class MatchMap(models.Model):
-    match = models.ForeignKey("CsMatch", on_delete=models.CASCADE)
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
     played_map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
     rounds_won_team_a = models.IntegerField(default=0)
     rounds_won_team_b = models.IntegerField(default=0)
@@ -317,10 +319,17 @@ class MatchMap(models.Model):
         ordering = ['starting_at']
 
     def get_prev_map(self) -> 'Self | None':
-        return self.match.matchmap_set.filter(map_nr__lt=self.map_nr).order_by('map_nr').last()
+        # Filter using self.__class__ to ensure we are working with the subclass
+        return self.__class__.objects.filter(
+            match=self.match,
+            map_nr__lt=self.map_nr
+        ).order_by('map_nr').last()
 
     def get_next_map(self) -> 'Self | None':
-        return self.match.matchmap_set.filter(map_nr__gt=self.map_nr).order_by('map_nr').first()
+        return self.__class__.objects.filter(
+            match=self.match,
+            map_nr_gt=self.map_nr
+        ).order_by('map_nr').first()
 
     @abstractmethod
     def has_ended(self) -> bool:
