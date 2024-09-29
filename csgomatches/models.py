@@ -274,7 +274,9 @@ class Match(models.Model):
 
     def save(self, *args, **kwargs):
         similar_matches_in_same_tournament = self.tournament.match_set.filter(
-            lineup_a=self.lineup_a, lineup_b=self.lineup_b
+            lineup_a=self.lineup_a,
+            lineup_b=self.lineup_b,
+            first_map_at=self.first_map_at
         )
         if similar_matches_in_same_tournament.exclude(pk=self.pk).exists():
             try:
