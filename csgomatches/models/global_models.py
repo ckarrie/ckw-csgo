@@ -304,7 +304,7 @@ class OneOnOneMatch(Match):
 
 class MatchMap(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    played_map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
+    map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
     rounds_won_team_a = models.IntegerField(default=0)
     rounds_won_team_b = models.IntegerField(default=0)
     starting_at = models.DateTimeField()
@@ -428,6 +428,14 @@ class OneOnOneMatchMap(MatchMap):
             self.match.first_map_at = first_matchmap.starting_at
             self.match.save()
         self.send_tweet(prev_instance=prev_instance)
+
+class OneOnOneMatchMap(MatchMap):
+    """
+    Abstract Match between two opponnents
+    """
+
+    class Meta:
+        abstract = True
 
 
 class ExternalLink(models.Model):
