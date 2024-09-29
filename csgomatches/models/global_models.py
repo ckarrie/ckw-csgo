@@ -3,7 +3,7 @@ import os
 import importlib.resources
 import twitter
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from django.contrib.sites.models import Site
 from django.db import models
@@ -316,17 +316,10 @@ class MatchMap(models.Model):
         ordering = ['starting_at']
 
     def get_prev_map(self) -> 'Self | None':
-        # Filter using self.__class__ to ensure we are working with the subclass
-        return self.__class__.objects.filter(
-            match=self.match,
-            map_nr__lt=self.map_nr
-        ).order_by('map_nr').last()
+        return self.match.matchmap_set.filter(map_nr__lt=self.map_nr).order_by('map_nr').last()
 
     def get_next_map(self) -> 'Self | None':
-        return self.__class__.objects.filter(
-            match=self.match,
-            map_nr_gt=self.map_nr
-        ).order_by('map_nr').first()
+        return self.match.matchmap_set.filter(map_nr__gt=self.map_nr).order_by('map_nr').first()
 
     @abstractmethod
     def has_ended(self) -> bool:
@@ -361,6 +354,9 @@ class OneOnOneMatchMap(MatchMap):
 
     def team_b_won(self) -> bool:
         return (self.rounds_won_team_a < self.rounds_won_team_b) and self.has_ended()
+
+    def __str__(self) -> str:
+        return f'{self.match} - {self.starting_at.date()} Map #{self.map_nr} (ID = {self.pk if self.pk else "-"})'
 
     def send_tweet(self, prev_instance=None, interval=180.) -> None:
         # Guard clause in case either lineup_a or lineup_b are None

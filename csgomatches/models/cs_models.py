@@ -106,3 +106,7 @@ class CsLineupPlayer(global_models.LineupPlayer):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+
+class CsMatchMap(global_models.MatchMap):
+    def has_ended(self) -> bool:
+        return (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2

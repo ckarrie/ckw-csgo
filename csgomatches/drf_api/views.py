@@ -151,7 +151,7 @@ class MatchMapUpdateView(CsView, mixins.RetrieveModelMixin, mixins.UpdateModelMi
     permission_classes = (permissions.IsAdminUser, )
     authentication_classes = (authentication.BasicAuthentication, )
     queryset = apps.get_model('csgomatches.CsMatchMap').objects.all()
-    serializer_class = ser.CsMatchMapUpdateSerializer
+    serializer_class = ser.CSGOMatchMapUpdateSerializer
 
 class FaceitProLeagueMatchesView(CsView, viewsets.ViewSet):
     serializer_class = ser.FaceitProLeagueMatchesSerializer
