@@ -129,7 +129,8 @@ class Lineup(models.Model):
 
 
 class LineupPlayer(models.Model):
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    player = models.ForeignKey('CsPlayer', on_delete=models.CASCADE)
+    role = models.ForeignKey(PlayerRole, on_delete=models.CASCADE, null=True, blank=True)
     lineup = models.ForeignKey(Lineup, on_delete=models.CASCADE)
 
     class Meta:
