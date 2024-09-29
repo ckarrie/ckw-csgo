@@ -192,11 +192,12 @@ class Match(models.Model):
     last_tweet = models.DateTimeField(null=True, blank=True)
     last_tweet_id = models.CharField(max_length=255, null=True, blank=True)
 
-    matchmap_set: QuerySet['MatchMap']
+    matchmap_set: QuerySet['OneOnOneMatchMap']
 
     class Meta:
         abstract = True
         ordering = ['-first_map_at']
+        verbose_name_plural = "matches"
 
     def get_first_matchmap(self) -> 'MatchMap | None':
         return self.matchmap_set.order_by('map_nr').first()
@@ -238,9 +239,7 @@ class OneOnOneMatch(Match):
     lineup_a = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_a_set', null=True, blank=True)
     lineup_b = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_b_set', null=True, blank=True)
 
-    matchmap_set: QuerySet['OneOnOneMatchMap']
-
-    class Meta(Match.Meta):
+    class Meta:
         abstract = True
 
     def __str__(self) -> str:
@@ -298,15 +297,10 @@ class OneOnOneMatch(Match):
             self.slug = slugify(f"id-{self.pk}")
         super(Match, self).save(*args, **kwargs)
 
-    def get_absolute_url(self) -> str:
-        return reverse('match_details', kwargs={'slug': self.slug})
-
 
 class MatchMap(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
-    rounds_won_team_a = models.IntegerField(default=0)
-    rounds_won_team_b = models.IntegerField(default=0)
     starting_at = models.DateTimeField()
     map_nr = models.IntegerField(null=True)
     unplayed = models.BooleanField(default=False)
@@ -356,6 +350,19 @@ class OneOnOneMatchMap(MatchMap):
     class Meta(MatchMap.Meta):
         abstract = True
 
+    def __str__(self) -> str:
+        return f'{self.match} - {self.starting_at.date()} Map #{self.map_nr} (ID = {self.pk if self.pk else "-"})'
+
+
+class OneOnOneMatchMap(MatchMap):
+    match = models.ForeignKey(OneOnOneMatch, on_delete=models.CASCADE)
+    rounds_won_team_a = models.IntegerField(default=0)
+    rounds_won_team_b = models.IntegerField(default=0)
+    map_pick_of = models.ForeignKey(Lineup, null=True, blank=True, on_delete=models.CASCADE)
+
+    class Meta:
+        abstract = True
+
     def team_a_won(self) -> bool:
         return (self.rounds_won_team_a > self.rounds_won_team_b) and self.has_ended()
 
@@ -364,9 +371,6 @@ class OneOnOneMatchMap(MatchMap):
 
     def team_b_won(self) -> bool:
         return (self.rounds_won_team_a < self.rounds_won_team_b) and self.has_ended()
-
-    def __str__(self) -> str:
-        return f'{self.match} - {self.starting_at.date()} Map #{self.map_nr} (ID = {self.pk if self.pk else "-"})'
 
     def send_tweet(self, prev_instance=None, interval=180.) -> None:
         # Guard clause in case either lineup_a or lineup_b are None
@@ -428,14 +432,6 @@ class OneOnOneMatchMap(MatchMap):
             self.match.first_map_at = first_matchmap.starting_at
             self.match.save()
         self.send_tweet(prev_instance=prev_instance)
-
-class OneOnOneMatchMap(MatchMap):
-    """
-    Abstract Match between two opponnents
-    """
-
-    class Meta:
-        abstract = True
 
 
 class ExternalLink(models.Model):
