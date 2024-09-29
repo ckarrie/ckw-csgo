@@ -91,7 +91,6 @@ class PlayerRole(models.Model):
     def __str__(self):
         return self.name
 
-    #TODO: Implement checking on LineupPlayer class, whether PlayerRole is reasonable for game.
 
 
 class Lineup(models.Model):
@@ -151,6 +150,9 @@ class LineupPlayer(models.Model):
             return f'{self.player.ingame_name} ({self.role.name})'
         return f'{self.player.ingame_name} @ {self.lineup.team.name}'
 
+    def save(self, *args, **kwargs):
+        #TODO: Implement checking, whether PlayerRole is reasonable for game.
+        super().save(*args, **kwargs)
 
 class Tournament(models.Model):
     name = models.CharField(max_length=255)
