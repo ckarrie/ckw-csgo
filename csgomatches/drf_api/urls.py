@@ -1,5 +1,5 @@
-from rest_framework import routers, renderers
-from . import views
+from rest_framework import routers
+from csgomatches.drf_api import views
 
 router = routers.DefaultRouter()
 router.APIRootView = views.CSGOAPIRootView

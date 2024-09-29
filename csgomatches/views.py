@@ -1,15 +1,12 @@
 from collections import OrderedDict
 
 import requests
-from django.db.models import Q
-from django.shortcuts import render
 from django.templatetags.static import static
 from django.utils import timezone
 from django.views import generic
 from django.apps import apps
 
 import random
-import asyncio
 
 from . import models
 
@@ -25,7 +22,7 @@ def get_random_background_image_url():
 
 
 class IndexView(generic.ListView):
-    model = models.Match
+    model = models.CsMatch
 
     def get_queryset(self):
         qs = super(IndexView, self).get_queryset()
@@ -69,7 +66,7 @@ class IndexView(generic.ListView):
 
 
 class YearArchiveView(generic.YearArchiveView):
-    model = models.Match
+    model = models.CsMatch
     date_field = 'first_map_at'
     make_object_list = True
     allow_future = True
@@ -87,7 +84,7 @@ class YearArchiveView(generic.YearArchiveView):
 
 
 class MatchDetailView(generic.DetailView):
-    model = models.Match
+    model = models.CsMatch
 
     def get_context_data(self, **kwargs):
         ctx = super(MatchDetailView, self).get_context_data(**kwargs)

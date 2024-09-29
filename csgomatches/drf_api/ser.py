@@ -3,88 +3,101 @@ from rest_framework import serializers
 from django.apps import apps
 
 from . import ser_objects
+from csgomatches.models.cs_models import CSLineupPlayerRole
 
-class CSGOTournamentSerializer(serializers.ModelSerializer):
+class CsTournamentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = apps.get_model('csgomatches.Tournament')
+        model = apps.get_model('csgomatches.CsTournament')
         fields = ['name', 'name_alt', 'name_hltv', 'name_99dmg', 'id']
 
 
-class CSGOTeamSerializer(serializers.ModelSerializer):
+class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = apps.get_model('csgomatches.Team')
         fields = ['name', 'name_long', 'name_alt', 'hltv_id', 'id']
 
 
-class CSGOPlayerShortSerializer(serializers.ModelSerializer):
+class CsPlayerShortSerializer(serializers.ModelSerializer):
     class Meta:
-        model = apps.get_model('csgomatches.Player')
+        model = apps.get_model('csgomatches.CsPlayer')
         fields = ['ingame_name',]
 
-
-class CSGOPlayerRoleShortSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = apps.get_model('csgomatches.PlayerRole')
-        fields = ['name',]
-
-class CSGOLineupPlayerSerializer(serializers.ModelSerializer):
-    player = CSGOPlayerShortSerializer()
-    role = CSGOPlayerRoleShortSerializer()
+class CsLineupPlayerSerializer(serializers.ModelSerializer):
+    player = CsPlayerShortSerializer()
+    role = serializers.SerializerMethodField()
 
     class Meta:
-        model = apps.get_model('csgomatches.LineupPlayer')
-        fields = ['player', 'role', ]
+        model = apps.get_model('csgomatches.CsLineupPlayer')
+        fields = ['player', 'role']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Map the enum value to a more human-readable string
+        representation['role'] = CSLineupPlayerRole(instance.role).name if instance.role else None
+        return representation
+
+    def to_internal_value(self, data):
+        # Convert string to enum value during deserialization
+        internal_value = super().to_internal_value(data)
+        role = data.get('role')
+
+        if role is not None:
+            try:
+                internal_value['role'] = CSLineupPlayerRole[role].value
+            except KeyError:
+                raise serializers.ValidationError(f"Invalid role: {role}")
+        return internal_value
 
 
-class CSGOLineupSerializer(serializers.ModelSerializer):
-    team = CSGOTeamSerializer(read_only=True)
-    players = CSGOLineupPlayerSerializer(many=True, read_only=True, source='lineupplayer_set')
+class CsLineupSerializer(serializers.ModelSerializer):
+    team = TeamSerializer(read_only=True)
+    players = CsLineupPlayerSerializer(many=True, read_only=True, source='lineupplayer_set')
 
     class Meta:
-        model = apps.get_model('csgomatches.Lineup')
+        model = apps.get_model('csgomatches.CsLineup')
         fields = ['team', 'team_logo_url', 'active_from', 'players', 'id']
 
-class CSGOMapSerializer(serializers.ModelSerializer):
+class CsMapSerializer(serializers.ModelSerializer):
     class Meta:
-        model = apps.get_model('csgomatches.Map')
+        model = apps.get_model('csgomatches.CsMap')
         fields = ['name', 'cs_name', 'id']
 
-class CSGOMatchMapSerializer(serializers.ModelSerializer):
-    map_pick_of = CSGOLineupSerializer(read_only=True)
-    played_map = CSGOMapSerializer(read_only=True)
+class CsMatchMapSerializer(serializers.ModelSerializer):
+    map_pick_of = CsLineupSerializer(read_only=True)
+    played = CsMapSerializer(read_only=True)
 
     class Meta:
-        model = apps.get_model('csgomatches.MatchMap')
-        fields = ['rounds_won_team_a', 'rounds_won_team_b', 'starting_at', 'map_pick_of', 'played_map', 'id']
+        model = apps.get_model('csgomatches.CsMatchMap')
+        fields = ['rounds_won_team_a', 'rounds_won_team_b', 'starting_at', 'map_pick_of', 'map', 'id']
 
 
-class CSGOMatchSerializer(serializers.ModelSerializer):
-    tournament = CSGOTournamentSerializer(read_only=True)
-    lineup_a = CSGOLineupSerializer(read_only=True)
-    lineup_b = CSGOLineupSerializer(read_only=True)
+class CsMatchSerializer(serializers.ModelSerializer):
+    tournament = CsTournamentSerializer(read_only=True)
+    lineup_a = CsLineupSerializer(read_only=True)
+    lineup_b = CsLineupSerializer(read_only=True)
     livescore_url = serializers.SerializerMethodField(read_only=True, source='get_livescore_url')
     html_detail_url = serializers.SerializerMethodField(read_only=True, source='get_html_detail_url')
-    matchmaps = CSGOMatchMapSerializer(many=True, source='matchmap_set')
+    matchmaps = CsMatchMapSerializer(many=True, source='matchmap_set')
 
     def get_livescore_url(self, obj):
         if obj.hltv_match_id:
             url = reverse('match_livescore-detail', kwargs={'pk': obj.hltv_match_id})
             request = self.context.get('request')
-            return request.build_absolute_uri(url)
+            return request.build_absolute_uri(url) # type: ignore
 
     def get_html_detail_url(self, obj):
         url = obj.get_absolute_url()
         request = self.context.get('request')
-        return request.build_absolute_uri(url)
+        return request.build_absolute_uri(url) # type: ignore
 
     class Meta:
-        model = apps.get_model('csgomatches.Match')
+        model = apps.get_model('csgomatches.CsMatch')
         fields = ['tournament', 'lineup_a', 'lineup_b', 'slug', 'bestof', 'first_map_at', 'cancelled', 'hltv_match_id', 'livescore_url', 'html_detail_url', 'matchmaps']
 
 
-class CSGOMatchMapUpdateSerializer(serializers.ModelSerializer):
+class CsMatchMapUpdateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = apps.get_model('csgomatches.MatchMap')
+        model = apps.get_model('csgomatches.CsMatchMap')
         fields = ['map_nr', 'rounds_won_team_a', 'rounds_won_team_b',]
 
 
@@ -117,7 +130,7 @@ class HLTVMatchSerializer(serializers.Serializer):
             if csgo_match:
                 url = reverse('match_all-detail', kwargs={'pk': csgo_match.pk})
                 request = self.context.get('request')
-                return request.build_absolute_uri(url)
+                return request.build_absolute_uri(url) # type: ignore
 
     def create(self, validated_data):
         hltv_match_id = validated_data.get('hltv_match_id')

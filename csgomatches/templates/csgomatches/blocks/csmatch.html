@@ -29,7 +29,7 @@
                 <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
             {% endfor %}
             {% if user.is_staff %}
-                <a class="admin-link" href="{% url 'admin:csgomatches_match_change' match.pk %}">&#x2744;</a>
+                <a class="admin-link" href="{% url 'admin:csgomatches_csmatch_change' match.pk %}">&#x2744;</a>
                 {% if match.enable_tweet %}
                     <span class="tweet-enabled" title="Twitter Bot aktiv">&#128038;</span>
                 {% else %}
