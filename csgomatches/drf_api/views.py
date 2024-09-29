@@ -66,17 +66,17 @@ class TeamViewSet(CsView, viewsets.ReadOnlyModelViewSet):
         return 'Teams'
 
 
-class TournamentViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
+class TournamentViewSet(CsView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.CsTournament').objects.all()
-    serializer_class = ser.CSGOTournamentSerializer
+    serializer_class = ser.CsTournamentSerializer
 
     def get_view_name(self):
         return 'Tournaments'
 
 
-class MatchViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
+class MatchViewSet(CsView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.CsMatch').objects.all()
-    serializer_class = ser.CSGOMatchSerializer
+    serializer_class = ser.CsMatchSerializer
 
     def get_view_name(self):
         return 'Matches (all)'
@@ -86,9 +86,9 @@ class MatchViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
         return super(MatchViewSet, self).list(request, *args, **kwargs)
 
 
-class MatchUpcomingViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
+class MatchUpcomingViewSet(CsView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.CsMatch').objects.filter(first_map_at__gte=timezone.now())
-    serializer_class = ser.CSGOMatchSerializer
+    serializer_class = ser.CsMatchSerializer
 
     def get_view_name(self):
         return 'Matches (upcoming)'
@@ -98,9 +98,9 @@ class MatchUpcomingViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
         return super(MatchUpcomingViewSet, self).list(request, *args, **kwargs)
 
 
-class LineupViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
+class LineupViewSet(CsView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.CsLineup').objects.all()
-    serializer_class = ser.CSGOLineupSerializer
+    serializer_class = ser.CsLineupSerializer
 
     def get_view_name(self):
         return 'Team Lineups'
@@ -151,7 +151,7 @@ class MatchMapUpdateView(CsView, mixins.RetrieveModelMixin, mixins.UpdateModelMi
     permission_classes = (permissions.IsAdminUser, )
     authentication_classes = (authentication.BasicAuthentication, )
     queryset = apps.get_model('csgomatches.CsMatchMap').objects.all()
-    serializer_class = ser.CSGOMatchMapUpdateSerializer
+    serializer_class = ser.CsMatchMapUpdateSerializer
 
 class FaceitProLeagueMatchesView(CsView, viewsets.ViewSet):
     serializer_class = ser.FaceitProLeagueMatchesSerializer

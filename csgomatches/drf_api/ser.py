@@ -22,8 +22,8 @@ class CsPlayerShortSerializer(serializers.ModelSerializer):
         model = apps.get_model('csgomatches.CsPlayer')
         fields = ['ingame_name',]
 
-class CSGOLineupPlayerSerializer(serializers.ModelSerializer):
-    player = CSGOPlayerShortSerializer()
+class CsLineupPlayerSerializer(serializers.ModelSerializer):
+    player = CsPlayerShortSerializer()
     role = serializers.SerializerMethodField()
 
     class Meta:
@@ -62,9 +62,9 @@ class CsMapSerializer(serializers.ModelSerializer):
         model = apps.get_model('csgomatches.CsMap')
         fields = ['name', 'cs_name', 'id']
 
-class CSGOMatchMapSerializer(serializers.ModelSerializer):
-    map_pick_of = CSGOLineupSerializer(read_only=True)
-    played = CSGOMapSerializer(read_only=True)
+class CsMatchMapSerializer(serializers.ModelSerializer):
+    map_pick_of = CsLineupSerializer(read_only=True)
+    played = CsMapSerializer(read_only=True)
 
     class Meta:
         model = apps.get_model('csgomatches.CsMatchMap')
