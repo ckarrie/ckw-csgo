@@ -299,7 +299,6 @@ class MatchMap(models.Model):
     rounds_won_team_a = models.IntegerField(default=0)
     rounds_won_team_b = models.IntegerField(default=0)
     starting_at = models.DateTimeField()
-    delay_minutes = models.IntegerField(default=0)
     map_nr = models.IntegerField(null=True)
     map_pick_of = models.ForeignKey(Lineup, null=True, blank=True, on_delete=models.CASCADE)
     unplayed = models.BooleanField(default=False)
