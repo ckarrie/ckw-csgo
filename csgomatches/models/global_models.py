@@ -1,6 +1,5 @@
 from abc import abstractmethod
 import os
-import requests
 import importlib.resources
 import twitter
 
@@ -175,6 +174,10 @@ class Tournament(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        abstract = True
+        ordering = ['name']
+
 
 class Map(models.Model):
     name = models.CharField(max_length=255)
@@ -315,10 +318,15 @@ class OneOnOneMatch(Match):
             self.slug = slugify(f"id-{self.pk}")
         super(Match, self).save(*args, **kwargs)
 
+    def get_absolute_url(self) -> str:
+        return reverse('match_details', kwargs={'slug': self.slug})
+
 
 class MatchMap(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
+    match = models.ForeignKey("CsMatch", on_delete=models.CASCADE)
+    played_map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
+    rounds_won_team_a = models.IntegerField(default=0)
+    rounds_won_team_b = models.IntegerField(default=0)
     starting_at = models.DateTimeField()
     map_nr = models.IntegerField(null=True)
     unplayed = models.BooleanField(default=False)

@@ -66,17 +66,17 @@ class TeamViewSet(CsView, viewsets.ReadOnlyModelViewSet):
         return 'Teams'
 
 
-class TournamentViewSet(CsView, viewsets.ReadOnlyModelViewSet):
+class TournamentViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.CsTournament').objects.all()
-    serializer_class = ser.CsTournamentSerializer
+    serializer_class = ser.CSGOTournamentSerializer
 
     def get_view_name(self):
         return 'Tournaments'
 
 
-class MatchViewSet(CsView, viewsets.ReadOnlyModelViewSet):
+class MatchViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.CsMatch').objects.all()
-    serializer_class = ser.CsMatchSerializer
+    serializer_class = ser.CSGOMatchSerializer
 
     def get_view_name(self):
         return 'Matches (all)'
@@ -86,9 +86,9 @@ class MatchViewSet(CsView, viewsets.ReadOnlyModelViewSet):
         return super(MatchViewSet, self).list(request, *args, **kwargs)
 
 
-class MatchUpcomingViewSet(CsView, viewsets.ReadOnlyModelViewSet):
+class MatchUpcomingViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.CsMatch').objects.filter(first_map_at__gte=timezone.now())
-    serializer_class = ser.CsMatchSerializer
+    serializer_class = ser.CSGOMatchSerializer
 
     def get_view_name(self):
         return 'Matches (upcoming)'
