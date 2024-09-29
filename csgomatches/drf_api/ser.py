@@ -28,25 +28,7 @@ class CsLineupPlayerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = apps.get_model('csgomatches.CsLineupPlayer')
-        fields = ['player', 'role']
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        # Map the enum value to a more human-readable string
-        representation['role'] = CSLineupPlayerRole(instance.role).name if instance.role else None
-        return representation
-
-    def to_internal_value(self, data):
-        # Convert string to enum value during deserialization
-        internal_value = super().to_internal_value(data)
-        role = data.get('role')
-
-        if role is not None:
-            try:
-                internal_value['role'] = CSLineupPlayerRole[role].value
-            except KeyError:
-                raise serializers.ValidationError(f"Invalid role: {role}")
-        return internal_value
+        fields = ['player', 'role', ]
 
 
 class CsLineupSerializer(serializers.ModelSerializer):

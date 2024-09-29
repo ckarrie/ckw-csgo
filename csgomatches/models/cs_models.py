@@ -57,3 +57,16 @@ class CsMatch(global_models.Match):
                     mm_obj.rounds_won_team_a = score_a
                     mm_obj.rounds_won_team_b = score_b
                     mm_obj.save()
+
+class CsLineupPlayer(global_models.LineupPlayer):
+    player = models.ForeignKey(CsPlayer, on_delete=models.CASCADE)
+    # TODO: Migrate role to Enum
+    role = models.ForeignKey(global_models.PlayerRole, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        if self.role:
+            return f'{self.player.ingame_name} ({self.role.name})'
+        return f'{self.player.ingame_name} @ {self.lineup.team.name}'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)

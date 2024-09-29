@@ -92,7 +92,6 @@ class PlayerRole(models.Model):
         return self.name
 
 
-
 class Lineup(models.Model):
     game = models.ForeignKey(Game, null=True, on_delete=models.SET_NULL)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
@@ -142,19 +141,12 @@ class Lineup(models.Model):
 
 
 class LineupPlayer(models.Model):
-    player = models.ForeignKey('CsPlayer', on_delete=models.CASCADE)
-    role = models.ForeignKey(PlayerRole, on_delete=models.CASCADE, null=True, blank=True)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
     lineup = models.ForeignKey(Lineup, on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
 
-    def __str__(self):
-        return f'{self.player.ingame_name} @ {self.lineup.team.name}'
-
-    def save(self, *args, **kwargs):
-        #TODO: Implement checking, whether PlayerRole is reasonable for game.
-        super().save(*args, **kwargs)
 
 class Tournament(models.Model):
     name = models.CharField(max_length=255)
