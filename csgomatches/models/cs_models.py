@@ -27,6 +27,12 @@ class CsTournament(global_models.Tournament):
         verbose_name_plural = "CS Tournaments"
 
 
+class CsMap(global_models.Map):
+    class Meta:
+        verbose_name = "CS Map"
+        verbose_name_plural = "CS Maps"
+
+
 class CsMatch(global_models.Match):
     tournament = models.ForeignKey(CsTournament, on_delete=models.CASCADE, related_name='match_set')
 
@@ -34,6 +40,8 @@ class CsMatch(global_models.Match):
     esea_match_id = models.CharField(max_length=255, null=True, blank=True)
     enable_99dmg = models.BooleanField(default=False)
     enable_hltv = models.BooleanField(default=True)
+
+    matchmap_set: QuerySet["CsMatchMap"]
 
     class Meta:
         verbose_name = "CS Match"
@@ -57,7 +65,7 @@ class CsMatch(global_models.Match):
                 map_nr = map_data.get('map_nr')
                 mm_obj = self.matchmap_set.filter(map_nr=map_nr).first()
                 if mm_obj:
-                    mm_obj.played_map = global_models.Map.objects.filter(
+                    mm_obj.played_map = CsMap.objects.filter(
                         models.Q(name=map_data.get('map_name')) |
                         models.Q(cs_name=map_data.get('map_name'))
                     ).first()
@@ -108,6 +116,9 @@ class CsLineupPlayer(global_models.LineupPlayer):
         super().save(*args, **kwargs)
 
 class CsMatchMap(global_models.MatchMap):
+    match = models.ForeignKey(CsMatch, on_delete=models.CASCADE)
+    played_map = models.ForeignKey(CsMap, on_delete=models.CASCADE, null=True, blank=True)
+
     class Meta:
         verbose_name = "CS Match Map"
         verbose_name_plural = "CS Match Maps"

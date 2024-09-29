@@ -59,7 +59,7 @@ class CSGOLineupSerializer(serializers.ModelSerializer):
 
 class CSGOMapSerializer(serializers.ModelSerializer):
     class Meta:
-        model = apps.get_model('csgomatches.Map')
+        model = apps.get_model('csgomatches.CsMap')
         fields = ['name', 'cs_name', 'id']
 
 class CSGOMatchMapSerializer(serializers.ModelSerializer):
