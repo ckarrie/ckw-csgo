@@ -80,6 +80,21 @@ class Player(models.Model):
         return f'{self.first_name} "{self.ingame_name}" {self.last_name}'
 
 
+class PlayerRole(models.Model):
+    """
+    The role of a player.
+    For CS i.e. Fragger, Support, Leader, AWPer, Lurker, (Coach).
+    Will not be reasonable for some games.
+    Maybe it's better to implement this as an Enum.
+    """
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+    #TODO: Implement checking on LineupPlayer class, whether PlayerRole is reasonable for game.
+
+
 class Lineup(models.Model):
     game = models.ForeignKey(Game, null=True, on_delete=models.SET_NULL)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
