@@ -32,7 +32,7 @@ class CSGOLineupPlayerSerializer(serializers.ModelSerializer):
     role = CSGOPlayerRoleShortSerializer()
 
     class Meta:
-        model = apps.get_model('csgomatches.LineupPlayer')
+        model = apps.get_model('csgomatches.CsLineupPlayer')
         fields = ['player', 'role', ]
 
 
