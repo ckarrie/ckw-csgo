@@ -143,6 +143,10 @@ class Tournament(models.Model):
     name = models.CharField(max_length=255)
     name_alt = models.CharField(max_length=255, null=True, blank=True)
 
+    class Meta:
+        abstract = True
+        ordering = ['name']
+
     # this will not actually exist, as the Tournament class is abstract
     # it's just here for type checking
     if TYPE_CHECKING:
@@ -153,9 +157,6 @@ class Tournament(models.Model):
     def __str__(self):
         return self.name
 
-    class Meta:
-        abstract = True
-        ordering = ['name']
 
 
 class Map(models.Model):
