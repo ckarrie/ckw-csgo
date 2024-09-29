@@ -1,3 +1,4 @@
+from enum import Enum
 from django.db import models
 from django.urls import reverse
 import requests
@@ -72,10 +73,26 @@ class CsMatch(global_models.Match):
                     mm_obj.rounds_won_team_b = score_b
                     mm_obj.save()
 
+
+class CSLineupPlayerRole(Enum):
+    RIFLE = "rifle"
+    IGL_RIFLE = "igl_rifle"
+    AWP = "awp"
+    IGL_AWP = "igl_awp"
+
+    @classmethod
+    def choices(cls):
+        return [(key.name, key.value) for key in cls]
+
+
 class CsLineupPlayer(global_models.LineupPlayer):
     player = models.ForeignKey(CsPlayer, on_delete=models.CASCADE)
-    # TODO: Migrate role to Enum
-    role = models.ForeignKey(global_models.PlayerRole, on_delete=models.CASCADE, null=True, blank=True)
+    role = models.CharField(
+        max_length=20,
+        choices=CSLineupPlayerRole.choices(),
+        null=True,
+        blank=True
+    )
 
     class Meta:
         verbose_name = "CS Lineup Player"
@@ -83,7 +100,7 @@ class CsLineupPlayer(global_models.LineupPlayer):
 
     def __str__(self):
         if self.role:
-            return f'{self.player.ingame_name} ({self.role.name})'
+            return f'{self.player.ingame_name} ({self.role})'
         return f'{self.player.ingame_name} @ {self.lineup.team.name}'
 
     def save(self, *args, **kwargs):
