@@ -94,6 +94,8 @@ class Lineup(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['team__name', '-active_from']
+        unique_together = ('team', 'active_from')
 
     def get_previous_lineup(self) -> 'Lineup | None':
         return self.team.lineup_set.filter(
@@ -144,6 +146,7 @@ class Tournament(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['name']
 
     # this will not actually exist, as the Tournament class is abstract
     # it's just here for type checking
@@ -193,6 +196,7 @@ class Match(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['-first_map_at']
 
     def get_first_matchmap(self) -> 'MatchMap | None':
         return self.matchmap_set.order_by('map_nr').first()
@@ -234,7 +238,7 @@ class OneOnOneMatch(Match):
     lineup_a = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_a_set', null=True, blank=True)
     lineup_b = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_b_set', null=True, blank=True)
 
-    class Meta:
+    class Meta(Match.Meta):
         abstract = True
 
     def __str__(self) -> str:
@@ -305,6 +309,7 @@ class MatchMap(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['starting_at']
 
     def get_prev_map(self) -> 'Self | None':
         # Filter using self.__class__ to ensure we are working with the subclass
@@ -354,7 +359,7 @@ class OneOnOneMatchMap(MatchMap):
     rounds_won_team_b = models.IntegerField(default=0)
     map_pick_of = models.ForeignKey(Lineup, null=True, blank=True, on_delete=models.CASCADE)
 
-    class Meta:
+    class Meta(MatchMap.Meta):
         abstract = True
 
     def team_a_won(self) -> bool:
