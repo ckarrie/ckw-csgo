@@ -47,8 +47,8 @@ class ExternalLinkInline(admin.TabularInline):
 
 # Models
 class MatchMapAdmin(admin.ModelAdmin):
-    list_display = ['match', 'rounds_won_team_a', 'rounds_won_team_b', 'map', 'has_ended', 'is_live', 'starting_at', 'unplayed', 'map_nr']
-    list_editable = ['rounds_won_team_a', 'rounds_won_team_b', 'map', 'map_nr']
+    list_display = ['match', 'rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'has_ended', 'is_live', 'starting_at', 'unplayed', 'map_nr']
+    list_editable = ['rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'map_nr']
     list_filter = ['match__tournament', 'match__lineup_a', 'match__lineup_b', 'map_nr']
 
     ordering = ['map_nr']
