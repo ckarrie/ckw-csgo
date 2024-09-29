@@ -101,7 +101,7 @@ class CsLineupPlayer(global_models.LineupPlayer):
 
     def __str__(self):
         if self.role:
-            return f'{self.player.ingame_name} ({self.role})'
+            return f'{self.player.ingame_name} ({self.role}) @ {self.lineup.team.name}'
         return f'{self.player.ingame_name} @ {self.lineup.team.name}'
 
     def save(self, *args, **kwargs):

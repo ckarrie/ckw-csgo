@@ -134,6 +134,9 @@ class LineupPlayer(models.Model):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        return f'{self.player.ingame_name} @ {self.lineup.team.name}'
+
 
 class Tournament(models.Model):
     name = models.CharField(max_length=255)
