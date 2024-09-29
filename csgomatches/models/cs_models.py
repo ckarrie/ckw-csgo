@@ -9,11 +9,21 @@ class CsPlayer(global_models.Player):
     hltv_id = models.IntegerField(null=True, blank=True)
     esea_user_id = models.IntegerField(null=True, blank=True)
 
+    class Meta:
+        verbose_name = "CS Player"
+        verbose_name_plural = "CS Players"
+
+
 class CsTournament(global_models.Tournament):
     name_hltv = models.CharField(max_length=255, null=True, blank=True)
     name_99dmg = models.CharField(max_length=255, null=True, blank=True)
     esea_bracket_id = models.IntegerField(null=True, blank=True)
     esea_bracket_team_ids = models.CharField(max_length=255, null=True, blank=True, help_text='Comma Separated')
+
+    class Meta:
+        verbose_name = "CS Tournament"
+        verbose_name_plural = "CS Tournaments"
+
 
 class CsMatch(global_models.Match):
     tournament = models.ForeignKey(CsTournament, on_delete=models.CASCADE)
@@ -22,6 +32,10 @@ class CsMatch(global_models.Match):
     esea_match_id = models.CharField(max_length=255, null=True, blank=True)
     enable_99dmg = models.BooleanField(default=False)
     enable_hltv = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "CS Match"
+        verbose_name_plural = "CS Matches"
 
     def get_livescore_url(self, request):
         if self.hltv_match_id:
@@ -62,6 +76,10 @@ class CsLineupPlayer(global_models.LineupPlayer):
     player = models.ForeignKey(CsPlayer, on_delete=models.CASCADE)
     # TODO: Migrate role to Enum
     role = models.ForeignKey(global_models.PlayerRole, on_delete=models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "CS Lineup Player"
+        verbose_name_plural = "CS Lineup Players"
 
     def __str__(self):
         if self.role:
