@@ -80,12 +80,18 @@ class Player(models.Model):
 
 
 class PlayerRole(models.Model):
+    """
+    The role of a player.
+    For CS i.e. Fragger, Support, Leader, AWPer, Lurker, (Coach).
+    Will not be reasonable for some games.
+    Maybe it's better to implement this as an Enum.
+    """
     name = models.CharField(max_length=255)
-
-    # i.e. Fragger, Support, Leader, AWPer, Lurker, Coach
 
     def __str__(self):
         return self.name
+
+    #TODO: Implement checking on LineupPlayer class, whether PlayerRole is reasonable for game.
 
 
 class Lineup(models.Model):
