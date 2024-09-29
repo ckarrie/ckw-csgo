@@ -94,8 +94,6 @@ class Lineup(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['team__name', '-active_from']
-        unique_together = ('team', 'active_from')
 
     def get_previous_lineup(self) -> 'Lineup | None':
         return self.team.lineup_set.filter(

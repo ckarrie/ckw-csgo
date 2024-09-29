@@ -98,9 +98,9 @@ class MatchUpcomingViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
         return super(MatchUpcomingViewSet, self).list(request, *args, **kwargs)
 
 
-class LineupViewSet(CsView, viewsets.ReadOnlyModelViewSet):
+class LineupViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
     queryset = apps.get_model('csgomatches.CsLineup').objects.all()
-    serializer_class = ser.CsLineupSerializer
+    serializer_class = ser.CSGOLineupSerializer
 
     def get_view_name(self):
         return 'Team Lineups'

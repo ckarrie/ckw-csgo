@@ -27,6 +27,14 @@ class CsTournament(global_models.Tournament):
         verbose_name_plural = "CS Tournaments"
 
 
+class CsLineup(global_models.Lineup):
+    class Meta:
+        verbose_name = "CS Lineup"
+        verbose_name_plural = "CS Lineups"
+        ordering = ['team__name', '-active_from']
+        unique_together = ('team', 'active_from')
+
+
 class CsMap(global_models.Map):
     class Meta:
         verbose_name = "CS Map"
@@ -35,6 +43,8 @@ class CsMap(global_models.Map):
 
 class CsMatch(global_models.OneOnOneMatch):
     tournament = models.ForeignKey(CsTournament, on_delete=models.CASCADE, related_name='match_set')
+    lineup_a = models.ForeignKey(CsLineup, on_delete=models.CASCADE, related_name='matches_as_lineup_a_set', null=True, blank=True)
+    lineup_b = models.ForeignKey(CsLineup, on_delete=models.CASCADE, related_name='matches_as_lineup_b_set', null=True, blank=True)
 
     hltv_match_id = models.CharField(max_length=20, null=True, blank=True, help_text='For HLTV Livescore during match')
     esea_match_id = models.CharField(max_length=255, null=True, blank=True)
@@ -96,6 +106,7 @@ class CSLineupPlayerRole(Enum):
 
 class CsLineupPlayer(global_models.LineupPlayer):
     player = models.ForeignKey(CsPlayer, on_delete=models.CASCADE)
+    lineup = models.ForeignKey(CsLineup, on_delete=models.CASCADE)
     role = models.CharField(
         max_length=20,
         choices=CSLineupPlayerRole.choices(),
@@ -118,6 +129,7 @@ class CsLineupPlayer(global_models.LineupPlayer):
 class CsMatchMap(global_models.OneOnOneMatchMap):
     match = models.ForeignKey(CsMatch, on_delete=models.CASCADE)
     map = models.ForeignKey(CsMap, on_delete=models.CASCADE, null=True, blank=True)
+    map_pick_of = models.ForeignKey(CsLineup, null=True, blank=True, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "CS Match Map"

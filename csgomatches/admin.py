@@ -255,7 +255,7 @@ def save_global(modeladmin, request, queryset):
 
 
 admin.site.register(models.Team, TeamAdmin)
-admin.site.register(models.Lineup, LineupAdmin)
+admin.site.register(models.CsLineup, LineupAdmin)
 admin.site.register(models.CsLineupPlayer, CsLineupPlayerAdmin)
 admin.site.register(models.ExternalLink, ExternalLinkAdmin)
 admin.site.register(models.CsMap)
