@@ -6,7 +6,7 @@ from . import ser_objects
 
 class CSGOTournamentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = apps.get_model('csgomatches.Tournament')
+        model = apps.get_model('csgomatches.CsTournament')
         fields = ['name', 'name_alt', 'name_hltv', 'name_99dmg', 'id']
 
 
@@ -70,15 +70,15 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
         if obj.hltv_match_id:
             url = reverse('match_livescore-detail', kwargs={'pk': obj.hltv_match_id})
             request = self.context.get('request')
-            return request.build_absolute_uri(url)
+            return request.build_absolute_uri(url) # type: ignore
 
     def get_html_detail_url(self, obj):
         url = obj.get_absolute_url()
         request = self.context.get('request')
-        return request.build_absolute_uri(url)
+        return request.build_absolute_uri(url) # type: ignore
 
     class Meta:
-        model = apps.get_model('csgomatches.Match')
+        model = apps.get_model('csgomatches.CsMatch')
         fields = ['tournament', 'lineup_a', 'lineup_b', 'slug', 'bestof', 'first_map_at', 'cancelled', 'hltv_match_id', 'livescore_url', 'html_detail_url', 'matchmaps']
 
 
@@ -117,7 +117,7 @@ class HLTVMatchSerializer(serializers.Serializer):
             if csgo_match:
                 url = reverse('match_all-detail', kwargs={'pk': csgo_match.pk})
                 request = self.context.get('request')
-                return request.build_absolute_uri(url)
+                return request.build_absolute_uri(url) # type: ignore
 
     def create(self, validated_data):
         hltv_match_id = validated_data.get('hltv_match_id')
