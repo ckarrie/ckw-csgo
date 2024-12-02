@@ -125,6 +125,7 @@ class CsLineupPlayer(global_models.LineupPlayer):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
+
 class CsMatchMap(global_models.OneOnOneMatchMap):
     match = models.ForeignKey(CsMatch, on_delete=models.CASCADE, related_name='matchmap_set')
     map = models.ForeignKey(CsMap, on_delete=models.CASCADE, null=True, blank=True)
