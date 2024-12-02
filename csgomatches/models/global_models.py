@@ -192,7 +192,7 @@ class Match(models.Model):
     last_tweet = models.DateTimeField(null=True, blank=True)
     last_tweet_id = models.CharField(max_length=255, null=True, blank=True)
 
-    matchmap_set: QuerySet['OneOnOneMatchMap']
+    matchmap_set: QuerySet['MatchMap']
 
     class Meta:
         abstract = True
@@ -237,6 +237,8 @@ class Match(models.Model):
 class OneOnOneMatch(Match):
     lineup_a = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_a_set', null=True, blank=True)
     lineup_b = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_b_set', null=True, blank=True)
+
+    matchmap_set: QuerySet['OneOnOneMatchMap']
 
     class Meta(Match.Meta):
         abstract = True
