@@ -1,16 +1,19 @@
+from abc import abstractmethod
 import os
-import requests
+import importlib.resources
 import twitter
+
+from typing import TYPE_CHECKING, Self
+
 from django.contrib.sites.models import Site
 from django.db import models
-from django.db.models import QuerySet
-# Create your models here.
+from django.db.models import QuerySet, Manager
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
-from . import managers
-from .utils.publishing import twitter_api
+from csgomatches import managers
+from csgomatches.utils.publishing import twitter_api
 
 
 def get_flags_choices()-> list[tuple[str, str]]:
@@ -18,12 +21,12 @@ def get_flags_choices()-> list[tuple[str, str]]:
     returns a list of tuples of all available flags by looking at png files in 'static/csgomatches/flags'
     """
     choices: list[tuple[str, str]] = []
-    base_pth = os.path.dirname(os.path.abspath(__file__))
-    flags_pth = os.path.join(base_pth, 'static/csgomatches/flags')
-    for fn in os.listdir(flags_pth):
-        if fn.endswith('.png'):
-            short_fn = fn.replace('.png', '')
-            choices.append((short_fn, short_fn))
+    with importlib.resources.path('csgomatches', 'static') as static_folder_path:
+        flags_folder_path = os.path.join(static_folder_path, 'csgomatches', 'flags')
+        for fn in os.listdir(flags_folder_path):
+            if fn.endswith('.png'):
+                short_fn = fn.replace('.png', '')
+                choices.append((short_fn, short_fn))
     choices.sort(key=lambda x: x[0])
     return choices
 
@@ -47,12 +50,12 @@ class Team(models.Model):
     hltv_id = models.IntegerField(null=True, blank=True)
     esea_team_id = models.IntegerField(null=True, blank=True)
 
-    lineup_set: QuerySet['Lineup']
+    lineup_set: managers.LineupQuerySet
 
     objects = managers.TeamManager()
 
     def get_hltv_id_from_name(self):
-        from .utils.scrapers.hltv import get_hltv_id_from_team_name
+        from csgomatches.utils.scrapers.hltv import get_hltv_id_from_team_name
         return get_hltv_id_from_team_name(team_mdl=self)
 
     def get_hltv_team_link(self):
@@ -70,20 +73,12 @@ class Player(models.Model):
     ingame_name = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    hltv_id = models.IntegerField(null=True, blank=True)
-    esea_user_id = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return f'{self.first_name} "{self.ingame_name}" {self.last_name}'
-
-
-class PlayerRole(models.Model):
-    name = models.CharField(max_length=255)
-
-    # i.e. Fragger, Support, Leader, AWPer, Lurker, Coach
-
-    def __str__(self):
-        return self.name
 
 
 class Lineup(models.Model):
@@ -93,7 +88,14 @@ class Lineup(models.Model):
     active_from = models.DateTimeField(help_text='Set -10 Days to avoid multiple Lineup creations')
     is_active = models.BooleanField(default=True)
 
+    lineupplayer_set: Manager['LineupPlayer']
+
     objects = managers.LineupQuerySet.as_manager()
+
+    class Meta:
+        abstract = True
+        ordering = ['team__name', '-active_from']
+        unique_together = ('team', 'active_from')
 
     def get_previous_lineup(self) -> 'Lineup | None':
         return self.team.lineup_set.filter(
@@ -126,44 +128,42 @@ class Lineup(models.Model):
             prev_lu.save()
         super(Lineup, self).save(*args, **kwargs)
 
-    class Meta:
-        ordering = ['team__name', '-active_from']
-        unique_together = ('team', 'active_from')
-
 
 class LineupPlayer(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    role = models.ForeignKey(PlayerRole, on_delete=models.CASCADE, null=True, blank=True)
     lineup = models.ForeignKey(Lineup, on_delete=models.CASCADE)
 
+    class Meta:
+        abstract = True
+
     def __str__(self):
-        if self.role:
-            return f'{self.player.ingame_name} ({self.role.name})'
         return f'{self.player.ingame_name} @ {self.lineup.team.name}'
 
 
 class Tournament(models.Model):
     name = models.CharField(max_length=255)
     name_alt = models.CharField(max_length=255, null=True, blank=True)
-    name_hltv = models.CharField(max_length=255, null=True, blank=True)
-    name_99dmg = models.CharField(max_length=255, null=True, blank=True)
-    esea_bracket_id = models.IntegerField(null=True, blank=True)
-    esea_bracket_team_ids = models.CharField(max_length=255, null=True, blank=True, help_text='Comma Separated')
 
-    match_set: QuerySet['Match']
+    class Meta:
+        abstract = True
+        ordering = ['name']
+
+    # this will not actually exist, as the Tournament class is abstract
+    # it's just here for type checking
+    if TYPE_CHECKING:
+        match_set: QuerySet['Match']
 
     # mappool = models.ManyToManyField(Map)
 
     def __str__(self):
         return self.name
 
-    class Meta:
-        ordering = ['name']
-
 
 class Map(models.Model):
     name = models.CharField(max_length=255)
-    cs_name = models.CharField(max_length=255, default='de_')
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return self.name
@@ -172,8 +172,6 @@ class Map(models.Model):
 class Match(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
     slug = models.SlugField(unique=True, allow_unicode=False, null=True, blank=True, max_length=255)
-    lineup_a = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_a_set', null=True, blank=True)
-    lineup_b = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_b_set', null=True, blank=True)
     bestof = models.IntegerField(choices=(
         (1, 'BO1'),
         (2, 'BO2'),
@@ -190,26 +188,15 @@ class Match(models.Model):
             (2, 'Defwin in favour of team B'),
         )
     )
-    hltv_match_id = models.CharField(max_length=20, null=True, blank=True, help_text='For HLTV Livescore during match')
-    esea_match_id = models.CharField(max_length=255, null=True, blank=True)
     enable_tweet = models.BooleanField(default=True)
     last_tweet = models.DateTimeField(null=True, blank=True)
     last_tweet_id = models.CharField(max_length=255, null=True, blank=True)
-    enable_99dmg = models.BooleanField(default=False)
-    enable_hltv = models.BooleanField(default=True)
 
     matchmap_set: QuerySet['MatchMap']
 
     class Meta:
+        abstract = True
         ordering = ['-first_map_at']
-        verbose_name_plural = "matches"
-
-    def __str__(self) -> str:
-        if self.lineup_a and self.lineup_b:
-            return f'{self.lineup_a.team.name} vs {self.lineup_b.team.name}'
-        elif self.lineup_a and not self.lineup_b:
-            return f'{self.lineup_a.team.name}'
-        return 'TBA vs TBA'
 
     def get_first_matchmap(self) -> 'MatchMap | None':
         return self.matchmap_set.order_by('starting_at').first()
@@ -235,15 +222,33 @@ class Match(models.Model):
         if last_map:
             if last_map.has_ended():
                 return True
-                # if last_map.starting_at
-        team_a, team_b = self.get_overall_score()
-        if team_a > team_b or team_b > team_a:
-            return True
+        else:
+            raise ValueError(f"No last map found for Match {self}")
         return False
 
     def is_upcoming(self) -> bool | None:
         if self.first_map_at:
             return self.first_map_at > timezone.now()
+
+    def get_absolute_url(self) -> str:
+        return reverse('match_details', kwargs={'slug': self.slug})
+
+
+class OneOnOneMatch(Match):
+    lineup_a = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_a_set', null=True, blank=True)
+    lineup_b = models.ForeignKey(Lineup, on_delete=models.CASCADE, related_name='matches_as_lineup_b_set', null=True, blank=True)
+
+    matchmap_set: QuerySet['OneOnOneMatchMap']
+
+    class Meta(Match.Meta):
+        abstract = True
+
+    def __str__(self) -> str:
+        if self.lineup_a and self.lineup_b:
+            return f'{self.lineup_a.team.name} vs {self.lineup_b.team.name}'
+        elif self.lineup_a and not self.lineup_b:
+            return f'{self.lineup_a.team.name}'
+        return 'TBA vs TBA'
 
     def get_overall_score(self) -> tuple[int, int]:
         lineup_a_mapwins = 0
@@ -274,7 +279,9 @@ class Match(models.Model):
 
     def save(self, *args, **kwargs):
         similar_matches_in_same_tournament = self.tournament.match_set.filter(
-            lineup_a=self.lineup_a, lineup_b=self.lineup_b
+            lineup_a=self.lineup_a,
+            lineup_b=self.lineup_b,
+            first_map_at=self.first_map_at
         )
         if similar_matches_in_same_tournament.exclude(pk=self.pk).exists():
             try:
@@ -286,94 +293,73 @@ class Match(models.Model):
                 self.slug = slugify(f"{self.tournament.name}-{self}-{idx}")
         else:
             self.slug = slugify(f"{self.tournament.name}-{self}")
-        existing_slugs = Match.objects.filter(slug=self.slug).exclude(pk=self.pk)
+        existing_slugs = self.__class__.objects.filter(slug=self.slug).exclude(pk=self.pk)
         if existing_slugs.exists():
             self.slug = slugify(f"id-{self.pk}")
         super(Match, self).save(*args, **kwargs)
 
-    def get_absolute_url(self) -> str:
-        return reverse('match_details', kwargs={'slug': self.slug})
-
-    def get_livescore_url(self, request):
-        if self.hltv_match_id:
-            url = reverse('match_livescore-detail', kwargs={'pk': self.hltv_match_id})
-            return request.build_absolute_uri(url)
-
-    def update_hltv_livescore(self, request) -> None:
-        # Guard clause in case lineup_a is None
-        if not self.lineup_a:
-            return
-
-        url = self.get_livescore_url(request=request)
-        if url:
-            response = requests.get(url=url, params={'format': 'json'}).json()
-            maps = response.get('maps', [])
-            for map_data in maps:
-                map_nr = map_data.get('map_nr')
-                mm_obj = self.matchmap_set.filter(map_nr=map_nr).first()
-                if mm_obj:
-                    mm_obj.played_map = Map.objects.filter(
-                        models.Q(name=map_data.get('map_name')) |
-                        models.Q(cs_name=map_data.get('map_name'))
-                    ).first()
-                    score_a, score_b = map_data.get('score_a'), map_data.get('score_b')
-                    swap_score = False
-                    team_a_hltv_id = response.get('team_a_id')
-                    if team_a_hltv_id != self.lineup_a.team.hltv_id:
-                        swap_score = True
-
-                    if swap_score:
-                        score_b, score_a = score_a, score_b
-
-                    mm_obj.rounds_won_team_a = score_a
-                    mm_obj.rounds_won_team_b = score_b
-                    mm_obj.save()
-
 
 class MatchMap(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    played_map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
-    rounds_won_team_a = models.IntegerField(default=0)
-    rounds_won_team_b = models.IntegerField(default=0)
+    map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
     starting_at = models.DateTimeField()
-    delay_minutes = models.IntegerField(default=0)
     map_nr = models.IntegerField(null=True)
-    map_pick_of = models.ForeignKey(Lineup, null=True, blank=True, on_delete=models.CASCADE)
     unplayed = models.BooleanField(default=False)
     # defwin_reason = models.CharField(max_length=255, null=True, blank=True)
     # defwin = models.BooleanField(default=False)
     cancelled = models.BooleanField(default=False)
 
-    def get_prev_map(self) -> 'MatchMap | None':
-        return self.match.matchmap_set.filter(map_nr__lt=self.map_nr).order_by('map_nr').last()
+    class Meta:
+        abstract = True
+        ordering = ['starting_at']
 
-    def get_next_map(self) -> 'MatchMap | None':
-        return self.match.matchmap_set.filter(map_nr__gt=self.map_nr).order_by('map_nr').first()
+    def get_prev_map(self) -> 'Self | None':
+        # Filter using self.__class__ to ensure we are working with the subclass
+        return self.__class__.objects.filter(
+            match=self.match,
+            map_nr__lt=self.map_nr
+        ).order_by('map_nr').last()
 
+    def get_next_map(self) -> 'Self | None':
+        return self.__class__.objects.filter(
+            match=self.match,
+            map_nr_gt=self.map_nr
+        ).order_by('map_nr').first()
+
+    @abstractmethod
     def has_ended(self) -> bool:
-        return (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2
+        """Has the MatchMap ended?"""
 
-    def is_live(self):
+    def is_live(self) -> bool:
         prev = self.get_prev_map()
         if prev and prev.is_live():
             return False
-        has_ended = self.has_ended()
-        if has_ended:
+        if self.has_ended():
             return False
         calc_end = self.starting_at + timezone.timedelta(minutes=100)
         return self.starting_at < timezone.now() < calc_end
 
+    def __str__(self) -> str:
+        return f'{self.match} - {self.starting_at.date()} Map #{self.map_nr} (ID = {self.pk if self.pk else "-"})'
+
+
+class OneOnOneMatchMap(MatchMap):
+    match = models.ForeignKey(OneOnOneMatch, on_delete=models.CASCADE)
+    rounds_won_team_a = models.IntegerField(default=0)
+    rounds_won_team_b = models.IntegerField(default=0)
+    map_pick_of = models.ForeignKey(Lineup, null=True, blank=True, on_delete=models.CASCADE)
+
+    class Meta(MatchMap.Meta):
+        abstract = True
+
     def team_a_won(self) -> bool:
-        return (self.rounds_won_team_a > self.rounds_won_team_b) and (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13)
+        return (self.rounds_won_team_a > self.rounds_won_team_b) and self.has_ended()
 
     def is_draw(self) -> bool:
-        return self.rounds_won_team_a == self.rounds_won_team_b
+        return self.rounds_won_team_a == self.rounds_won_team_b and self.has_ended()
 
     def team_b_won(self) -> bool:
-        return (self.rounds_won_team_a < self.rounds_won_team_b) and (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13)
-
-    def __str__(self):
-        return f'{self.match} - {self.starting_at.date()} Map #{self.map_nr} (ID = {self.pk if self.pk else "-"})'
+        return (self.rounds_won_team_a < self.rounds_won_team_b) and self.has_ended()
 
     def send_tweet(self, prev_instance=None, interval=180.) -> None:
         # Guard clause in case either lineup_a or lineup_b are None
@@ -390,7 +376,7 @@ class MatchMap(models.Model):
                     'score_a': self.rounds_won_team_a,
                     'score_b': self.rounds_won_team_b,
                     'map_nr': self.map_nr,
-                    'map_name': self.played_map.name if self.played_map else "-",
+                    'map_name': self.map.name if self.map else "-",
                     'tournament': self.match.tournament.name,
                     'slug': self.match.get_absolute_url()
                 }
@@ -427,7 +413,7 @@ class MatchMap(models.Model):
     def save(self, *args, **kwargs):
         prev_instance = None
         if self.pk:
-            prev_instance = MatchMap.objects.get(pk=self.pk)
+            prev_instance = type(self).objects.get(pk=self.pk)
 
         super(MatchMap, self).save(*args, **kwargs)
         first_matchmap = self.match.get_first_matchmap()
@@ -436,12 +422,9 @@ class MatchMap(models.Model):
             self.match.save()
         self.send_tweet(prev_instance=prev_instance)
 
-    class Meta:
-        ordering = ['starting_at']
-
 
 class ExternalLink(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    match = models.ForeignKey("CsMatch", on_delete=models.CASCADE)
     link_type = models.CharField(max_length=255, choices=(
         ('hltv_match', 'HLTV'),
         ('esea_match', 'ESEA Match'),
@@ -471,7 +454,7 @@ class ExternalLink(models.Model):
         ordering = ['match', 'link_flag', 'link_type']
 
 
-class CSGOSiteSetting(models.Model):
+class SiteSetting(models.Model):
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
     main_team = models.ForeignKey('csgomatches.Team', on_delete=models.CASCADE, related_name='main_team_settings')
     second_team = models.ForeignKey('csgomatches.Team', on_delete=models.CASCADE, related_name='sec_team_settings')

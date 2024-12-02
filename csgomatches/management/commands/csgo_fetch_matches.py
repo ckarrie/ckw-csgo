@@ -2,6 +2,7 @@ import asyncio
 from json import JSONDecodeError
 
 import dateutil.parser
+from django.db.models.base import Model
 import requests
 from bs4 import BeautifulSoup
 from django.apps import apps
@@ -386,14 +387,14 @@ class Command(BaseCommand):
                                     # set map
                                     cs_name = HLTV_MAP_NAMES_TO_CS_NAME.get(name, 'de_' + name.lower())
                                     # not found in HLTV_MAP_NAMES_TO_CS_NAME
-                                    played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
+                                    map, map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
                                         cs_name=cs_name,
                                         defaults={
                                             'name': name
                                         }
                                     )
                                     print("[crawl_y0fl0w_de]  - Setting Map name", name, match)
-                                    matchmap.played_map = played_map
+                                    matchmap.map = map
                                     matchmap.save()
 
                                 if map_pick_lineup and matchmap.map_pick_of is None:
@@ -581,16 +582,16 @@ class Command(BaseCommand):
 
                             # get or create Maps
                             if 'de_tba' in mapinfos.get('name'):
-                                played_map = None
+                                map = None
                             else:
-                                played_map, played_map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
+                                map, map_created = apps.get_model('csgomatches.Map').objects.get_or_create(
                                     cs_name=mapinfos.get('name'),
                                     defaults={
                                         'name': mapinfos.get('name')
                                     }
                                 )
 
-                            matchmap = apps.get_model('csgomatches.MatchMap').objects.filter(
+                            matchmap = apps.get_model('csgomatches.CsMatchMap').objects.filter(
                                 match=match,
                                 map_nr=map_nr
                             ).first()
@@ -598,8 +599,8 @@ class Command(BaseCommand):
                                 print("[crawl_99damage_de]    - found Matchmap #", matchmap.map_nr, matchmap, sep='')
 
                             if matchmap:
-                                if score_left > matchmap.rounds_won_team_a or score_right > matchmap.rounds_won_team_b or played_map != matchmap.played_map:
-                                    matchmap.played_map = played_map
+                                if score_left > matchmap.rounds_won_team_a or score_right > matchmap.rounds_won_team_b or map != matchmap.map:
+                                    matchmap.map = map
                                     matchmap.rounds_won_team_a = score_left
                                     matchmap.rounds_won_team_b = score_right
                                     matchmap.save()
@@ -608,7 +609,7 @@ class Command(BaseCommand):
                                 matchmap = apps.get_model('csgomatches.MatchMap')(
                                     match=match,
                                     map_nr=map_nr,
-                                    played_map=played_map,
+                                    map=map,
                                     rounds_won_team_a=score_left,
                                     rounds_won_team_b=score_right,
                                     starting_at=m_datetime + timezone.timedelta(hours=map_nr),

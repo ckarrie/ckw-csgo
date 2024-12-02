@@ -1,12 +1,12 @@
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
-from . import models
+from csgomatches import models
 
 
 # Inlines
-class LineupPlayerInline(admin.TabularInline):
-    model = models.LineupPlayer
+class CsLineupPlayerInline(admin.TabularInline):
+    model = models.CsLineupPlayer
     autocomplete_fields = ['player']
     extra = 5
     max_num = 5
@@ -17,8 +17,8 @@ class LineupInline(admin.TabularInline):
     extra = 0
 
 
-class MatchMapInline(admin.TabularInline):
-    model = models.MatchMap
+class CsMatchMapInline(admin.TabularInline):
+    model = models.CsMatchMap
     extra = 0
     verbose_name = 'Map'
     verbose_name_plural = 'Match Maps'
@@ -31,8 +31,8 @@ class ExternalLinkInline(admin.TabularInline):
 
 # Models
 class MatchMapAdmin(admin.ModelAdmin):
-    list_display = ['match', 'rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'has_ended', 'is_live', 'delay_minutes', 'starting_at', 'unplayed', 'map_nr']
-    list_editable = ['rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'map_nr']
+    list_display = ['match', 'rounds_won_team_a', 'rounds_won_team_b', 'map', 'has_ended', 'is_live', 'starting_at', 'unplayed', 'map_nr']
+    list_editable = ['rounds_won_team_a', 'rounds_won_team_b', 'map', 'map_nr']
     list_filter = ['match__tournament', 'match__lineup_a', 'match__lineup_b', 'map_nr']
 
     ordering = ['-starting_at']
@@ -48,7 +48,8 @@ class MatchMapAdmin(admin.ModelAdmin):
     is_live.boolean = True
 
 
-class TournamentAdmin(admin.ModelAdmin):
+# Currently no generic implementation of ModelAdmin for Tournament class
+class CsTournamentAdmin(admin.ModelAdmin):
     search_fields = ['name', 'name_alt', 'name_hltv', 'name_99dmg']
     list_display = ['name', 'name_alt', 'name_hltv', 'name_99dmg']
     actions = ['cleanup', 'merge_two']
@@ -182,7 +183,7 @@ class LineupAdmin(admin.ModelAdmin):
     list_display = ['team', 'game', 'team_logo_url', 'active_from', 'get_is_active', 'is_active']
     autocomplete_fields = ['team']
     list_filter = ['game', 'is_active']
-    inlines = [LineupPlayerInline]
+    inlines = [CsLineupPlayerInline]
 
     def get_is_active(self, obj):
         return obj.get_is_active()
@@ -194,7 +195,7 @@ class MatchAdmin(admin.ModelAdmin):
     list_filter = ['lineup_a', 'lineup_b']
     search_fields = ['lineup_b__team__name', 'lineup_b__team__name_long', 'tournament__name']
     autocomplete_fields = ['lineup_a', 'lineup_b', 'tournament']
-    inlines = [MatchMapInline, ExternalLinkInline]
+    inlines = [CsMatchMapInline, ExternalLinkInline]
     # replace "Save and add another" button with "Save as new" to use previous matches as template
     # https://docs.djangoproject.com/en/5.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.save_as
     save_as = True
@@ -210,7 +211,7 @@ class PlayerAdmin(admin.ModelAdmin):
     list_editable = ['ingame_name', 'first_name', 'last_name']
 
 
-class LineupPlayerAdmin(admin.ModelAdmin):
+class CsLineupPlayerAdmin(admin.ModelAdmin):
     list_display = ['player', 'role', 'lineup']
     list_editable = ['role']
     list_filter = ['role']
@@ -238,15 +239,14 @@ def save_global(modeladmin, request, queryset):
 
 
 admin.site.register(models.Team, TeamAdmin)
-admin.site.register(models.Lineup, LineupAdmin)
-admin.site.register(models.LineupPlayer, LineupPlayerAdmin)
+admin.site.register(models.CsLineup, LineupAdmin)
+admin.site.register(models.CsLineupPlayer, CsLineupPlayerAdmin)
 admin.site.register(models.ExternalLink, ExternalLinkAdmin)
-admin.site.register(models.Map)
-admin.site.register(models.Match, MatchAdmin)
-admin.site.register(models.MatchMap, MatchMapAdmin)
-admin.site.register(models.Player, PlayerAdmin)
-admin.site.register(models.PlayerRole)
-admin.site.register(models.Tournament, TournamentAdmin)
+admin.site.register(models.CsMap)
+admin.site.register(models.CsMatch, MatchAdmin)
+admin.site.register(models.CsMatchMap, MatchMapAdmin)
+admin.site.register(models.CsPlayer, PlayerAdmin)
+admin.site.register(models.CsTournament, CsTournamentAdmin)
 admin.site.register(models.Game, GameAdmin)
 admin.site.register(models.StaticPage)
 

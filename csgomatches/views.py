@@ -1,15 +1,12 @@
 from collections import OrderedDict
 
 import requests
-from django.db.models import Q
-from django.shortcuts import render
 from django.templatetags.static import static
 from django.utils import timezone
 from django.views import generic
 from django.apps import apps
 
 import random
-import asyncio
 
 from . import models
 
@@ -25,7 +22,7 @@ def get_random_background_image_url():
 
 
 class IndexView(generic.ListView):
-    model = models.Match
+    model = models.CsMatch
 
     def get_queryset(self):
         qs = super(IndexView, self).get_queryset()
@@ -38,25 +35,25 @@ class IndexView(generic.ListView):
         ctx = super(IndexView, self).get_context_data(*args, **kwargs)
         big = models.Team.objects.get(name="BIG")
         statistics = {
-            'last_sixteen_zero': models.MatchMap.objects.filter(
+            'last_thirteen_zero': models.CsMatchMap.objects.filter(
                 match__lineup_a__team=big,
-                rounds_won_team_a=16,
+                rounds_won_team_a=13,
                 rounds_won_team_b=0
             ).order_by('-starting_at').first(),
-            'last_zero_sixteen': models.MatchMap.objects.filter(
+            'last_zero_thirteen': models.CsMatchMap.objects.filter(
                 match__lineup_a__team=big,
                 rounds_won_team_a=0,
-                rounds_won_team_b=16
+                rounds_won_team_b=13
             ).order_by('-starting_at').first(),
-            'last_sixteen_fourteen': models.MatchMap.objects.filter(
+            'last_thirteen_eleven': models.CsMatchMap.objects.filter(
                 match__lineup_a__team=big,
-                rounds_won_team_a=16,
-                rounds_won_team_b=14
+                rounds_won_team_a=13,
+                rounds_won_team_b=11
             ).order_by('-starting_at').first(),
-            'last_fourteen_sixteen': models.MatchMap.objects.filter(
+            'last_eleven_thirteen': models.CsMatchMap.objects.filter(
                 match__lineup_a__team=big,
-                rounds_won_team_a=14,
-                rounds_won_team_b=16
+                rounds_won_team_a=11,
+                rounds_won_team_b=13
             ).order_by('-starting_at').first(),
         }
         ctx.update({
@@ -69,7 +66,7 @@ class IndexView(generic.ListView):
 
 
 class YearArchiveView(generic.YearArchiveView):
-    model = models.Match
+    model = models.CsMatch
     date_field = 'first_map_at'
     make_object_list = True
     allow_future = True
@@ -87,7 +84,7 @@ class YearArchiveView(generic.YearArchiveView):
 
 
 class MatchDetailView(generic.DetailView):
-    model = models.Match
+    model = models.CsMatch
 
     def get_context_data(self, **kwargs):
         ctx = super(MatchDetailView, self).get_context_data(**kwargs)
