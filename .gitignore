@@ -24,5 +24,5 @@ node_modules
 dist
 dist-ssr
 *.local
-csgomatches/static/csgomatches/assets/**/*
+csgomatches/static/csgomatches/frontend/**/*
 csgomatches/static/manifest.json

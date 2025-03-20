@@ -1,14 +1,16 @@
 {
-  "name": "ckw-csgo",
-  "private": true,
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^6.2.0"
-  }
+	"name": "ckw-csgo",
+	"private": true,
+	"version": "1.0.0",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"devDependencies": {
+		"vite": "^6.2.0"
+	},
+	"dependencies": {
+		"fs-extra": "^11.3.0"
+	}
 }
