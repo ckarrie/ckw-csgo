@@ -34,7 +34,7 @@ export default defineConfig((mode) => {
       assetsDir: "csgomatches/assets",
       rollupOptions: {
         input: {
-          css: join(INPUT_DIR, '/style.css'),
+          css: join(INPUT_DIR, '/entry.js'),
         },
       },
     },

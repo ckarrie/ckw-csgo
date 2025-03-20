@@ -19,9 +19,7 @@
 
     {% load django_vite %}
     {% vite_hmr_client %}
-
-    <link rel="stylesheet" href="{% vite_asset_url 'style.css' %}">
-
+    {% vite_asset 'entry.js' %}
 
     <link media="screen" href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,600,700&display=swap" rel="stylesheet">
     <link rel="icon" href="https://bigclan.gg/wp-content/uploads/2018/03/cropped-big-fav-32x32.png" sizes="32x32"/>
