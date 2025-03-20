@@ -11,3 +11,18 @@ csgomatches/utils/publishing/twitter_credentials.txt
 
 csgomatches/utils/scrapers/proxies.json
 csgomatches/utils/scrapers/proxies*.json
+
+#django-vite
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+node_modules
+dist
+dist-ssr
+*.local
+csgomatches/static/csgomatches/assets/**/*
+csgomatches/static/manifest.json
