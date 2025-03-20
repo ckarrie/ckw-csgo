@@ -40,23 +40,23 @@ class IndexView(generic.ListView):
         statistics = {
             'last_sixteen_zero': models.MatchMap.objects.filter(
                 match__lineup_a__team=big,
-                rounds_won_team_a=16,
+                rounds_won_team_a=13,
                 rounds_won_team_b=0
             ).order_by('-starting_at').first(),
             'last_zero_sixteen': models.MatchMap.objects.filter(
                 match__lineup_a__team=big,
                 rounds_won_team_a=0,
-                rounds_won_team_b=16
+                rounds_won_team_b=13
             ).order_by('-starting_at').first(),
             'last_sixteen_fourteen': models.MatchMap.objects.filter(
                 match__lineup_a__team=big,
-                rounds_won_team_a=16,
-                rounds_won_team_b=14
+                rounds_won_team_a=13,
+                rounds_won_team_b=111
             ).order_by('-starting_at').first(),
             'last_fourteen_sixteen': models.MatchMap.objects.filter(
                 match__lineup_a__team=big,
-                rounds_won_team_a=14,
-                rounds_won_team_b=16
+                rounds_won_team_a=11,
+                rounds_won_team_b=13
             ).order_by('-starting_at').first(),
         }
         ctx.update({
