@@ -1,8 +1,21 @@
 import { defineConfig, loadEnv } from 'vite';
 import { resolve, join } from 'path';
 import { rmSync } from 'fs';
+import postcssImportExtGlob from 'postcss-import-ext-glob';
+import postcssImport from 'postcss-import';
+import postcssAdvancedVariables from 'postcss-advanced-variables';
+import autoprefixer from 'autoprefixer';
 
 const assetsDir = 'csgomatches/frontend';
+
+const postcssConfig = {
+	plugins: [
+		postcssImportExtGlob,
+		postcssImport,
+		postcssAdvancedVariables,
+		autoprefixer,
+	],
+};
 
 const plugins = [
 	{
@@ -33,7 +46,9 @@ export default defineConfig(mode => {
 		},
 		root: resolve(INPUT_DIR),
 		base: '/static/',
-		css: {},
+		css: {
+			postcss: postcssConfig,
+		},
 		server: {
 			host: env.DJANGO_VITE_DEV_SERVER_HOST,
 			port: env.DJANGO_VITE_DEV_SERVER_PORT,
