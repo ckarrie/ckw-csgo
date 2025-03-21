@@ -37,13 +37,9 @@
         <main class="grid">
             <div class="content-grid">
                 <div class="content">
-                    <div>
-                        <h1>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Minus rerum vitae, obcaecati quidem tempora laudantium laboriosam voluptatibus reiciendis eligendi, libero explicabo quo molestias modi ipsa fugit quos hic odio qui!</h1>
-                    </div>
-                    <div>
-                        <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eum molestiae ratione similique beatae error totam inventore quo reprehenderit eos aspernatur? Beatae error veritatis deleniti in nihil ipsa culpa commodi laudantium?</p>
-                        <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eum molestiae ratione similique beatae error totam inventore quo reprehenderit eos aspernatur? Beatae error veritatis deleniti in nihil ipsa culpa commodi laudantium?</p>
-                    </div>
+                    {% block content %}
+
+                    {% endblock %}
                 </div>
                 <aside class="aside">
                     <h2>aside</h2>
@@ -94,7 +90,7 @@
     <p style="margin: 50px 0 10px 0">
         <a href="">Match eintragen</a>
     </p>
-                                  -->
+                                     -->
             <div class="footer">
                 {% block footer_0 %}
                     {% if statistics %}
@@ -120,8 +116,8 @@
                     <small>
                         Export kommende Matches [<code><a href="{% url 'ics_upcoming_big' %}">iCal</a></code>, <code><a href="{% url 'ics_upcoming_big_cs' %}">iCal CS</a></code>, <code><a href="https://wannspieltbig.de/api/match_upcoming/">JSON</a></code>] [<code><a href="{% url 'api-root' %}" target="_blank">API</a></code>]
 
-                        <!--                               Beta:
-                [<code><a href="{% url 'livestreams' %}" target="" class="livestream">Faceit Livestreams</a></code>]                               -->
+                        <!--                                  Beta:
+                [<code><a href="{% url 'livestreams' %}" target="" class="livestream">Faceit Livestreams</a></code>]                                  -->
                     </small>
                 </p>
                 <hr />
