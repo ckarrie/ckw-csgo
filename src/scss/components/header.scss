@@ -1,0 +1,20 @@
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: calc(100% - (var(--padding-inline) * 2));
+	max-width: calc(var(--content-max-width));
+	background-color: var(--color-dark-700);
+	padding: 0 40px;
+	height: 68px;
+
+	&__headline {
+		font-weight: 400;
+		font-size: 28px;
+		text-transform: uppercase;
+	}
+
+	&__big-name {
+		font-weight: 800;
+	}
+}
