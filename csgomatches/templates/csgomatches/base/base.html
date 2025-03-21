@@ -30,28 +30,8 @@
             --random-background-image: url({{ bg_url }});
         }
     </style>
-
-    {% comment %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script type="text/javascript">
-
-
-        $(document).ready(function () {
-            $('.bg-holder').css({height: $(window).height(), width: $(window).width()})
-                .fadeIn('slow', function () {
-                    $('body').css('background-image', 'url({% static "csgomatches/backgrounds/IMG_6239.JPG" %})');
-                    $('#mask').fadeOut('slow');
-                })
-        });
-
-    </script>
-    {% endcomment %}
 </head>
 <body>
-
-<div class="bg-holder">
-
-</div>
 
 <div class="center">
     <div class="header">
