@@ -1,106 +1,126 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% block meta %}{% endblock %}
-    <title>
-        {% block page_title %}
-            Wann spielt{% if current_view == 'index' %}{% else %}e{% endif %} BIG?
-            {% with next_match=object_list.first %}
-                {% if next_match and current_view == 'index' %}
-                    Am {{ next_match.first_map_at|date:'d.m.Y H:i' }} {{ next_match.lineup_a.team.name }} gegen {{ next_match.lineup_b.team.name }}
-                {% endif %}
-            {% endwith %}
+<html lang="de" dir="ltr">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Eine Fanseite für den BIG-Clan - von und für die Community." />
+        {% block meta %}
+
         {% endblock %}
-    </title>
+        <title>
+            {% block page_title %}
+                Wann spielt{% if current_view == 'index' %}
 
-    {% load django_vite %}
-    {% vite_hmr_client %}
-    {% vite_asset 'entry.js' %}
+                {% else %}
+                    e
+                {% endif %}BIG?{% with next_match=object_list.first %}
+                    {% if next_match and current_view == 'index' %}
+                        Am {{ next_match.first_map_at|date:'d.m.Y H:i' }} {{ next_match.lineup_a.team.name }} gegen {{ next_match.lineup_b.team.name }}
+                    {% endif %}
+                {% endwith %}
+            {% endblock %}
+        </title>
 
-    <link media="screen" href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,600,700&display=swap" rel="stylesheet">
+        {% load django_vite %}
+        {% vite_hmr_client %}
+        {% vite_asset 'entry.js' %}
 
-    {% include 'csgomatches/partials/favicons.html' %}
-</head>
-<body>
+        <link media="screen" href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,600,700&display=swap" rel="stylesheet" />
 
-<div class="center">
-    <div class="header">
-        {% block content_header %}
-            <div class="logo">
-                <a href="https://bigclan.gg" target="_blank" title="Zur Webseite bigclan.gg">
-                    <!--<img src="{% static 'csgomatches/logos/BIGLOGO-04.png' %}">-->
-                    <img src="{% static 'csgomatches/logos/big.webp' %}">
-                </a>
+        {% include 'csgomatches/partials/favicons.html' %}
+    </head>
+    <body>
+        <div class="center">
+            <div class="header">
+                {% block content_header %}
+                    <div class="logo">
+                        <a href="https://bigclan.gg" target="_blank" title="Zur Webseite bigclan.gg">
+                            <!-- <img src="{% static 'csgomatches/logos/BIGLOGO-04.png' %}"> -->
+                            <img src="{% static 'csgomatches/logos/big.webp' %}" />
+                        </a>
+                    </div>
+
+                    <h1>
+                        {% block content_header_h1 %}
+                            <a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a>
+                        {% endblock %}
+                    </h1>
+                    <p>
+                        Eine Fanseite für den <a href="https://bigclan.gg">BIG-Clan</a> - von und für die Community.
+                    </p>
+                {% endblock %}
             </div>
 
-            <h1>{% block content_header_h1 %}<a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a>{% endblock %}</h1>
-            <p>Eine Fanseite für den <a href="https://bigclan.gg">BIG-Clan</a> - von und für die Community.</p>
-        {% endblock %}
-    </div>
+            {% block content %}
 
-    {% block content %}
-    {% endblock %}
+            {% endblock %}
 
-    {% block navigation %}
-        <ul class="navigation">
-            <li class="{% if current_view == 'index' %}active{% endif %}"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
-            <!--<li class=""><a class="livestream" href="sdf">Live</a> </li>-->
-            {% for date in date_list %}
-                <li class="{% if year.year == date.year %}active{% endif %}"><a href="{% url 'match_history' year=date.year %}">{{ date|date:"Y" }}</a></li>
-            {% endfor %}
-        </ul>
+            {% block navigation %}
+                <ul class="navigation">
+                    <li class="{% if current_view == 'index' %}active{% endif %}">
+                        <a href="{% url 'match_upcoming' %}">Kommende Matches</a>
+                    </li>
+                    <!-- <li class=""><a class="livestream" href="sdf">Live</a> </li> -->
+                    {% for date in date_list %}
+                        <li class="{% if year.year == date.year %}active{% endif %}">
+                            <a href="{% url 'match_history' year=date.year %}">{{ date|date:'Y' }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endblock %}
 
-    {% endblock %}
-
-    <!--
+            <!-- 
     <p style="margin: 50px 0 10px 0">
         <a href="">Match eintragen</a>
     </p>
-    -->
-    <div class="footer">
-        {% block footer_0 %}
-            {% if statistics %}
-                <p style="font-size: small">Fun-Facts: </p>
-                <ul>
-                    <li style="font-size: small"><a href="{{ statistics.last_sixteen_zero.match.get_absolute_url }}">letzte 16:0 Überfahrt</a> vor {{ statistics.last_sixteen_zero.starting_at|timesince }}</li>
-                    <li style="font-size: small"><a href="{{ statistics.last_zero_sixteen.match.get_absolute_url }}">letzter 0:16 Throw</a> vor {{ statistics.last_zero_sixteen.starting_at|timesince }}</li>
-                    <li style="font-size: small"><a href="{{ statistics.last_sixteen_fourteen.match.get_absolute_url }}">letzter knapper Sieg</a> 16:14 vor {{ statistics.last_sixteen_fourteen.starting_at|timesince }}</li>
-                    <li style="font-size: small"><a href="{{ statistics.last_fourteen_sixteen.match.get_absolute_url }}">letzte knappe Niederlage</a> 14:16 vor {{ statistics.last_fourteen_sixteen.starting_at|timesince }}</li>
-                </ul>
-                <hr>
-            {% endif %}
-        {% endblock %}
-        <p>
-            <small>
-                Export kommende Matches [<code><a href="{% url 'ics_upcoming_big' %}">iCal</a></code>, <code><a href="{% url 'ics_upcoming_big_cs' %}">iCal CS</a></code>, <code><a href="https://wannspieltbig.de/api/match_upcoming/">JSON</a></code>]
-                [<code><a href="{% url 'api-root' %}" target="_blank">API</a></code>]
+          -->
+            <div class="footer">
+                {% block footer_0 %}
+                    {% if statistics %}
+                        <p style="font-size: small">Fun-Facts:</p>
+                        <ul>
+                            <li style="font-size: small">
+                                <a href="{{ statistics.last_sixteen_zero.match.get_absolute_url }}">letzte 16:0 Überfahrt</a> vor {{ statistics.last_sixteen_zero.starting_at|timesince }}
+                            </li>
+                            <li style="font-size: small">
+                                <a href="{{ statistics.last_zero_sixteen.match.get_absolute_url }}">letzter 0:16 Throw</a> vor {{ statistics.last_zero_sixteen.starting_at|timesince }}
+                            </li>
+                            <li style="font-size: small">
+                                <a href="{{ statistics.last_sixteen_fourteen.match.get_absolute_url }}">letzter knapper Sieg</a> 16:14 vor {{ statistics.last_sixteen_fourteen.starting_at|timesince }}
+                            </li>
+                            <li style="font-size: small">
+                                <a href="{{ statistics.last_fourteen_sixteen.match.get_absolute_url }}">letzte knappe Niederlage</a> 14:16 vor {{ statistics.last_fourteen_sixteen.starting_at|timesince }}
+                            </li>
+                        </ul>
+                        <hr />
+                    {% endif %}
+                {% endblock %}
+                <p>
+                    <small>
+                        Export kommende Matches [<code><a href="{% url 'ics_upcoming_big' %}">iCal</a></code>, <code><a href="{% url 'ics_upcoming_big_cs' %}">iCal CS</a></code>, <code><a href="https://wannspieltbig.de/api/match_upcoming/">JSON</a></code>] [<code><a href="{% url 'api-root' %}" target="_blank">API</a></code>]
 
-                <!-- Beta:
-                [<code><a href="{% url 'livestreams' %}" target="" class="livestream">Faceit Livestreams</a></code>] -->
-            </small>
-        </p>
-        <hr>
-        <p>
-            <small>
-                <a class="twitch_cast" href="https://discord.gg/roaringbears" target="_blank" title="Fanclub RoaringBears e.V. Discord">BIG Fanclub RoaringBears e.V.</a> |
-                <a class="twitter_link" href="https://twitter.com/wannspieltbig" target="_blank" title="wannspieltbig.de auf Twitter">@wannspieltbig</a> |
-                <a href="https://github.com/ckarrie/ckw-csgo">Code</a>
-                | <a href="https://github.com/ckarrie/ckw-csgo/issues">Bugs</a>
-                | Datenquellen:
-                <a href="https://www.hltv.org/team/7532/big">HLTV.org</a>,
-                | <a href="{% url 'staticpage' slug='impressum' %}">Kontakt und Impressum</a>
+                        <!--       Beta:
+                [<code><a href="{% url 'livestreams' %}" target="" class="livestream">Faceit Livestreams</a></code>]       -->
+                    </small>
+                </p>
+                <hr />
+                <p>
+                    <small>
+                        <a class="twitch_cast" href="https://discord.gg/roaringbears" target="_blank" title="Fanclub RoaringBears e.V. Discord">BIG Fanclub RoaringBears e.V.</a> |
+                        <a class="twitter_link" href="https://twitter.com/wannspieltbig" target="_blank" title="wannspieltbig.de auf Twitter">@wannspieltbig</a> |
+                        <a href="https://github.com/ckarrie/ckw-csgo">Code</a>
+                        | <a href="https://github.com/ckarrie/ckw-csgo/issues">Bugs</a>
+                        | Datenquellen:
+                        <a href="https://www.hltv.org/team/7532/big">HLTV.org</a>, | <a href="{% url 'staticpage' slug='impressum' %}">Kontakt und Impressum</a>
 
-                <br>
-                Credits: <code>mightyrepooc</code> (Idee) <code>y0fl0w</code> (HLTV Crawler, VOD- und Streamlinks) <code>Philian</code> (BIG-Logo) <code>chrissiMZ</code> (Coding, Fotos)
-            </small>
-        </p>
-    </div>
-
-</div>
-
-</body>
+                        <br />
+                        Credits: <code>mightyrepooc</code> (Idee) <code>y0fl0w</code> (HLTV Crawler, VOD- und Streamlinks) <code>Philian</code> (BIG-Logo) <code>chrissiMZ</code> (Coding, Fotos)
+                    </small>
+                </p>
+            </div>
+        </div>
+    </body>
 </html>
