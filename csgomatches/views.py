@@ -15,6 +15,8 @@ from . import models
 
 from csgomatches.utils.scrapers import faceit
 
+from datetime import date, timedelta
+
 def get_random_background_image_url():
     images = [
         static("csgomatches/backgrounds/IMG_6232.webp"),
@@ -62,6 +64,8 @@ class IndexView(generic.ListView):
         ctx.update({
             'date_list': self.model.objects.all().dates('first_map_at', 'year', order='DESC'),
             'current_view': 'index',
+            'today': date.today(),
+            'tomorrow': date.today() + timedelta(days=1),
             'statistics': statistics
         })
         return ctx
