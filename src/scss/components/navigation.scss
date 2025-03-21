@@ -1,0 +1,15 @@
+.navigation {
+	&__list {
+		display: flex;
+		gap: 32px;
+	}
+
+	&__link {
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+			text-underline-offset: 2px;
+		}
+	}
+}
