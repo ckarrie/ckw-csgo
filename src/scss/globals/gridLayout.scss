@@ -5,9 +5,8 @@
 
 .grid {
 	display: grid;
-
-	display: grid;
 	max-width: calc(var(--content-max-width) + (var(--padding-inline) * 2));
+	width: 100%;
 	grid-template-columns:
 		var(--padding-inline)
 		[content-start] min(100% - (var(--padding-inline) * 2), var(--content-max-width))
@@ -22,6 +21,7 @@
 	display: grid;
 	grid-template-columns: 1fr 310px;
 	gap: 20px;
+	width: 100%;
 }
 
 .content {
