@@ -13,3 +13,4 @@ python-twitter==3.5
 requests==2.32.3
 setuptools==78.1.0
 twitchAPI==4.4.0
+django-vite==3.1.0
