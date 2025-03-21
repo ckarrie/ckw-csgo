@@ -3,36 +3,51 @@
 {% load static %}
 
 {% block page_title %}
-    Wann spielt BIG?
-    {% with next_match=object_list.first %}
+    Wann spielt BIG?{% with next_match=object_list.first %}
         {% if next_match and current_view == 'index' %}
-            Am {{ next_match.first_map_at|date:'d.m.Y H:i' }} {{ next_match.lineup_a.team.name }} gegen {{ next_match.lineup_b.team.name }}
+            - Am {{ next_match.first_map_at|date:'d.m.Y H:i' }} {{ next_match.lineup_a.team.name }} gegen {{ next_match.lineup_b.team.name }}
         {% endif %}
     {% endwith %}
 {% endblock %}
 
-{% block content_header_h1 %}
-    <a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a>
-{% endblock %}
-
 {% block content %}
-    <div class="matches">
-        {% for match in object_list %}
-            {% include 'csgomatches/blocks/match.html' %}
-        {% empty %}
-            <div class="row">
-                <p>BIG disband? ;-) Keine kommenden Matches eingetragen.</p>
+    {% for match in object_list %}
+
+    {% if forloop.first %}
+        <div class="matchday u-rounded-corners">
+        <div class="matchday__date">
+            {% include 'csgomatches/partials/relativeDate.html' with date=match.first_map_at %}
+        </div>
+        <div class="matchday__matches">
+    {% else %}
+    {% with object_list|slice:":forloop.counter0"|first as prev_match %}
+        {% if match.first_map_at|date:"Y-m-d" != prev_match.first_map_at|date:"Y-m-d" %}
+            </div></div>
+            <div class="matchday u-rounded-corners">
+            <div class="matchday__date">
+                {% include 'csgomatches/partials/relativeDate.html' with date=match.first_map_at %}
             </div>
-        {% endfor %}
-    </div>
+            <div class="matchday__matches">
+        {% endif %}
+    {% endwith %}
+    {% endif %}
+
+    {% include 'csgomatches/blocks/match.html' with match=match %}
+    {% if forloop.last %}</div></div>{% endif %}  {# Schließt das letzte <div> #}
+
+    {% endfor %}
 {% endblock %}
 
 {% block navigation %}
     <ul class="navigation">
-        <li class="active"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
-        <!--<li class=""><a class="livestream" href="sdf">Live</a> </li>-->
+        <li class="active">
+            <a href="{% url 'match_upcoming' %}">Kommende Matches</a>
+        </li>
+        <!-- <li class=""><a class="livestream" href="sdf">Live</a> </li> -->
         {% for date in date_list %}
-            <li class="{% if year.year == date.year %}active{% endif %}"><a href="{% url 'match_history' year=date.year %}">{{ date|date:"Y" }}</a></li>
+            <li class="{% if year.year == date.year %}active{% endif %}">
+                <a href="{% url 'match_history' year=date.year %}">{{ date|date:'Y' }}</a>
+            </li>
         {% endfor %}
     </ul>
 {% endblock %}

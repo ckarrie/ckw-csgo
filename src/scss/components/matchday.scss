@@ -1,0 +1,19 @@
+.matchday {
+	background-color: var(--color-dark-700);
+	padding: 28px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+
+	&__matches {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	&__date {
+		font-family: 'Moderniz', Arial, Helvetica, sans-serif;
+		font-size: 28px;
+		font-weight: bold;
+	}
+}

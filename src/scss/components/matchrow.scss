@@ -1,0 +1,76 @@
+.matchrow {
+	display: flex;
+	align-items: center;
+	background-color: var(--color-dark-800);
+	gap: 12px;
+	height: 72px;
+	padding: 0 16px;
+
+	&__team {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	&__team-name {
+		font-size: 14px;
+		font-weight: 500;
+	}
+
+	&__team-logo {
+		height: 40px;
+		width: auto;
+		margin-right: 8px;
+	}
+
+	&__score-box {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 105px;
+		height: 40px;
+		background-color: var(--color-dark-700);
+		font-size: 14px;
+	}
+
+	&__status {
+		font-size: 14px;
+	}
+
+	&__live {
+		position: relative;
+		padding-left: 10px;
+		&:before {
+			content: '';
+			position: absolute;
+			width: 4px;
+			height: 4px;
+			border-radius: 50%;
+			top: 50%;
+			left: 0;
+			transform: translateY(-50%);
+
+			animation-name: pulse;
+			animation-duration: 2s;
+			animation-iteration-count: infinite;
+
+			background: #fa2020;
+			box-shadow: 0px 0px 25px var(--color-red);
+		}
+	}
+}
+
+@keyframes pulse {
+	0% {
+		opacity: 0;
+	}
+	40% {
+		opacity: 1;
+	}
+	70% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
