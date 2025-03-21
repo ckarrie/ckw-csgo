@@ -1,0 +1,7 @@
+{% if date|date:'Y-m-d' == today|date:'Y-m-d' %}
+    Heute
+{% elif date|date:'Y-m-d' == tomorrow|date:'Y-m-d' %}
+    Morgen
+{% else %}
+    {{ date.date|date:'j. M' }}
+{% endif %}
