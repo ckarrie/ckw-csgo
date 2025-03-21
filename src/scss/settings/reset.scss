@@ -17,6 +17,7 @@ html {
 
 body {
 	min-height: 100vh;
+	font-size: 16px;
 }
 
 /* Media responsive */
@@ -39,6 +40,14 @@ h6 {
 
 p {
 	text-wrap: pretty; /* Prevents orphans on lines */
+}
+
+ul {
+	list-style: none;
+}
+
+a {
+	color: inherit;
 }
 
 @media (prefers-reduced-motion: no-preference) {
