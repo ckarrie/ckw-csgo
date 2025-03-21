@@ -1,0 +1,36 @@
+:root {
+	--padding-inline: 25px;
+	--content-max-width: 1300px;
+}
+
+.grid {
+	display: grid;
+
+	display: grid;
+	max-width: calc(var(--content-max-width) + (var(--padding-inline) * 2));
+	grid-template-columns:
+		var(--padding-inline)
+		[content-start] min(100% - (var(--padding-inline) * 2), var(--content-max-width))
+		[content-end]
+		var(--padding-inline);
+
+	& > * {
+		grid-column: content;
+	}
+}
+.content-grid {
+	display: grid;
+	grid-template-columns: 1fr 310px;
+	gap: 20px;
+}
+
+.content {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.aside {
+	display: flex;
+	gap: 20px;
+}
