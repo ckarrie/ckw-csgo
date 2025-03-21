@@ -5,6 +5,9 @@ import postcssImportExtGlob from 'postcss-import-ext-glob';
 import postcssImport from 'postcss-import';
 import postcssAdvancedVariables from 'postcss-advanced-variables';
 import autoprefixer from 'autoprefixer';
+import postcssSassyMixins from 'postcss-sassy-mixins';
+import postcssNested from 'postcss-nested';
+import postcssPxToRem from 'postcss-pxtorem';
 
 const assetsDir = 'csgomatches/frontend';
 
@@ -12,7 +15,13 @@ const postcssConfig = {
 	plugins: [
 		postcssImportExtGlob,
 		postcssImport,
+		postcssNested,
+		postcssSassyMixins,
 		postcssAdvancedVariables,
+		postcssPxToRem({
+			unitPrecision: 3,
+			selectorBlackList: ['body'],
+		}),
 		autoprefixer,
 	],
 };
