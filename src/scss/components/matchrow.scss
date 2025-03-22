@@ -20,7 +20,9 @@
 	&__game-logo-wrapper {
 		position: relative;
 
-		width: 60px;
+		width: 47px;
+		height: 30px;
+		margin-right: 11px;
 
 		&:after {
 			content: '';
@@ -29,9 +31,24 @@
 			width: 2px;
 			height: 48px;
 			top: 50%;
-			right: 0;
+			right: -11px;
 			transform: translateY(-50%);
 			background-color: var(--color-grey-400);
+		}
+	}
+
+	&__game-logo {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+
+		&:before {
+			content: '';
+			position: absolute;
+			display: block;
+			width: 100%;
+			height: 100%;
+			background-color: var(--color-dark-800);
 		}
 	}
 

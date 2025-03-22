@@ -2,9 +2,9 @@
 
 <div class="matchrow-cell matchrow-cell--first">
     <div class="matchrow__game-logo-wrapper">
-        {% if match.lineup_a.game.game_logo_url %}
-            <img class="matchrow__game-logo" src="{{ match.lineup_a.game.game_logo_url }}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" />
-        {% endif %}
+        {% with image_path='csgomatches/games/'|add:match.lineup_a.game.name_short|add:'.svg' %}
+            <img class="matchrow__game-logo" src="{% static image_path %}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" />
+        {% endwith %}
     </div>
 </div>
 
