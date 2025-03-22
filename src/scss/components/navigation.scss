@@ -1,4 +1,10 @@
 .navigation {
+	display: none;
+
+	@include medium() {
+		display: flex;
+	}
+
 	&__list {
 		display: flex;
 		gap: 32px;

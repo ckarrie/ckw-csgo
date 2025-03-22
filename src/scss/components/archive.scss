@@ -4,13 +4,23 @@
 
 	&__list {
 		display: flex;
-		justify-content: end;
-		gap: 32px;
+		flex-wrap: wrap;
+		gap: 16px 32px;
+
+		@include medium() {
+			justify-content: end;
+		}
 	}
 
 	&__list-item {
+		display: block;
 		&:first-child {
 			margin-right: auto;
+			width: 100%;
+
+			@include medium() {
+				width: auto;
+			}
 		}
 	}
 

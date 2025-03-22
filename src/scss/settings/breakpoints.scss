@@ -3,3 +3,15 @@
 		@content;
 	}
 }
+
+@mixin medium() {
+	@media (width > 900px) {
+		@content;
+	}
+}
+
+@mixin large() {
+	@media (width > 1240px) {
+		@content;
+	}
+}
