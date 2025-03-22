@@ -1,15 +1,56 @@
-.matchrow {
+.matchrow-cell {
 	display: flex;
 	align-items: center;
 	background-color: var(--color-dark-800);
-	gap: 12px;
 	height: 72px;
-	padding: 0 16px;
+
+	&--first {
+		border-top-left-radius: var(--radius);
+		border-bottom-left-radius: var(--radius);
+		padding-left: 10px;
+	}
+
+	&--last {
+		border-top-right-radius: var(--radius);
+		border-bottom-right-radius: var(--radius);
+		padding-right: 28px;
+	}
+}
+.matchrow {
+	&__game-logo-wrapper {
+		position: relative;
+
+		width: 60px;
+
+		&:after {
+			content: '';
+			position: absolute;
+			display: block;
+			width: 2px;
+			height: 48px;
+			top: 50%;
+			right: 0;
+			transform: translateY(-50%);
+			background-color: var(--color-grey-400);
+		}
+	}
 
 	&__team {
 		display: flex;
 		align-items: center;
-		justify-content: center;
+
+		gap: 8px;
+		width: 120px;
+		hyphens: auto;
+
+		&--left {
+			text-align: right;
+			justify-content: end;
+		}
+
+		&--right {
+			text-align: left;
+		}
 	}
 
 	&__team-name {
@@ -17,9 +58,15 @@
 		font-weight: 500;
 	}
 
-	&__team-logo {
+	&__team-logo-wrapper {
+		width: 40px;
 		height: 40px;
-		width: auto;
+	}
+
+	&__team-logo {
+		height: 100%;
+		width: 100%;
+		object-fit: contain;
 		margin-right: 8px;
 	}
 
@@ -29,12 +76,36 @@
 		justify-content: center;
 		width: 105px;
 		height: 40px;
+		margin: 0 var(--matchrow-cel-spacing);
 		background-color: var(--color-dark-700);
 		font-size: 14px;
 	}
 
+	&__tournament {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		width: 100%;
+		text-align: right;
+		padding: 0 var(--matchrow-cel-spacing);
+		font-size: 14px;
+	}
+
+	&__tournament-logo-wrapper {
+		width: 40px;
+		height: 40px;
+	}
+
+	&__tournament-logo {
+		height: 100%;
+		width: 100%;
+		object-fit: contain;
+		margin-right: 8px;
+	}
+
 	&__status {
 		font-size: 14px;
+		width: 90px;
 	}
 
 	&__live {

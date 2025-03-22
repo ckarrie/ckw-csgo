@@ -1,4 +1,5 @@
 :root {
+	/* COLORS */
 	--color-white: #fff;
 
 	--color-black: #000;
@@ -12,8 +13,17 @@
 	--color-grey-200: #d9d9d9;
 
 	--color-blue: #586aea;
-
-	--radius: 10px;
+	--color-red: #fa2020;
 
 	--gradient-dark: linear-gradient(180deg, var(--color-dark-200) 0%, var(--color-dark-300) 100%);
+
+	/* MATCHROW */
+	--matchrow-cel-spacing: 12px;
+
+	/* GRID */
+	--padding-inline: 25px;
+	--content-max-width: 1300px;
+
+	/* UTILS */
+	--radius: 10px;
 }
