@@ -1,0 +1,11 @@
+.discord-sidebar {
+	background-color: var(--color-blue);
+	display: flex;
+	flex-direction: column;
+	padding: 16px;
+	height: 280px;
+
+	&__button {
+		margin-top: auto;
+	}
+}

@@ -46,7 +46,9 @@
                     {% endblock %}
                 </div>
                 <aside class="aside">
-                    <h2>aside</h2>
+                    {% block sidebar %}
+                        {% include 'csgomatches/blocks/sidebar/discord.html' %}
+                    {% endblock %}
                 </aside>
             </div>
         </main>
