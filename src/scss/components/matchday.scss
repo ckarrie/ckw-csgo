@@ -7,7 +7,7 @@
 
 	&__matches {
 		display: grid;
-		grid-template-columns: auto auto auto auto 1fr auto;
+		grid-template-columns: min-content min-content min-content min-content 1fr min-content;
 		gap: 12px 0;
 	}
 
