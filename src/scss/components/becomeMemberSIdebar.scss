@@ -1,0 +1,13 @@
+.become-member-sidebar {
+	background-color: var(--color-dark-700);
+	display: flex;
+	flex-direction: column;
+	gap: 45px;
+	padding: 16px;
+
+	&__image {
+		height: 216px;
+		aspect-ratio: 150 / 216;
+		align-self: center;
+	}
+}
