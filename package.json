@@ -16,6 +16,7 @@
 		"postcss-import": "^16.1.0",
 		"postcss-import-ext-glob": "^2.1.1",
 		"postcss-nested": "^7.0.2",
+		"postcss-nested-ancestors": "^3.0.0",
 		"postcss-pxtorem": "^6.1.0",
 		"postcss-sassy-mixins": "^2.1.0",
 		"vite": "^6.2.0"

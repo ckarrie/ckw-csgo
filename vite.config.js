@@ -8,6 +8,7 @@ import autoprefixer from 'autoprefixer';
 import postcssSassyMixins from 'postcss-sassy-mixins';
 import postcssNested from 'postcss-nested';
 import postcssPxToRem from 'postcss-pxtorem';
+import postcssNestedAncestors from 'postcss-nested-ancestors';
 
 const assetsDir = 'csgomatches/frontend';
 
@@ -16,6 +17,7 @@ const postcssConfig = {
 		postcssImportExtGlob,
 		postcssImport,
 		postcssNested,
+		postcssNestedAncestors,
 		postcssSassyMixins,
 		postcssAdvancedVariables,
 		postcssPxToRem({
