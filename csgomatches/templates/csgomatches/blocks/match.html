@@ -1,6 +1,6 @@
 {% load static %}
 
-<div class="matchrow-cell matchrow-cell--first">
+<div class="matchrow-cell matchrow-cell--first {% if match.is_live %}is-live{% endif %}">
     <div class="matchrow__game-logo-wrapper">
         {% with image_path='csgomatches/games/'|add:match.lineup_a.game.name_short|add:'.svg' %}
             <img class="matchrow__game-logo" src="{% static image_path %}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" />
