@@ -1,8 +1,3 @@
-:root {
-	--padding-inline: 25px;
-	--content-max-width: 1300px;
-}
-
 .grid {
 	display: grid;
 	max-width: calc(var(--content-max-width) + (var(--padding-inline) * 2));
