@@ -1,0 +1,24 @@
+.meta-sidebar {
+	&__list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px 20px;
+	}
+
+	&__link {
+		text-decoration: none;
+		line-height: 1;
+
+		&:hover {
+			text-decoration: underline;
+			text-underline-offset: 2px;
+		}
+	}
+
+	&__link,
+	&__copyright {
+		display: block;
+		color: var(--color-grey-400);
+		font-size: 14px;
+	}
+}
