@@ -1,17 +1,23 @@
 @mixin small() {
-	@media (width > 500px) {
+	@media (width >= $bp-small) {
 		@content;
 	}
 }
 
 @mixin medium() {
-	@media (width > 900px) {
+	@media (width >= $bp-medium) {
 		@content;
 	}
 }
 
 @mixin large() {
-	@media (width > 1240px) {
+	@media (width >= $bp-large) {
+		@content;
+	}
+}
+
+@mixin small-lt-large() {
+	@media ($bp-small <= width < $bp-large) {
 		@content;
 	}
 }

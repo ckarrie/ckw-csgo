@@ -11,6 +11,12 @@
 		grid-template-columns: 1fr 1fr 1fr;
 	}
 
+	@include small-lt-large() {
+		> * {
+			height: auto !important;
+		}
+	}
+
 	@include large() {
 		grid-template-columns: 1fr;
 		flex-direction: column;
