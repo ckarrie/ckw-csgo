@@ -45,11 +45,14 @@
 
                     {% endblock %}
                 </div>
-                <aside class="aside">
+                <aside class="sidebar">
                     {% block sidebar %}
                         {% include 'csgomatches/blocks/sidebar/discord.html' %}
                         {% include 'csgomatches/blocks/sidebar/becomeMember.html' %}
-                        {% include 'csgomatches/blocks/sidebar/social.html' %}
+                        <div class="sidebar__group">
+                            {% include 'csgomatches/blocks/sidebar/social.html' %}
+                            {% include 'csgomatches/blocks/sidebar/meta.html' %}
+                        </div>
                     {% endblock %}
                 </aside>
             </div>
@@ -98,7 +101,7 @@
     <p style="margin: 50px 0 10px 0">
         <a href="">Match eintragen</a>
     </p>
-                                          -->
+                                            -->
             <div class="footer">
                 {% block footer_0 %}
                     {% if statistics %}
