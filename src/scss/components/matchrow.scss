@@ -98,11 +98,22 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		gap: 4px;
 		width: 105px;
 		height: 40px;
 		margin: 0 var(--matchrow-cel-spacing);
 		background-color: var(--color-dark-700);
 		font-size: 14px;
+	}
+
+	&__score {
+		&.is-win {
+			color: var(--color-green);
+		}
+
+		&.is-lose {
+			color: var(--color-red);
+		}
 	}
 
 	&__tournament {
