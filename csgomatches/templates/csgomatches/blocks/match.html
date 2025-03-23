@@ -1,68 +1,68 @@
 {% load static %}
 
-<div class="matchrow-cell matchrow-cell--first {% if match.is_live %}is-live{% endif %}">
-    <div class="matchrow__game-logo-wrapper">
-        {% with image_path='csgomatches/games/'|add:match.lineup_a.game.name_short|add:'.svg' %}
-            <img class="matchrow__game-logo" src="{% static image_path %}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" />
-        {% endwith %}
+<a class="matchrow {% if match.is_live %}is-live{% endif %}" href="{{ match.get_absolute_url }}" title="{{ match }} @ {{ match.tournament.name }}">
+    <div class="matchrow__col">
+        <div class="matchrow__game-logo-wrapper">
+            {% with image_path='csgomatches/games/'|add:match.lineup_a.game.name_short|add:'.svg' %}
+                <img class="matchrow__game-logo" src="{% static image_path %}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" />
+            {% endwith %}
+        </div>
     </div>
 
-    <a class="matchrow__link" href="{{ match.get_absolute_url }}" title="{{ match }} @ {{ match.tournament.name }}">{{ match }} @ {{ match.tournament.name }}</a>
-</div>
+    <div class="matchrow__col">
+        <div class="matchrow__team matchrow__team--left">
+            <div class="matchrow__team-name">{{ match.lineup_a.team }}</div>
 
-<div class="matchrow-cell">
-    <div class="matchrow__team matchrow__team--left">
-        <div class="matchrow__team-name">{{ match.lineup_a.team }}</div>
+            <div class="matchrow__team-logo-wrapper">
+                {% if match.lineup_a.team_logo_url %}
+                    <img class="matchrow__team-logo" src="{{ match.lineup_a.team_logo_url }}" alt="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}" title="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}" />
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-        <div class="matchrow__team-logo-wrapper">
-            {% if match.lineup_a.team_logo_url %}
-                <img class="matchrow__team-logo" src="{{ match.lineup_a.team_logo_url }}" alt="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}" title="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}" />
+    <div class="matchrow__col">
+        <div class="matchrow__score-box u-rounded">TBD : XX</div>
+    </div>
+
+    <div class="matchrow__col">
+        <div class="matchrow__team matchrow__team--right">
+            {% if match.lineup_b %}
+                <div class="matchrow__team-logo-wrapper">
+                    {% if match.lineup_b.team_logo_url %}
+                        <img class="matchrow__team-logo" src="{{ match.lineup_b.team_logo_url }}" alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" />
+                    {% endif %}
+                </div>
+
+                <div class="matchrow__team-name">{{ match.lineup_b.team }}</div>
+            {% else %}
+                <div class="matchrow__questionmark">?</div>
+                <div class="matchrow__team-name">TBD</div>
             {% endif %}
         </div>
     </div>
-</div>
 
-<div class="matchrow-cell">
-    <div class="matchrow__score-box u-rounded">TBD : XX</div>
-</div>
-
-<div class="matchrow-cell">
-    <div class="matchrow__team matchrow__team--right">
-        {% if match.lineup_b %}
-            <div class="matchrow__team-logo-wrapper">
-                {% if match.lineup_b.team_logo_url %}
-                    <img class="matchrow__team-logo" src="{{ match.lineup_b.team_logo_url }}" alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" />
-                {% endif %}
-            </div>
-
-            <div class="matchrow__team-name">{{ match.lineup_b.team }}</div>
-        {% else %}
-            <div class="matchrow__questionmark">?</div>
-            <div class="matchrow__team-name">TBD</div>
-        {% endif %}
+    <div class="matchrow__col matchrow__col--grow">
+        <div class="matchrow__tournament">
+            {% if match.lineup_b.team_logo_url %}
+                <div class="matchrow__tournament-logo-wrapper">
+                    <img class="matchrow__tournament-logo" src="{{ match.lineup_b.team_logo_url }}" alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" />
+                </div>
+            {% endif %}
+            {{ match.tournament.name }}
+        </div>
     </div>
-</div>
 
-<div class="matchrow-cell">
-    <div class="matchrow__tournament">
-        {% if match.lineup_b.team_logo_url %}
-            <div class="matchrow__tournament-logo-wrapper">
-                <img class="matchrow__tournament-logo" src="{{ match.lineup_b.team_logo_url }}" alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" />
-            </div>
-        {% endif %}
-        {{ match.tournament.name }}
+    <div class="matchrow__col">
+        <div class="matchrow__status">
+            {% if match.is_live %}
+                <div class="matchrow__live">Live</div>
+            {% else %}
+                <div class="matchrow__time">{{ match.first_map_at|date:'H:i' }} Uhr</div>
+            {% endif %}
+        </div>
     </div>
-</div>
-
-<div class="matchrow-cell matchrow-cell--last">
-    <div class="matchrow__status">
-        {% if match.is_live %}
-            <div class="matchrow__live">Live</div>
-        {% else %}
-            <div class="matchrow__time">{{ match.first_map_at|date:'H:i' }} Uhr</div>
-        {% endif %}
-    </div>
-</div>
+</a>
 
 {% comment '' %}
 <a class="matchdetail-link" href="{{ match.get_absolute_url }}" title="Match-Details {{ match }} @ {{ match.tournament.name }}">
