@@ -197,6 +197,12 @@ class Match(models.Model):
     def get_first_matchmap(self) -> 'MatchMap | None':
         return self.matchmap_set.order_by('map_nr').first()
 
+    def get_live_matchmap(self) -> 'MatchMap | None':
+        for mmap in self.matchmap_set.order_by('map_nr'):
+            if mmap.is_live():
+                return mmap
+            return False
+
     def is_live(self) -> bool | None:
         if self.has_ended():
             return False
