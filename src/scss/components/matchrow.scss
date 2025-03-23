@@ -29,6 +29,16 @@
 	}
 }
 .matchrow {
+	&__link {
+		position: absolute;
+		width: 100%;
+		height: 72px;
+		font-size: 0;
+		color: transparent;
+		user-select: none;
+		z-index: 1;
+	}
+
 	&__game-logo-wrapper {
 		position: relative;
 

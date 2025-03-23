@@ -6,6 +6,8 @@
             <img class="matchrow__game-logo" src="{% static image_path %}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" />
         {% endwith %}
     </div>
+
+    <a class="matchrow__link" href="{{ match.get_absolute_url }}" title="{{ match }} @ {{ match.tournament.name }}">{{ match }} @ {{ match.tournament.name }}</a>
 </div>
 
 <div class="matchrow-cell">
