@@ -1,0 +1,11 @@
+.social-sidebar {
+	background-color: var(--color-dark-700);
+	display: flex;
+	padding: 16px;
+	gap: 9px;
+
+	&__icon {
+		height: 28px;
+		width: auto;
+	}
+}
