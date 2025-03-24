@@ -3,5 +3,7 @@
 {% elif date|date:'Y-m-d' == tomorrow|date:'Y-m-d' %}
     Morgen
 {% else %}
-    {{ date.date|date:'j. M' }}
+    {% with dateFormat=dateFormat|default:'j. M' %}
+        {{ date.date|date:dateFormat }}
+    {% endwith %}
 {% endif %}
