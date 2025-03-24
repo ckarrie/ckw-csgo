@@ -1,0 +1,10 @@
+.section-title {
+	background-color: var(--color-dark-700);
+	padding: 16px 28px;
+
+	&__headline {
+		font-size: 28px;
+		font-weight: bold;
+		line-height: 1;
+	}
+}
