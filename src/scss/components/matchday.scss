@@ -8,10 +8,11 @@
 	&__matches {
 		position: relative;
 		display: none;
+		flex-direction: column;
 		gap: 12px 0;
 
 		@include medium() {
-			display: block;
+			display: flex;
 		}
 	}
 
