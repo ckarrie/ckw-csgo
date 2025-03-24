@@ -51,7 +51,7 @@ class IndexView(generic.ListView):
             'last_sixteen_fourteen': models.MatchMap.objects.filter(
                 match__lineup_a__team=big,
                 rounds_won_team_a=13,
-                rounds_won_team_b=111
+                rounds_won_team_b=11
             ).order_by('-starting_at').first(),
             'last_fourteen_sixteen': models.MatchMap.objects.filter(
                 match__lineup_a__team=big,
