@@ -203,6 +203,9 @@ class Match(models.Model):
                 return mmap
             return False
 
+    def get_previous_match(self) -> 'Match | None':
+        return Match.objects.filter(first_map_at__gt=self.first_map_at).order_by('first_map_at').first()
+
     def is_live(self) -> bool | None:
         if self.has_ended():
             return False

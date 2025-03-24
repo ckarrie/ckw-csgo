@@ -3,9 +3,11 @@
 <a class="matchrow {% if match.is_live %}is-live{% endif %}" href="{{ match.get_absolute_url }}" title="{{ match }} @ {{ match.tournament.name }}">
     <div class="matchrow__col">
         <div class="matchrow__game-logo-wrapper">
-            {% with image_path='csgomatches/games/'|add:match.lineup_a.game.name_short|add:'.svg' %}
-                <img class="matchrow__game-logo" src="{% static image_path %}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" />
-            {% endwith %}
+            {% if match.lineup_a.game %}
+                {% with image_path='csgomatches/games/'|add:match.lineup_a.game.name_short|add:'.svg' %}
+                    <img class="matchrow__game-logo" src="{% static image_path %}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" />
+                {% endwith %}
+            {% endif %}
         </div>
     </div>
 
