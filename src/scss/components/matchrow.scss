@@ -108,11 +108,13 @@
 
 	&__score {
 		&.is-win {
-			color: var(--color-green);
+			/* color: var(--color-green);
+			color: var(--color-green); */
 		}
 
 		&.is-lose {
 			color: var(--color-red);
+			color: var(--color-grey-300);
 		}
 	}
 

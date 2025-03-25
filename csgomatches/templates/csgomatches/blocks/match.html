@@ -25,18 +25,20 @@
 
     <div class="matchrow__col">
         <div class="matchrow__score-box u-rounded">
-            {% if match.has_ended %}
-                <div class="matchrow__score {% if mm.team_a_won %}is-win{% endif %}{% if mm.team_b_won %}is-lose{% endif %}">{{ match.get_overall_score.0 }}</div>
+            {% if match.is_live %}
+                {% with map=match.get_live_matchmap %}
+                    <div class="matchrow__score">{{ map.rounds_won_team_a }}</div>
+                    <div class="matchrow__score-divider">:</div>
+                    <div class="matchrow__score">{{ map.rounds_won_team_b }}</div>
+                {% endwith %}
+            {% elif match.is_upcoming %}
+                <div class="matchrow__score">&ndash;</div>
                 <div class="matchrow__score-divider">:</div>
-                <div class="matchrow__score {% if mm.team_b_won %}is-win{% endif %}{% if mm.team_a_won %}is-lose{% endif %}">{{ match.get_overall_score.1 }}</div>
-            {% elif match.is_live %}
-                <div class="matchrow__score {% if mm.team_a_won %}is-win{% endif %}{% if mm.team_b_won %}is-lose{% endif %}">{{ match.get_live_matchmap.rounds_won_team_a }}</div>
-                <div class="matchrow__score-divider">:</div>
-                <div class="matchrow__score {% if mm.team_b_won %}is-win{% endif %}{% if mm.team_a_won %}is-lose{% endif %}">{{ match.get_live_matchmap.rounds_won_team_b }}</div>
+                <div class="matchrow__score">&ndash;</div>
             {% else %}
-                <div class="matchrow__score">&ndash;</div>
+                <div class="matchrow__score {% if match.team_a_won %}is-win{% endif %}{% if match.team_b_won %}is-lose{% endif %}">{{ match.get_overall_score.0 }}</div>
                 <div class="matchrow__score-divider">:</div>
-                <div class="matchrow__score">&ndash;</div>
+                <div class="matchrow__score {% if match.team_b_won %}is-win{% endif %}{% if match.team_a_won %}is-lose{% endif %}">{{ match.get_overall_score.1 }}</div>
             {% endif %}
         </div>
     </div>
