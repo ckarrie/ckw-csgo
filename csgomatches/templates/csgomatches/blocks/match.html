@@ -73,6 +73,8 @@
         <div class="matchrow__status">
             {% if match.is_live %}
                 <div class="matchrow__live">Live</div>
+            {% elif match.cancelled > 0 %}
+                <div class="matchrow__time">Canceled</div>
             {% else %}
                 <div class="matchrow__time">{{ match.first_map_at|date:'H:i' }} Uhr</div>
             {% endif %}
