@@ -1,11 +1,16 @@
 {% load static %}
 
-<a class="matchrow {% if match.is_live %}is-live{% endif %}" href="{{ match.get_absolute_url }}" title="{{ match }} @ {{ match.tournament.name }}">
+<a class="matchrow {% if match.is_live %}is-live{% endif %}"
+   href="{{ match.get_absolute_url }}"
+   title="{{ match }} @ {{ match.tournament.name }}">
     <div class="matchrow__col">
         <div class="matchrow__game-logo-wrapper">
             {% if match.lineup_a.game %}
-                {% with image_path='csgomatches/games/'|add:match.lineup_a.game.name_short|add:'.svg' %}
-                    <img class="matchrow__game-logo" src="{% static image_path %}" alt="{{ match.lineup_a.game.name }}" title="{{ match.lineup_a.game.name }}" />
+                {% with image_path="csgomatches/games/"|add:match.lineup_a.game.name_short|add:".svg" %}
+                    <img class="matchrow__game-logo"
+                         src="{% static image_path %}"
+                         alt="{{ match.lineup_a.game.name }}"
+                         title="{{ match.lineup_a.game.name }}" />
                 {% endwith %}
             {% endif %}
         </div>
@@ -14,10 +19,12 @@
     <div class="matchrow__col">
         <div class="matchrow__team matchrow__team--left">
             <div class="matchrow__team-name">{{ match.lineup_a.team }}</div>
-
             <div class="matchrow__team-logo-wrapper">
                 {% if match.lineup_a.team_logo_url %}
-                    <img class="matchrow__team-logo" src="{{ match.lineup_a.team_logo_url }}" alt="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}" title="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}" />
+                    <img class="matchrow__team-logo"
+                         src="{{ match.lineup_a.team_logo_url }}"
+                         alt="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}"
+                         title="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}" />
                 {% endif %}
             </div>
         </div>
@@ -32,13 +39,17 @@
                     <div class="matchrow__score">{{ map.rounds_won_team_b }}</div>
                 {% endwith %}
             {% elif match.is_upcoming %}
-                <div class="matchrow__score">&ndash;</div>
+                <div class="matchrow__score">–</div>
                 <div class="matchrow__score-divider">:</div>
-                <div class="matchrow__score">&ndash;</div>
+                <div class="matchrow__score">–</div>
             {% else %}
-                <div class="matchrow__score {% if match.team_a_won %}is-win{% endif %}{% if match.team_b_won %}is-lose{% endif %}">{{ match.get_overall_score.0 }}</div>
+                <div class="matchrow__score {% if match.team_a_won %}is-win{% endif %} {% if match.team_b_won %}is-lose{% endif %}">
+                    {{ match.get_overall_score.0 }}
+                </div>
                 <div class="matchrow__score-divider">:</div>
-                <div class="matchrow__score {% if match.team_b_won %}is-win{% endif %}{% if match.team_a_won %}is-lose{% endif %}">{{ match.get_overall_score.1 }}</div>
+                <div class="matchrow__score {% if match.team_b_won %}is-win{% endif %} {% if match.team_a_won %}is-lose{% endif %}">
+                    {{ match.get_overall_score.1 }}
+                </div>
             {% endif %}
         </div>
     </div>
@@ -48,10 +59,12 @@
             {% if match.lineup_b %}
                 <div class="matchrow__team-logo-wrapper">
                     {% if match.lineup_b.team_logo_url %}
-                        <img class="matchrow__team-logo" src="{{ match.lineup_b.team_logo_url }}" alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" />
+                        <img class="matchrow__team-logo"
+                             src="{{ match.lineup_b.team_logo_url }}"
+                             alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}"
+                             title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" />
                     {% endif %}
                 </div>
-
                 <div class="matchrow__team-name">{{ match.lineup_b.team }}</div>
             {% else %}
                 <div class="matchrow__questionmark">?</div>
@@ -64,13 +77,15 @@
         <div class="matchrow__tournament">
             {% if match.lineup_b.team_logo_url %}
                 <div class="matchrow__tournament-logo-wrapper">
-                    <img class="matchrow__tournament-logo" src="{{ match.lineup_b.team_logo_url }}" alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" />
+                    <img class="matchrow__tournament-logo"
+                         src="{{ match.lineup_b.team_logo_url }}"
+                         alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}"
+                         title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" />
                 </div>
             {% endif %}
             {{ match.tournament.name }}
         </div>
     </div>
-
     <div class="matchrow__col">
         <div class="matchrow__status">
             {% if match.is_live %}
@@ -125,4 +140,5 @@
 </small>
 
 {% include 'csgomatches/blocks/box_matchrow.html' %}
+
 {% endcomment %}

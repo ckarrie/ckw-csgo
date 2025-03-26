@@ -1,59 +1,63 @@
 {% load static %}
 {% load django_vite %}
+
 <!DOCTYPE html>
 <html lang="de" dir="ltr">
     <head>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content="Eine Fanseite für den BIG-Clan - von und für die Community." />
-        {% block meta %}
+        <meta name="description"
+              content="Eine Fanseite für den BIG-Clan - von und für die Community." />
+        <meta name="keywords"
+              content="BIG Clan, eSports, CS:GO, CS2, Matches, Fanseite, League Of Legends, Trackmania, Fortnite" />
 
-        {% endblock %}
+        {% block meta %}
+        {% endblock meta %}
+
+        {% include "csgomatches/partials/favicons.html" %}
+
         <title>
             {% block page_title %}
-                Wann spielt{% if current_view == 'index' %}
-
+                Wann spielt
+                {% if current_view == 'index' %}
                 {% else %}
                     e
-                {% endif %}BIG?{% with next_match=object_list.first %}
+                {% endif %}
+                BIG?
+                {% with next_match=object_list.first %}
                     {% if next_match and current_view == 'index' %}
                         Am {{ next_match.first_map_at|date:'d.m.Y H:i' }} {{ next_match.lineup_a.team.name }} gegen {{ next_match.lineup_b.team.name }}
                     {% endif %}
                 {% endwith %}
-            {% endblock %}
+            {% endblock page_title %}
         </title>
 
         {% vite_hmr_client %}
         {% vite_asset 'entry.js' %}
-
-        <link media="screen" href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,600,700&display=swap" rel="stylesheet" />
-
-        {% include 'csgomatches/partials/favicons.html' %}
     </head>
     <body>
-        {% include 'csgomatches/partials/header.html' %}
+        {% include "csgomatches/partials/header.html" %}
 
         <main class="grid">
             <div class="content-grid">
                 <div class="content">
                     {% block content %}
-
-                    {% endblock %}
+                    {% endblock content %}
 
                     {% block bottomContent %}
-
-                    {% endblock %}
+                    {% endblock bottomContent %}
                 </div>
                 <aside class="sidebar">
                     {% block sidebar %}
-                        {% include 'csgomatches/blocks/sidebar/discord.html' %}
-                        {% include 'csgomatches/blocks/sidebar/becomeMember.html' %}
+                        {% include "csgomatches/blocks/sidebar/discord.html" %}
+                        {% include "csgomatches/blocks/sidebar/becomeMember.html" %}
+
                         <div class="sidebar__group">
-                            {% include 'csgomatches/blocks/sidebar/social.html' %}
-                            {% include 'csgomatches/blocks/sidebar/meta.html' %}
+                            {% include "csgomatches/blocks/sidebar/social.html" %}
+                            {% include "csgomatches/blocks/sidebar/meta.html" %}
                         </div>
-                    {% endblock %}
+                    {% endblock sidebar %}
                 </aside>
             </div>
         </main>
@@ -97,11 +101,6 @@
                 </ul>
             {% endblock %}
 
-            <!-- 
-    <p style="margin: 50px 0 10px 0">
-        <a href="">Match eintragen</a>
-    </p>
-                                            -->
             <div class="footer">
                 {% block footer_0 %}
                     {% if statistics %}
