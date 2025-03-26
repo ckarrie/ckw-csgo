@@ -15,9 +15,9 @@
 {% endblock meta %}
 
 {% block content %}
-    <div class="match-summary">
+    <div class="match-summary u-rounded">
         <div class="match-summary__team">
-            <div class="match-summary__logo-wrapper">
+            <div class="match-summary__logo-wrapper u-rounded">
                 {% if match.lineup_a.team_logo_url %}
                     <img class="match-summary__logo"
                          src="{{ match.lineup_a.team_logo_url }}"
@@ -27,8 +27,31 @@
             </div>
             <div class="match-summary__name">{{ match.lineup_a.team }}</div>
         </div>
+
+        <div class="match-summary__details">
+            <div class="match-summary__date">{{ match.first_map_at|date:'M D, Y - H:i' }}</div>
+            <div class="match-summary__score">
+                {% if match.team_a_won %}
+                    <span class="match-summary__score--win">{{ score.0 }}</span><span>:</span><span class="match-summary__score--loss">{{ score.1 }}</span>
+                {% elif match.team_b_won %}
+                    <span class="match-summary__score--loss">{{ score.0 }}</span><span>:</span><span class="match-summary__score--win">{{ score.1 }}</span>
+                {% else %}
+                    <span class="match-summary__score--draw">{{ score.0 }}</span><span>:</span><span class="match-summary__score--draw">{{ score.1 }}</span>
+                {% endif %}
+            </div>
+            <div class="match-summary__best-of">
+                {% if match.bestof == 1 %}
+                    Best of one
+                {% elif match.bestof == 2 %}
+                    Best of two
+                {% elif match.bestof == 3 %}
+                    Best of three
+                {% endif %}
+            </div>
+        </div>
+
         <div class="match-summary__team">
-            <div class="match-summary__logo-wrapper">
+            <div class="match-summary__logo-wrapper u-rounded">
                 {% if match.lineup_b.team_logo_url %}
                     <img class="match-summary__logo"
                          src="{{ match.lineup_b.team_logo_url }}"
@@ -39,6 +62,7 @@
             <div class="match-summary__name">{{ match.lineup_b.team }}</div>
         </div>
     </div>
+
     <f:comment>
     <div class="matches">
         <h2>
