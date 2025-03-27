@@ -63,7 +63,60 @@
         </div>
     </div>
 
-    <f:comment>
+    <div class="match-maps u-rounded" data-bo="{{ match.bestof }}">
+        <div class="matchday__date">Maps</div>
+
+        <div class="match-maps__maps-wrapper">
+            {% for mm in match.matchmap_set.all %}
+                <div class="match-maps__map u-rounded {% if mm.unplayed %}is-unplayed{% endif %} {% if mm.is_live %}is-live{% endif %} {% if mm.has_ended %}has-ended{% endif %}">
+                    {% with mapImageName=mm.played_map.mapImageName %}
+                        {% if mapImageName %}
+                            {% with imagePath="csgomatches/maps/"|add:mapImageName|add:".jpg" %}
+                                <div class="match-maps__map-image-wrapper">
+
+                                    <img alt="{{ mm.played_map }}"
+                                         src="{% static imagePath %}"
+                                         class="match-maps__map-image" />
+                                </div>
+                            {% endwith %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <div class="match-maps__content">
+                        {% if mm.is_live %}<div class="match-maps">LIVE</div>{% endif %}
+
+                        <div class="match-maps__logo-wrapper">
+                            {% if mm.map_pick_of %}
+                                {% if mm.map_pick_of.team_logo_url %}
+                                    <img class="match-maps__logo"
+                                         src="{{ mm.map_pick_of.team_logo_url }}"
+                                         alt="{{ mm.map_pick_of.team.name_long|default:mm.map_pick_of.team.name }}"
+                                         title="{{ mm.map_pick_of.team.name_long|default:mm.map_pick_of.team.name }}" />
+                                {% else %}
+                                    <div class="match-maps__no-logo">?</div>
+                                {% endif %}
+                            {% else %}
+                                <div class="match-maps__decider">Decider</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="match-maps__scores">
+                            <div class="match-maps__score {% if mm.team_a_won %}is-win{% endif %}{% if mm.team_b_won %}is-loss{% endif %}">
+                                {{ mm.rounds_won_team_a }}
+                            </div>
+                            <div class="match-maps__score {% if mm.team_b_won %}is-win{% endif %}{% if mm.team_a_won %}is-loss{% endif %}">
+                                {{ mm.rounds_won_team_b }}
+                            </div>
+                        </div>
+
+                        <div class="match-maps__map-name">{{ mm.played_map|default:"-" }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% comment "" %}
     <div class="matches">
         <h2>
             <span class="bo">{{ match.first_map_at|date:'d.m.y H:i' }}</span>
@@ -111,17 +164,12 @@
                         {% for link in match.externallink_set.visible %}
                             {% ifchanged link.link_flag %}
                                 <dt>
-                                    <img alt="{{ link.link_flag }}"
-                                         src="{% static link.get_flag_url %}"
-                                         class="flag" />
+                                    <img alt="{{ link.link_flag }}" src="{% ic link.get_flag_url %}" class="flag" />
                                 </dt>
                             {% else %}
                             {% endifchanged %}
                             <dd>
-                                <a href="{{ link.url }}"
-                                   target="_blank"
-                                   title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})"
-                                   class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }} ({{ link.title }})</code></a>
+                                <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }} ({{ link.title }})</code></a>
                             </dd>
                         {% endfor %}
                     </dl>
@@ -130,7 +178,7 @@
         {% endwith %}
     </div>
     <p>&nbsp;</p>
-    </f:comment>
+    {% endcomment %}
 {% endblock content %}
 
 {% block navigation %}
