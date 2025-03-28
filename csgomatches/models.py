@@ -192,7 +192,7 @@ class Match(models.Model):
     )
     hltv_match_id = models.CharField(max_length=20, null=True, blank=True, help_text='For HLTV Livescore during match')
     esea_match_id = models.CharField(max_length=255, null=True, blank=True)
-    enable_tweet = models.BooleanField(default=True)
+    enable_tweet = models.BooleanField(default=False)
     last_tweet = models.DateTimeField(null=True, blank=True)
     last_tweet_id = models.CharField(max_length=255, null=True, blank=True)
     enable_99dmg = models.BooleanField(default=False)
