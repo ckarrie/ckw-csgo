@@ -1,5 +1,7 @@
 .discord-sidebar {
 	height: 280px;
+	background-color: var(--color-blue);
+	flex-direction: column;
 
 	&__button {
 		margin-top: auto;
