@@ -5,4 +5,12 @@
 	padding: 28px;
 	background-color: var(--color-dark-700);
 	@include rounded;
+
+	&__headline {
+		font-family: var(--font-ff-heavy);
+		text-transform: uppercase;
+		font-size: 28px;
+		font-weight: bold;
+		line-height: 1;
+	}
 }

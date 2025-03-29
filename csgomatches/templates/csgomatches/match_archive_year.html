@@ -12,7 +12,7 @@
     {% for match in object_list %}
         {% if forloop.first %}
             <div class="section matchday">
-                <div class="matchday__date">
+                <div class="section__headline">
                     {% include "csgomatches/partials/relativeDate.html" with date=match.first_map_at dateFormat="j. M Y" %}
                 </div>
                 <div class="matchday__matches">
@@ -22,7 +22,7 @@
                         </div>
                     </div>
                     <div class="section matchday">
-                        <div class="matchday__date">
+                        <div class="section__headline">
                             {% include "csgomatches/partials/relativeDate.html" with date=match.first_map_at dateFormat="j. M Y" %}
                         </div>
                         <div class="matchday__matches">
