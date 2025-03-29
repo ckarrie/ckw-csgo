@@ -1,12 +1,11 @@
 .match-summary {
-	background-color: var(--color-dark-700);
-	display: flex;
 	justify-content: center;
 	align-items: center;
 	padding: 40px;
 
 	@include medium {
-		padding: 28px;
+		padding-top: 66px;
+		padding-bottom: 66px;
 	}
 
 	&__team {

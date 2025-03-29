@@ -1,11 +1,9 @@
 .archive {
-	background-color: var(--color-dark-700);
-	padding: 16px 28px;
-
 	&__list {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 16px 32px;
+		width: 100%;
 
 		@include medium() {
 			justify-content: end;

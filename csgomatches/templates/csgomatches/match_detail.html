@@ -15,7 +15,7 @@
 {% endblock meta %}
 
 {% block content %}
-    <div class="match-summary u-rounded">
+    <div class="boxed match-summary">
         <div class="match-summary__team">
             <div class="match-summary__logo-wrapper u-rounded">
                 {% if match.lineup_a.team_logo_url %}
@@ -63,7 +63,7 @@
         </div>
     </div>
 
-    <div class="match-maps u-rounded" data-bo="{{ match.bestof }}">
+    <div class="section match-maps" data-bo="{{ match.bestof }}">
         <div class="matchday__date">Maps</div>
 
         <div class="match-maps__maps-wrapper">

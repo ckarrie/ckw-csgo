@@ -1,0 +1,8 @@
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 28px;
+	background-color: var(--color-dark-700);
+	@include rounded;
+}

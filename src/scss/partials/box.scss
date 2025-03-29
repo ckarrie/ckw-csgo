@@ -1,0 +1,7 @@
+.boxed {
+	display: flex;
+	gap: 16px;
+	padding: 16px 28px;
+	background-color: var(--color-dark-700);
+	@include rounded;
+}

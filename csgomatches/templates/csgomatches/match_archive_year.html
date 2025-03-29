@@ -5,13 +5,13 @@
 {% endblock page_title %}
 
 {% block content %}
-    <div class="section-title u-rounded">
+    <div class="boxed section-title">
         <h2 class="section-title__headline">Match-Archiv {{ year.year }}</h2>
     </div>
 
     {% for match in object_list %}
         {% if forloop.first %}
-            <div class="matchday u-rounded">
+            <div class="section matchday">
                 <div class="matchday__date">
                     {% include "csgomatches/partials/relativeDate.html" with date=match.first_map_at dateFormat="j. M Y" %}
                 </div>
@@ -21,7 +21,7 @@
                         {% if match.first_map_at|date:"Y-m-d" != prev_match.first_map_at|date:"Y-m-d" %}
                         </div>
                     </div>
-                    <div class="matchday u-rounded">
+                    <div class="section matchday">
                         <div class="matchday__date">
                             {% include "csgomatches/partials/relativeDate.html" with date=match.first_map_at dateFormat="j. M Y" %}
                         </div>
@@ -53,7 +53,7 @@
 {% endblock content %}
 
 {% block bottomContent %}
-    <div class="archive u-rounded">
+    <div class="boxed archive">
         <ul class="archive__list">
             <li class="archive__list-item">
                 <a class="archive__link {% if current_view == 'index' %}is-active{% endif %}"
