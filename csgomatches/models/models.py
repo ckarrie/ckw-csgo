@@ -2,6 +2,7 @@ import os
 import requests
 import twitter
 import importlib.resources
+import pycountry
 from django.contrib.sites.models import Site
 from django.db import models
 from django.db.models import QuerySet
@@ -29,6 +30,12 @@ def get_flags_choices()-> list[tuple[str, str]]:
     choices.sort(key=lambda x: x[0])
     return choices
 
+def country_code_to_language(code):
+    try:
+        language = pycountry.languages.get(alpha_2=code.lower())
+        return language.name if language else False
+    except AttributeError:
+        return False
 
 class Team(models.Model):
     #game = models.ForeignKey(Game, on_delete=models.SET_NULL, null=True)
@@ -456,6 +463,9 @@ class ExternalLink(models.Model):
     title = models.CharField(max_length=255)
     url = models.URLField()
     objects = managers.ExternalLinkManager()
+
+    def get_link_language(self) -> str:
+        return country_code_to_language(self.link_flag)
 
     def get_flag_url(self) -> str:
         return f'csgomatches/flags/{self.link_flag}.png'
