@@ -12,9 +12,9 @@
     {% for match in object_list %}
         {% if forloop.first %}
             <div class="section matchday">
-                <div class="section__headline">
+                <h2 class="section__headline">
                     {% include "csgomatches/partials/relativeDate.html" with date=match.first_map_at dateFormat="j. M Y" %}
-                </div>
+                </h2>
                 <div class="matchday__matches">
                 {% else %}
                     {% with match.get_previous_match as prev_match %}
@@ -22,9 +22,9 @@
                         </div>
                     </div>
                     <div class="section matchday">
-                        <div class="section__headline">
+                        <h2 class="section__headline">
                             {% include "csgomatches/partials/relativeDate.html" with date=match.first_map_at dateFormat="j. M Y" %}
-                        </div>
+                        </h2>
                         <div class="matchday__matches">
                         {% endif %}
                     {% endwith %}
