@@ -165,7 +165,7 @@
                         {% for link in match.externallink_set.visible %}
                             {% ifchanged link.link_flag %}
                                 <dt>
-                                    <img alt="{{ link.link_flag }}" src="{% ic link.get_flag_url %}" class="flag" />
+                                    <img alt="{{ link.link_flag }}" src="{% static link.get_flag_url %}" class="flag" />
                                 </dt>
                             {% else %}
                             {% endifchanged %}
