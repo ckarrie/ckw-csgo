@@ -83,7 +83,7 @@
                     {% endwith %}
 
                     <div class="match-maps__content">
-                        {% if mm.is_live %}<div class="match-maps">LIVE</div>{% endif %}
+                        {% if mm.is_live %}<div class="match-maps__live">LIVE</div>{% endif %}
 
                         <div class="match-maps__logo-wrapper">
                             {% if mm.map_pick_of %}
@@ -104,6 +104,7 @@
                             <div class="match-maps__score {% if mm.team_a_won %}is-win{% endif %}{% if mm.team_b_won %}is-loss{% endif %}">
                                 {{ mm.rounds_won_team_a }}
                             </div>
+                            <div>:</div>
                             <div class="match-maps__score {% if mm.team_b_won %}is-win{% endif %}{% if mm.team_a_won %}is-loss{% endif %}">
                                 {{ mm.rounds_won_team_b }}
                             </div>
