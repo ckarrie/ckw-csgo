@@ -117,6 +117,35 @@
         </div>
     </div>
 
+    {% with matchlinks=match.externallink_set.visible %}
+        {% if matchlinks.exists %}
+            <div class="section match-links">
+                <h2 class="section__headline">Watch live</h2>
+
+                <div class="match-links__links">
+                    {% for link in match.externallink_set.visible %}
+                        <a href="{{ link.url }}"
+                           target="_blank"
+                           title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})"
+                           class="match-links__link u-rounded">
+
+                            <div class="match-links__avatar">
+                                <img alt="{{ link.link_flag }}"
+                                     src="{% static link.get_flag_url %}"
+                                     class="match-links__avatar-flag" />
+                            </div>
+
+                            <div class="match-links__content">
+                                <div class="match-links__title">{{ link.title }}</div>
+                                <div class="match-links__language">{{ link.get_link_language|default:link.link_flag }}</div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+
     {% comment "" %}
     <div class="matches">
         <h2>
