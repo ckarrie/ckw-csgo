@@ -212,7 +212,7 @@ class Match(models.Model):
         return 'TBA vs TBA'
 
     def get_first_matchmap(self) -> 'MatchMap | None':
-        return self.matchmap_set.order_by('starting_at').first()
+        return self.matchmap_set.order_by('map_nr').first()
 
     def is_live(self) -> bool | None:
         if self.has_ended():
@@ -362,8 +362,7 @@ class MatchMap(models.Model):
         has_ended = self.has_ended()
         if has_ended:
             return False
-        calc_end = self.starting_at + timezone.timedelta(minutes=100)
-        return self.starting_at < timezone.now() < calc_end
+        return True
 
     def team_a_won(self) -> bool:
         return (self.rounds_won_team_a > self.rounds_won_team_b) and (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13)
