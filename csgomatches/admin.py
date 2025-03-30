@@ -19,10 +19,10 @@ class LineupInline(admin.TabularInline):
 
 class MatchMapInline(admin.TabularInline):
     model = models.MatchMap
-    extra = 0
+    extra = 1
     verbose_name = 'Map'
     verbose_name_plural = 'Match Maps'
-
+    readonly_fields = ('map_nr',)
 
 class ExternalLinkInline(admin.TabularInline):
     model = models.ExternalLink
@@ -32,10 +32,10 @@ class ExternalLinkInline(admin.TabularInline):
 # Models
 class MatchMapAdmin(admin.ModelAdmin):
     list_display = ['match', 'rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'has_ended', 'is_live', 'delay_minutes', 'starting_at', 'unplayed', 'map_nr']
-    list_editable = ['rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'map_nr']
+    list_editable = ['rounds_won_team_a', 'rounds_won_team_b', 'played_map']
     list_filter = ['match__tournament', 'match__lineup_a', 'match__lineup_b', 'map_nr']
 
-    ordering = ['-starting_at']
+    ordering = ['-map_nr']
 
     def has_ended(self, obj):
         return obj.has_ended()
