@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
@@ -17,12 +18,42 @@ class LineupInline(admin.TabularInline):
     extra = 0
 
 
+class MatchMapForm(forms.ModelForm):
+    """Custom form to prepopulate 'starting_at' from the Match instance."""
+    class Meta:
+        model = models.MatchMap
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        match_instance = kwargs.pop('match_instance', None)
+        super().__init__(*args, **kwargs)
+        
+        # Prepopulate 'starting_at' if this is a new instance and 'match_instance' exists
+        if match_instance and not self.instance.pk:
+            self.fields['starting_at'].initial = match_instance.first_map_at
+
+
 class MatchMapInline(admin.TabularInline):
     model = models.MatchMap
     extra = 0
+    form = MatchMapForm
     verbose_name = 'Map'
     verbose_name_plural = 'Match Maps'
+    readonly_fields = ('map_nr',)
 
+    def get_formset(self, request, obj=None, **kwargs):
+        """Pass the match instance to the formset for prepopulating 'starting_at'."""
+        kwargs['form'] = self._get_form_with_match(obj)
+        return super().get_formset(request, obj, **kwargs)
+
+    def _get_form_with_match(self, match_instance):
+        """Returns a custom form class that passes the match instance when instantiated."""
+        class MatchMapFormWithMatch(MatchMapForm):
+            def __init__(self, *args, **kwargs):
+                kwargs["match_instance"] = match_instance  # Pass Match instance
+                super().__init__(*args, **kwargs)
+
+        return MatchMapFormWithMatch
 
 class ExternalLinkInline(admin.TabularInline):
     model = models.ExternalLink
@@ -32,10 +63,10 @@ class ExternalLinkInline(admin.TabularInline):
 # Models
 class MatchMapAdmin(admin.ModelAdmin):
     list_display = ['match', 'rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'has_ended', 'is_live', 'delay_minutes', 'starting_at', 'unplayed', 'map_nr']
-    list_editable = ['rounds_won_team_a', 'rounds_won_team_b', 'played_map', 'map_nr']
+    list_editable = ['rounds_won_team_a', 'rounds_won_team_b', 'played_map']
     list_filter = ['match__tournament', 'match__lineup_a', 'match__lineup_b', 'map_nr']
 
-    ordering = ['-starting_at']
+    ordering = ['map_nr']
 
     def has_ended(self, obj):
         return obj.has_ended()
