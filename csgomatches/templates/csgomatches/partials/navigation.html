@@ -1,25 +1,34 @@
 <nav class="navigation">
     <ul class="navigation__list">
-        <li class="navigation__item">
-            <a class="navigation__link" href="{% url 'match_upcoming' %}">Counter-Strike</a>
-        </li>
-        <li class="navigation__item">
-            <a class="navigation__link" href="{% url 'match_upcoming' %}">League of Legends</a>
-        </li>
-        <li class="navigation__item">
-            <a class="navigation__link" href="{% url 'match_upcoming' %}">Trackmania</a>
-        </li>
-        <li class="navigation__item">
-            <a class="navigation__link" href="{% url 'match_upcoming' %}">Fortnite</a>
-        </li>
-        <li class="navigation__item">
-            <a class="navigation__link" href="{% url 'match_upcoming' %}">Tekken</a>
-        </li>
-        <li class="navigation__item">
-            <a class="navigation__link" href="{% url 'match_upcoming' %}">Starcraft 2</a>
-        </li>
-        <li class="navigation__item">
-            <a class="navigation__link" href="{% url 'match_upcoming' %}">Quake</a>
-        </li>
+        {% with game=match.lineup_a.game.name_short|lower %}
+            <li class="navigation__item">
+                <a href="{% url 'match_upcoming' %}"
+                   class="navigation__link  {% if game == 'cs' %}is-active{% endif %}">Counter-Strike</a>
+            </li>
+            <li class="navigation__item">
+                <a href="{% url 'match_upcoming' %}"
+                   class="navigation__link  {% if game == 'lol' %}is-active{% endif %}">League of Legends</a>
+            </li>
+            <li class="navigation__item">
+                <a href="{% url 'match_upcoming' %}"
+                   class="navigation__link  {% if game == 'tm' %}is-active{% endif %}">Trackmania</a>
+            </li>
+            <li class="navigation__item">
+                <a href="{% url 'match_upcoming' %}"
+                   class="navigation__link  {% if game == 'fn' %}is-active{% endif %}">Fortnite</a>
+            </li>
+            <li class="navigation__item">
+                <a href="{% url 'match_upcoming' %}"
+                   class="navigation__link  {% if game == 't8' %}is-active{% endif %}">Tekken</a>
+            </li>
+            <li class="navigation__item">
+                <a href="{% url 'match_upcoming' %}"
+                   class="navigation__link  {% if game == 'sc' %}is-active{% endif %}">Starcraft 2</a>
+            </li>
+            <li class="navigation__item">
+                <a href="{% url 'match_upcoming' %}"
+                   class="navigation__link  {% if game == 'cs' %}is-active{% endif %}">Quake</a>
+            </li>
+        {% endwith %}
     </ul>
 </nav>
