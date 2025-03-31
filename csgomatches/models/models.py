@@ -49,6 +49,9 @@ class Team(models.Model):
 
     objects = managers.TeamManager()
 
+    def get_slug(self):
+        return slugify(self.name)
+
     def get_hltv_id_from_name(self):
         from csgomatches.utils.scrapers.hltv import get_hltv_id_from_team_name
         return get_hltv_id_from_team_name(team_mdl=self)
@@ -70,6 +73,9 @@ class Player(models.Model):
     last_name = models.CharField(max_length=255)
     hltv_id = models.IntegerField(null=True, blank=True)
     esea_user_id = models.IntegerField(null=True, blank=True)
+
+    def get_slug(self):
+        return slugify(self.ingame_name)
 
     def __str__(self):
         return f'{self.first_name} "{self.ingame_name}" {self.last_name}'

@@ -1,0 +1,17 @@
+.lineup {
+	&__player-wrapper {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	&__player {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12px;
+		line-height: 1;
+
+		object-fit: contain;
+		object-position: bottom center;
+	}
+}

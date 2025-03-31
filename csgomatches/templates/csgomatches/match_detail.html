@@ -146,6 +146,27 @@
         {% endif %}
     {% endwith %}
 
+    {% if match.lineup_a and match.lineup_a.lineupplayer_set.exists %}
+        <div class="section lineup">
+            <h2 class="section__headline">Lineup</h2>
+
+            <div class="lineup__player-wrapper">
+                {% for lp in match.lineup_a.lineupplayer_set.all %}
+                    <div class="lineup__player">
+
+                        {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/"|add:match.lineup_a.team.get_slug|add:"/"|add:lp.player.get_slug|add:".png" %}
+                            <img src="{% static imagePath %}"
+                                 alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
+                                 class="lineup__player-image">
+                        {% endwith %}
+
+                        {{ lp.player.ingame_name }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
     {% comment "" %}
     <div class="matches">
         <h2>
