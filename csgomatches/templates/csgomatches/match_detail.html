@@ -29,7 +29,8 @@
         </div>
 
         <div class="match-summary__details">
-            <div class="match-summary__date">{{ match.first_map_at|date:'M D, Y - H:i' }}</div>
+            <div class="match-summary__date u-show-at-medium">{{ match.first_map_at|date:'M d, Y - H:i' }}</div>
+            <div class="match-summary__date u-show-lt-medium">{{ match.first_map_at|date:'d.m.y - H:i' }}</div>
             <div class="match-summary__score">
                 {% if match.team_a_won %}
                     <span class="match-summary__score--win">{{ score.0 }}</span><span>:</span><span class="match-summary__score--loss">{{ score.1 }}</span>
