@@ -16,6 +16,12 @@
 	}
 }
 
+@mixin lt-medium() {
+	@media (width < $bp-medium) {
+		@content;
+	}
+}
+
 @mixin large() {
 	@media (width >= $bp-large) {
 		@content;
