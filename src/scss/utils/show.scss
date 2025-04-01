@@ -1,0 +1,17 @@
+.u-show {
+	&-at {
+		&-medium {
+			@include lt-medium {
+				display: none;
+			}
+		}
+	}
+
+	&-lt {
+		&-medium {
+			@include medium {
+				display: none;
+			}
+		}
+	}
+}
