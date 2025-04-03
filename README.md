@@ -56,6 +56,10 @@ INSTALLED_APPS = [
     'csgomatches',           # Add
 ]
 
+# Add
+# 'csgomatches.context_processors.games'
+# to TEAMPLATES context_processors
+
 ROOT_URLCONF = 'csgomatches.urls'
 
 LANGUAGE_CODE = 'de'
