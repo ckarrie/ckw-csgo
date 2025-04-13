@@ -67,7 +67,7 @@ class TeamViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
 
 
 class TournamentViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
-    queryset = apps.get_model('csgomatches.Tournament').objects.all()
+    queryset = apps.get_model('csgomatches.CsTournament').objects.all()
     serializer_class = ser.CSGOTournamentSerializer
 
     def get_view_name(self):
@@ -75,7 +75,7 @@ class TournamentViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
 
 
 class MatchViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
-    queryset = apps.get_model('csgomatches.Match').objects.all()
+    queryset = apps.get_model('csgomatches.CsMatch').objects.all()
     serializer_class = ser.CSGOMatchSerializer
 
     def get_view_name(self):
@@ -87,7 +87,7 @@ class MatchViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
 
 
 class MatchUpcomingViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
-    queryset = apps.get_model('csgomatches.Match').objects.filter(first_map_at__gte=timezone.now())
+    queryset = apps.get_model('csgomatches.CsMatch').objects.filter(first_map_at__gte=timezone.now())
     serializer_class = ser.CSGOMatchSerializer
 
     def get_view_name(self):
@@ -120,7 +120,7 @@ class HLTVLiveScoreViewSet(CSGOView, mixins.RetrieveModelMixin, mixins.ListModel
 
     def get_queryset(self):
         last_7_days = timezone.now() - timezone.timedelta(days=7)
-        return apps.get_model('csgomatches.Match').objects.filter(
+        return apps.get_model('csgomatches.CsMatch').objects.filter(
             hltv_match_id__isnull=False,
             first_map_at__gte=last_7_days
         )

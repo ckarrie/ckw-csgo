@@ -1,5 +1,4 @@
 import os
-import requests
 import importlib.resources
 import twitter
 
@@ -157,10 +156,6 @@ class LineupPlayer(models.Model):
 class Tournament(models.Model):
     name = models.CharField(max_length=255)
     name_alt = models.CharField(max_length=255, null=True, blank=True)
-    name_hltv = models.CharField(max_length=255, null=True, blank=True)
-    name_99dmg = models.CharField(max_length=255, null=True, blank=True)
-    esea_bracket_id = models.IntegerField(null=True, blank=True)
-    esea_bracket_team_ids = models.CharField(max_length=255, null=True, blank=True, help_text='Comma Separated')
 
     match_set: QuerySet['Match']
 
@@ -170,6 +165,7 @@ class Tournament(models.Model):
         return self.name
 
     class Meta:
+        abstract = True
         ordering = ['name']
 
 
@@ -202,17 +198,14 @@ class Match(models.Model):
             (2, 'Defwin in favour of team B'),
         )
     )
-    hltv_match_id = models.CharField(max_length=20, null=True, blank=True, help_text='For HLTV Livescore during match')
-    esea_match_id = models.CharField(max_length=255, null=True, blank=True)
-    enable_tweet = models.BooleanField(default=False)
+    enable_tweet = models.BooleanField(default=True)
     last_tweet = models.DateTimeField(null=True, blank=True)
     last_tweet_id = models.CharField(max_length=255, null=True, blank=True)
-    enable_99dmg = models.BooleanField(default=False)
-    enable_hltv = models.BooleanField(default=True)
 
     matchmap_set: QuerySet['MatchMap']
 
     class Meta:
+        abstract = True
         ordering = ['-first_map_at']
         verbose_name_plural = "matches"
 
@@ -308,44 +301,9 @@ class Match(models.Model):
     def get_absolute_url(self) -> str:
         return reverse('match_details', kwargs={'slug': self.slug})
 
-    def get_livescore_url(self, request):
-        if self.hltv_match_id:
-            url = reverse('match_livescore-detail', kwargs={'pk': self.hltv_match_id})
-            return request.build_absolute_uri(url)
-
-    def update_hltv_livescore(self, request) -> None:
-        # Guard clause in case lineup_a is None
-        if not self.lineup_a:
-            return
-
-        url = self.get_livescore_url(request=request)
-        if url:
-            response = requests.get(url=url, params={'format': 'json'}).json()
-            maps = response.get('maps', [])
-            for map_data in maps:
-                map_nr = map_data.get('map_nr')
-                mm_obj = self.matchmap_set.filter(map_nr=map_nr).first()
-                if mm_obj:
-                    mm_obj.played_map = Map.objects.filter(
-                        models.Q(name=map_data.get('map_name')) |
-                        models.Q(cs_name=map_data.get('map_name'))
-                    ).first()
-                    score_a, score_b = map_data.get('score_a'), map_data.get('score_b')
-                    swap_score = False
-                    team_a_hltv_id = response.get('team_a_id')
-                    if team_a_hltv_id != self.lineup_a.team.hltv_id:
-                        swap_score = True
-
-                    if swap_score:
-                        score_b, score_a = score_a, score_b
-
-                    mm_obj.rounds_won_team_a = score_a
-                    mm_obj.rounds_won_team_b = score_b
-                    mm_obj.save()
-
 
 class MatchMap(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    match = models.ForeignKey("CsMatch", on_delete=models.CASCADE)
     played_map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
     rounds_won_team_a = models.IntegerField(default=0)
     rounds_won_team_b = models.IntegerField(default=0)
@@ -457,7 +415,7 @@ class MatchMap(models.Model):
 
 
 class ExternalLink(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    match = models.ForeignKey("CsMatch", on_delete=models.CASCADE)
     link_type = models.CharField(max_length=255, choices=(
         ('hltv_match', 'HLTV'),
         ('esea_match', 'ESEA Match'),
