@@ -2,6 +2,8 @@ import os
 import importlib.resources
 import twitter
 
+from typing import TYPE_CHECKING
+
 from django.contrib.sites.models import Site
 from django.db import models
 from django.db.models import QuerySet, Manager
@@ -137,7 +139,10 @@ class Tournament(models.Model):
     name = models.CharField(max_length=255)
     name_alt = models.CharField(max_length=255, null=True, blank=True)
 
-    match_set: QuerySet['Match']
+    # this will not actually exist, as the Tournament class is abstract
+    # it's just here for type checking
+    if TYPE_CHECKING:
+        match_set: QuerySet['Match']
 
     # mappool = models.ManyToManyField(Map)
 
@@ -273,7 +278,7 @@ class Match(models.Model):
                 self.slug = slugify(f"{self.tournament.name}-{self}-{idx}")
         else:
             self.slug = slugify(f"{self.tournament.name}-{self}")
-        existing_slugs = Match.objects.filter(slug=self.slug).exclude(pk=self.pk)
+        existing_slugs = self.__class__.objects.filter(slug=self.slug).exclude(pk=self.pk)
         if existing_slugs.exists():
             self.slug = slugify(f"id-{self.pk}")
         super(Match, self).save(*args, **kwargs)
