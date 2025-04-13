@@ -71,8 +71,9 @@ class Player(models.Model):
     ingame_name = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    hltv_id = models.IntegerField(null=True, blank=True)
-    esea_user_id = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return f'{self.first_name} "{self.ingame_name}" {self.last_name}'
@@ -135,7 +136,7 @@ class Lineup(models.Model):
 
 
 class LineupPlayer(models.Model):
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    player = models.ForeignKey('CsPlayer', on_delete=models.CASCADE)
     role = models.ForeignKey(PlayerRole, on_delete=models.CASCADE, null=True, blank=True)
     lineup = models.ForeignKey(Lineup, on_delete=models.CASCADE)
 

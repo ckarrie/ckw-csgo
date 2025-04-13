@@ -18,7 +18,7 @@ class CSGOTeamSerializer(serializers.ModelSerializer):
 
 class CSGOPlayerShortSerializer(serializers.ModelSerializer):
     class Meta:
-        model = apps.get_model('csgomatches.Player')
+        model = apps.get_model('csgomatches.CsPlayer')
         fields = ['ingame_name',]
 
 
