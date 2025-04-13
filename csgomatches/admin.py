@@ -1,12 +1,12 @@
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
-from . import models
+from csgomatches import models
 
 
 # Inlines
-class LineupPlayerInline(admin.TabularInline):
-    model = models.LineupPlayer
+class CsLineupPlayerInline(admin.TabularInline):
+    model = models.CsLineupPlayer
     autocomplete_fields = ['player']
     extra = 5
     max_num = 5
@@ -183,7 +183,7 @@ class LineupAdmin(admin.ModelAdmin):
     list_display = ['team', 'game', 'team_logo_url', 'active_from', 'get_is_active', 'is_active']
     autocomplete_fields = ['team']
     list_filter = ['game', 'is_active']
-    inlines = [LineupPlayerInline]
+    inlines = [CsLineupPlayerInline]
 
     def get_is_active(self, obj):
         return obj.get_is_active()
@@ -211,7 +211,7 @@ class PlayerAdmin(admin.ModelAdmin):
     list_editable = ['ingame_name', 'first_name', 'last_name']
 
 
-class LineupPlayerAdmin(admin.ModelAdmin):
+class CsLineupPlayerAdmin(admin.ModelAdmin):
     list_display = ['player', 'role', 'lineup']
     list_editable = ['role']
     list_filter = ['role']
@@ -240,7 +240,7 @@ def save_global(modeladmin, request, queryset):
 
 admin.site.register(models.Team, TeamAdmin)
 admin.site.register(models.Lineup, LineupAdmin)
-admin.site.register(models.LineupPlayer, LineupPlayerAdmin)
+admin.site.register(models.CsLineupPlayer, CsLineupPlayerAdmin)
 admin.site.register(models.ExternalLink, ExternalLinkAdmin)
 admin.site.register(models.Map)
 admin.site.register(models.CsMatch, MatchAdmin)
