@@ -2,6 +2,9 @@
 
 from django.db import migrations, models
 
+def set_default_map_nr(apps, schema_editor):
+    MatchMap = apps.get_model('csgomatches', 'MatchMap')
+    MatchMap.objects.filter(map_nr__isnull=True).update(map_nr=1)
 
 class Migration(migrations.Migration):
 
@@ -10,6 +13,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(set_default_map_nr),
         migrations.AlterField(
             model_name='matchmap',
             name='map_nr',
