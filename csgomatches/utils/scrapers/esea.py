@@ -293,8 +293,8 @@ def process_api_match_data(matches_data):
                 if team_a_score > first_matchmap.rounds_won_team_a or \
                                 team_b_score > first_matchmap.rounds_won_team_b or \
                         first_map_at_changed or \
-                                first_matchmap.played_map != map_instance:
-                    first_matchmap.played_map = map_instance
+                                first_matchmap.map != map_instance:
+                    first_matchmap.map = map_instance
                     first_matchmap.rounds_won_team_a = team_a_score
                     first_matchmap.rounds_won_team_b = team_b_score
                     first_matchmap.starting_at = match.first_map_at

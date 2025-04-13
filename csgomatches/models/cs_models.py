@@ -65,7 +65,7 @@ class CsMatch(global_models.Match):
                 map_nr = map_data.get('map_nr')
                 mm_obj = self.matchmap_set.filter(map_nr=map_nr).first()
                 if mm_obj:
-                    mm_obj.played_map = CsMap.objects.filter(
+                    mm_obj.map = CsMap.objects.filter(
                         models.Q(name=map_data.get('map_name')) |
                         models.Q(cs_name=map_data.get('map_name'))
                     ).first()
@@ -115,9 +115,9 @@ class CsLineupPlayer(global_models.LineupPlayer):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-class CsMatchMap(global_models.MatchMap):
+class CsMatchMap(global_models.OneOnOneMatchMap):
     match = models.ForeignKey(CsMatch, on_delete=models.CASCADE)
-    played_map = models.ForeignKey(CsMap, on_delete=models.CASCADE, null=True, blank=True)
+    map = models.ForeignKey(CsMap, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = "CS Match Map"
