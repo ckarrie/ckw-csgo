@@ -1,6 +1,7 @@
 import os
 import requests
 import twitter
+import importlib.resources
 from django.contrib.sites.models import Site
 from django.db import models
 from django.db.models import QuerySet
@@ -18,12 +19,12 @@ def get_flags_choices()-> list[tuple[str, str]]:
     returns a list of tuples of all available flags by looking at png files in 'static/csgomatches/flags'
     """
     choices: list[tuple[str, str]] = []
-    base_pth = os.path.dirname(os.path.abspath(__file__))
-    flags_pth = os.path.join(base_pth, 'static/csgomatches/flags')
-    for fn in os.listdir(flags_pth):
-        if fn.endswith('.png'):
-            short_fn = fn.replace('.png', '')
-            choices.append((short_fn, short_fn))
+    with importlib.resources.path('csgomatches', 'static') as static_folder_path:
+        flags_folder_path = os.path.join(static_folder_path, 'csgomatches', 'flags')
+        for fn in os.listdir(flags_folder_path):
+            if fn.endswith('.png'):
+                short_fn = fn.replace('.png', '')
+                choices.append((short_fn, short_fn))
     choices.sort(key=lambda x: x[0])
     return choices
 
