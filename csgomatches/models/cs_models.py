@@ -22,18 +22,15 @@ class CsTournament(global_models.Tournament):
     esea_bracket_id = models.IntegerField(null=True, blank=True)
     esea_bracket_team_ids = models.CharField(max_length=255, null=True, blank=True, help_text='Comma Separated')
 
-    class Meta:
-        ordering = ['name']
+    class Meta(global_models.Tournament.Meta):
         verbose_name = "CS Tournament"
         verbose_name_plural = "CS Tournaments"
 
 
 class CsLineup(global_models.Lineup):
-    class Meta:
+    class Meta(global_models.Lineup.Meta):
         verbose_name = "CS Lineup"
         verbose_name_plural = "CS Lineups"
-        ordering = ['team__name', '-active_from']
-        unique_together = ('team', 'active_from')
 
 
 class CsMap(global_models.Map):
@@ -54,8 +51,7 @@ class CsMatch(global_models.OneOnOneMatch):
 
     matchmap_set: QuerySet["CsMatchMap"]
 
-    class Meta:
-        ordering = ['-first_map_at']
+    class Meta(global_models.OneOnOneMatch.Meta):
         verbose_name = "CS Match"
         verbose_name_plural = "CS Matches"
 
@@ -133,8 +129,7 @@ class CsMatchMap(global_models.OneOnOneMatchMap):
     map = models.ForeignKey(CsMap, on_delete=models.CASCADE, null=True, blank=True)
     map_pick_of = models.ForeignKey(CsLineup, null=True, blank=True, on_delete=models.CASCADE)
 
-    class Meta:
-        ordering = ['starting_at']
+    class Meta(global_models.OneOnOneMatchMap.Meta):
         verbose_name = "CS Match Map"
         verbose_name_plural = "CS Match Maps"
 
