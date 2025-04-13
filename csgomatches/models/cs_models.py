@@ -33,7 +33,7 @@ class CsMap(global_models.Map):
         verbose_name_plural = "CS Maps"
 
 
-class CsMatch(global_models.Match):
+class CsMatch(global_models.OneOnOneMatch):
     tournament = models.ForeignKey(CsTournament, on_delete=models.CASCADE, related_name='match_set')
 
     hltv_match_id = models.CharField(max_length=20, null=True, blank=True, help_text='For HLTV Livescore during match')
