@@ -9,8 +9,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
-from . import managers
-from .utils.publishing import twitter_api
+from csgomatches import managers
+from csgomatches.utils.publishing import twitter_api
 
 
 def get_flags_choices()-> list[tuple[str, str]]:
@@ -52,7 +52,7 @@ class Team(models.Model):
     objects = managers.TeamManager()
 
     def get_hltv_id_from_name(self):
-        from .utils.scrapers.hltv import get_hltv_id_from_team_name
+        from csgomatches.utils.scrapers.hltv import get_hltv_id_from_team_name
         return get_hltv_id_from_team_name(team_mdl=self)
 
     def get_hltv_team_link(self):
