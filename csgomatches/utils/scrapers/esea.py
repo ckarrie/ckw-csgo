@@ -17,7 +17,7 @@ DEBUG = False
 """
 Run this local, not on a hosted server
 
-Usage: 
+Usage:
 
 /home/christian/workspace/venvs/wannbigspielt/bin/python /home/christian/workspace/src/github/ckw-csgo/csgomatches/utils/scrapers/esea.py
 """
@@ -335,7 +335,7 @@ def get_esea_team_schedule():
 
     # crawl player pages
     for wsb_team in apps.get_model('csgomatches.Team').objects.filter(id__in=TEAM_A_MAPPINGS.values()):
-        first_player_with_esea_user_id = apps.get_model('csgomatches.Player').objects.filter(
+        first_player_with_esea_user_id = apps.get_model('csgomatches.CsPlayer').objects.filter(
             esea_user_id__isnull=False,
             lineupplayer__lineup__team=wsb_team,
             lineupplayer__lineup__is_active=True,
