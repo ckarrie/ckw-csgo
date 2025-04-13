@@ -92,6 +92,9 @@ class Lineup(models.Model):
 
     objects = managers.LineupQuerySet.as_manager()
 
+    class Meta:
+        abstract = True
+
     def get_previous_lineup(self) -> 'Lineup | None':
         return self.team.lineup_set.filter(
             active_from__lt=self.active_from
@@ -122,10 +125,6 @@ class Lineup(models.Model):
             prev_lu.is_active = False
             prev_lu.save()
         super(Lineup, self).save(*args, **kwargs)
-
-    class Meta:
-        ordering = ['team__name', '-active_from']
-        unique_together = ('team', 'active_from')
 
 
 class LineupPlayer(models.Model):

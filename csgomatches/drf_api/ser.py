@@ -54,7 +54,7 @@ class CSGOLineupSerializer(serializers.ModelSerializer):
     players = CSGOLineupPlayerSerializer(many=True, read_only=True, source='lineupplayer_set')
 
     class Meta:
-        model = apps.get_model('csgomatches.Lineup')
+        model = apps.get_model('csgomatches.CsLineup')
         fields = ['team', 'team_logo_url', 'active_from', 'players', 'id']
 
 class CSGOMapSerializer(serializers.ModelSerializer):
