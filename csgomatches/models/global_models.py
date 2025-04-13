@@ -295,7 +295,7 @@ class Match(models.Model):
 
 class MatchMap(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    played_map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
+    map = models.ForeignKey(Map, on_delete=models.CASCADE, null=True, blank=True)
     rounds_won_team_a = models.IntegerField(default=0)
     rounds_won_team_b = models.IntegerField(default=0)
     starting_at = models.DateTimeField()
@@ -362,7 +362,7 @@ class MatchMap(models.Model):
                     'score_a': self.rounds_won_team_a,
                     'score_b': self.rounds_won_team_b,
                     'map_nr': self.map_nr,
-                    'map_name': self.played_map.name if self.played_map else "-",
+                    'map_name': self.map.name if self.map else "-",
                     'tournament': self.match.tournament.name,
                     'slug': self.match.get_absolute_url()
                 }
@@ -410,6 +410,14 @@ class MatchMap(models.Model):
             self.match.first_map_at = first_matchmap.starting_at
             self.match.save()
         self.send_tweet(prev_instance=prev_instance)
+
+class OneOnOneMatchMap(MatchMap):
+    """
+    Abstract Match between two opponnents
+    """
+
+    class Meta:
+        abstract = True
 
 
 class ExternalLink(models.Model):
