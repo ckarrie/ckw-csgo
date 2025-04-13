@@ -364,6 +364,19 @@ class OneOnOneMatchMap(MatchMap):
     class Meta(MatchMap.Meta):
         abstract = True
 
+    def __str__(self) -> str:
+        return f'{self.match} - {self.starting_at.date()} Map #{self.map_nr} (ID = {self.pk if self.pk else "-"})'
+
+
+class OneOnOneMatchMap(MatchMap):
+    match = models.ForeignKey(OneOnOneMatch, on_delete=models.CASCADE)
+    rounds_won_team_a = models.IntegerField(default=0)
+    rounds_won_team_b = models.IntegerField(default=0)
+    map_pick_of = models.ForeignKey(Lineup, null=True, blank=True, on_delete=models.CASCADE)
+
+    class Meta(MatchMap.Meta):
+        abstract = True
+
     def team_a_won(self) -> bool:
         return (self.rounds_won_team_a > self.rounds_won_team_b) and self.has_ended()
 
