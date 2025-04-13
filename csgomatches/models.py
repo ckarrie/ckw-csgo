@@ -212,7 +212,7 @@ class Match(models.Model):
         return 'TBA vs TBA'
 
     def get_first_matchmap(self) -> 'MatchMap | None':
-        return self.matchmap_set.order_by('starting_at').first()
+        return self.matchmap_set.order_by('map_nr').first()
 
     def is_live(self) -> bool | None:
         if self.has_ended():
@@ -339,7 +339,7 @@ class MatchMap(models.Model):
     rounds_won_team_b = models.IntegerField(default=0)
     starting_at = models.DateTimeField()
     delay_minutes = models.IntegerField(default=0)
-    map_nr = models.IntegerField(null=True)
+    map_nr = models.IntegerField(editable=False)
     map_pick_of = models.ForeignKey(Lineup, null=True, blank=True, on_delete=models.CASCADE)
     unplayed = models.BooleanField(default=False)
     # defwin_reason = models.CharField(max_length=255, null=True, blank=True)
@@ -362,8 +362,7 @@ class MatchMap(models.Model):
         has_ended = self.has_ended()
         if has_ended:
             return False
-        calc_end = self.starting_at + timezone.timedelta(minutes=100)
-        return self.starting_at < timezone.now() < calc_end
+        return True
 
     def team_a_won(self) -> bool:
         return (self.rounds_won_team_a > self.rounds_won_team_b) and (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13)
@@ -430,6 +429,9 @@ class MatchMap(models.Model):
         prev_instance = None
         if self.pk:
             prev_instance = MatchMap.objects.get(pk=self.pk)
+        if not self.map_nr:  # Only set map_nr if it's not already assigned
+            last_map = self.match.matchmap_set.order_by('-map_nr').first()
+            self.map_nr = (last_map.map_nr + 1) if last_map else 1
 
         super(MatchMap, self).save(*args, **kwargs)
         first_matchmap = self.match.get_first_matchmap()
