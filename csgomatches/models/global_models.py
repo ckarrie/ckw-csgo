@@ -144,7 +144,6 @@ class Tournament(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['name']
 
     # this will not actually exist, as the Tournament class is abstract
     # it's just here for type checking
@@ -194,8 +193,6 @@ class Match(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['-first_map_at']
-        verbose_name_plural = "matches"
 
     def get_first_matchmap(self) -> 'MatchMap | None':
         return self.matchmap_set.order_by('map_nr').first()
@@ -308,7 +305,6 @@ class MatchMap(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['starting_at']
 
     def get_prev_map(self) -> 'Self | None':
         # Filter using self.__class__ to ensure we are working with the subclass
