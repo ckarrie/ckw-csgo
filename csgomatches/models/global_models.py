@@ -159,7 +159,6 @@ class Tournament(models.Model):
 
 class Map(models.Model):
     name = models.CharField(max_length=255)
-    cs_name = models.CharField(max_length=255, default='de_')
 
     def __str__(self):
         return self.name
