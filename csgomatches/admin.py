@@ -18,23 +18,8 @@ class LineupInline(admin.TabularInline):
     extra = 0
 
 
-class MatchMapForm(forms.ModelForm):
-    """Custom form to prepopulate 'starting_at' from the Match instance."""
-    class Meta:
-        model = models.MatchMap
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        match_instance = kwargs.pop('match_instance', None)
-        super().__init__(*args, **kwargs)
-        
-        # Prepopulate 'starting_at' if this is a new instance and 'match_instance' exists
-        if match_instance and not self.instance.pk:
-            self.fields['starting_at'].initial = match_instance.first_map_at
-
-
-class MatchMapInline(admin.TabularInline):
-    model = models.MatchMap
+class CsMatchMapInline(admin.TabularInline):
+    model = models.CsMatchMap
     extra = 0
     form = MatchMapForm
     verbose_name = 'Map'
@@ -226,7 +211,7 @@ class MatchAdmin(admin.ModelAdmin):
     list_filter = ['lineup_a', 'lineup_b']
     search_fields = ['lineup_b__team__name', 'lineup_b__team__name_long', 'tournament__name']
     autocomplete_fields = ['lineup_a', 'lineup_b', 'tournament']
-    inlines = [MatchMapInline, ExternalLinkInline]
+    inlines = [CsMatchMapInline, ExternalLinkInline]
     # replace "Save and add another" button with "Save as new" to use previous matches as template
     # https://docs.djangoproject.com/en/5.1/ref/contrib/admin/#django.contrib.admin.ModelAdmin.save_as
     save_as = True
@@ -275,7 +260,7 @@ admin.site.register(models.CsLineupPlayer, CsLineupPlayerAdmin)
 admin.site.register(models.ExternalLink, ExternalLinkAdmin)
 admin.site.register(models.Map)
 admin.site.register(models.CsMatch, MatchAdmin)
-admin.site.register(models.MatchMap, MatchMapAdmin)
+admin.site.register(models.CsMatchMap, MatchMapAdmin)
 admin.site.register(models.CsPlayer, PlayerAdmin)
 admin.site.register(models.CsTournament, CsTournamentAdmin)
 admin.site.register(models.Game, GameAdmin)

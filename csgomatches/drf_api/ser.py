@@ -67,7 +67,7 @@ class CSGOMatchMapSerializer(serializers.ModelSerializer):
     played_map = CSGOMapSerializer(read_only=True)
 
     class Meta:
-        model = apps.get_model('csgomatches.MatchMap')
+        model = apps.get_model('csgomatches.CsMatchMap')
         fields = ['rounds_won_team_a', 'rounds_won_team_b', 'starting_at', 'map_pick_of', 'played_map', 'id']
 
 
@@ -97,7 +97,7 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
 
 class CSGOMatchMapUpdateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = apps.get_model('csgomatches.MatchMap')
+        model = apps.get_model('csgomatches.CsMatchMap')
         fields = ['map_nr', 'rounds_won_team_a', 'rounds_won_team_b',]
 
 
