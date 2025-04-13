@@ -443,7 +443,7 @@ class ExternalLink(models.Model):
         ordering = ['match', 'link_flag', 'link_type']
 
 
-class CSGOSiteSetting(models.Model):
+class SiteSetting(models.Model):
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
     main_team = models.ForeignKey('csgomatches.Team', on_delete=models.CASCADE, related_name='main_team_settings')
     second_team = models.ForeignKey('csgomatches.Team', on_delete=models.CASCADE, related_name='sec_team_settings')
