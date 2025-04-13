@@ -150,7 +150,7 @@ class HLTVLiveScoreViewSet(CSGOView, mixins.RetrieveModelMixin, mixins.ListModel
 class MatchMapUpdateView(CSGOView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
     permission_classes = (permissions.IsAdminUser, )
     authentication_classes = (authentication.BasicAuthentication, )
-    queryset = apps.get_model('csgomatches.MatchMap').objects.all()
+    queryset = apps.get_model('csgomatches.CsMatchMap').objects.all()
     serializer_class = ser.CSGOMatchMapUpdateSerializer
 
 class FaceitProLeagueMatchesView(CSGOView, viewsets.ViewSet):

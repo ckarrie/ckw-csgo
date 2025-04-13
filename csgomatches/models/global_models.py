@@ -1,8 +1,9 @@
+from abc import abstractmethod
 import os
 import importlib.resources
 import twitter
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from django.contrib.sites.models import Site
 from django.db import models
@@ -303,35 +304,39 @@ class MatchMap(models.Model):
     # defwin = models.BooleanField(default=False)
     cancelled = models.BooleanField(default=False)
 
-    def get_prev_map(self) -> 'MatchMap | None':
+    class Meta:
+        abstract = True
+        ordering = ['starting_at']
+
+    def get_prev_map(self) -> 'Self | None':
         return self.match.matchmap_set.filter(map_nr__lt=self.map_nr).order_by('map_nr').last()
 
-    def get_next_map(self) -> 'MatchMap | None':
+    def get_next_map(self) -> 'Self | None':
         return self.match.matchmap_set.filter(map_nr__gt=self.map_nr).order_by('map_nr').first()
 
+    @abstractmethod
     def has_ended(self) -> bool:
-        return (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2
+        """Has the MatchMap ended?"""
 
-    def is_live(self):
+    def is_live(self) -> bool:
         prev = self.get_prev_map()
         if prev and prev.is_live():
             return False
-        has_ended = self.has_ended()
-        if has_ended:
+        if self.has_ended():
             return False
         calc_end = self.starting_at + timezone.timedelta(minutes=100)
         return self.starting_at < timezone.now() < calc_end
 
     def team_a_won(self) -> bool:
-        return (self.rounds_won_team_a > self.rounds_won_team_b) and (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13)
+        return (self.rounds_won_team_a > self.rounds_won_team_b) and self.has_ended()
 
     def is_draw(self) -> bool:
-        return self.rounds_won_team_a == self.rounds_won_team_b
+        return self.rounds_won_team_a == self.rounds_won_team_b and self.has_ended()
 
     def team_b_won(self) -> bool:
-        return (self.rounds_won_team_a < self.rounds_won_team_b) and (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13)
+        return (self.rounds_won_team_a < self.rounds_won_team_b) and self.has_ended()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.match} - {self.starting_at.date()} Map #{self.map_nr} (ID = {self.pk if self.pk else "-"})'
 
     def send_tweet(self, prev_instance=None, interval=180.) -> None:
@@ -394,9 +399,6 @@ class MatchMap(models.Model):
             self.match.first_map_at = first_matchmap.starting_at
             self.match.save()
         self.send_tweet(prev_instance=prev_instance)
-
-    class Meta:
-        ordering = ['starting_at']
 
 
 class ExternalLink(models.Model):
