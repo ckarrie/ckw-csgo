@@ -48,7 +48,8 @@ class MatchMapAdmin(admin.ModelAdmin):
     is_live.boolean = True
 
 
-class TournamentAdmin(admin.ModelAdmin):
+# Currently no generic implementation of ModelAdmin for Tournament class
+class CsTournamentAdmin(admin.ModelAdmin):
     search_fields = ['name', 'name_alt', 'name_hltv', 'name_99dmg']
     list_display = ['name', 'name_alt', 'name_hltv', 'name_99dmg']
     actions = ['cleanup', 'merge_two']
@@ -242,11 +243,11 @@ admin.site.register(models.Lineup, LineupAdmin)
 admin.site.register(models.LineupPlayer, LineupPlayerAdmin)
 admin.site.register(models.ExternalLink, ExternalLinkAdmin)
 admin.site.register(models.Map)
-admin.site.register(models.Match, MatchAdmin)
+admin.site.register(models.CsMatch, MatchAdmin)
 admin.site.register(models.MatchMap, MatchMapAdmin)
 admin.site.register(models.CsPlayer, PlayerAdmin)
 admin.site.register(models.PlayerRole)
-admin.site.register(models.Tournament, TournamentAdmin)
+admin.site.register(models.CsTournament, CsTournamentAdmin)
 admin.site.register(models.Game, GameAdmin)
 admin.site.register(models.StaticPage)
 
