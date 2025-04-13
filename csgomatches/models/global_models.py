@@ -412,10 +412,7 @@ class OneOnOneMatchMap(MatchMap):
     def save(self, *args, **kwargs):
         prev_instance = None
         if self.pk:
-            prev_instance = MatchMap.objects.get(pk=self.pk)
-        if not self.map_nr:  # Only set map_nr if it's not already assigned
-            last_map = self.match.matchmap_set.order_by('-map_nr').first()
-            self.map_nr = (last_map.map_nr + 1) if last_map else 1
+            prev_instance = type(self).objects.get(pk=self.pk)
 
         super(MatchMap, self).save(*args, **kwargs)
         first_matchmap = self.match.get_first_matchmap()
