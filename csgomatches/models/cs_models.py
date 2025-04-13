@@ -108,5 +108,9 @@ class CsLineupPlayer(global_models.LineupPlayer):
         super().save(*args, **kwargs)
 
 class CsMatchMap(global_models.MatchMap):
+    class Meta:
+        verbose_name = "CS Match Map"
+        verbose_name_plural = "CS Match Maps"
+
     def has_ended(self) -> bool:
         return (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2
