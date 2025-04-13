@@ -3,15 +3,15 @@
 {% load static %}
 
 {% block page_title %}
-    {{ match }} - {{ match.first_map_at|date:"SHORT_DATE_FORMAT" }} - {{ match.tournament.name }} - Matchdetails - Wann spielt BIG?
+    {{ csmatch }} - {{ csmatch.first_map_at|date:"SHORT_DATE_FORMAT" }} - {{ csmatch.tournament.name }} - Matchdetails - Wann spielt BIG?
 {% endblock %}
 
 {% block meta %}
-    {% if match.is_live %}
+    {% if csmatch.is_live %}
         {% if update_seconds %}
             <meta http-equiv="refresh" content="{{ update_seconds }}">
         {% endif %}
-    {% elif match.is_upcoming %}
+    {% elif csmatch.is_upcoming %}
         <meta http-equiv="refresh" content="60">
     {% endif %}
 {% endblock %}
@@ -23,51 +23,51 @@
 {% block content %}
     <div class="matches">
         <h2>
-            <span class="bo">{{ match.first_map_at|date:'d.m.y H:i' }}</span>
-            <span class="team_a">{{ match.lineup_a.team }}</span>
-            {% if match.lineup_b %}
-                <span class="{% if match.team_a_won %}map_win{% elif match.team_b_won %}map_loss{% elif match.is_draw %}map_draw{% endif %}">{{ score.0 }}</span>:
-                <span class="{% if match.team_a_won %}map_loss{% elif match.team_b_won %}map_win{% elif match.is_draw %}map_draw{% endif %}">{{ score.1 }}</span>
-                <span class="team_b">{{ match.lineup_b.team }}</span>
+            <span class="bo">{{ csmatch.first_map_at|date:'d.m.y H:i' }}</span>
+            <span class="team_a">{{ csmatch.lineup_a.team }}</span>
+            {% if csmatch.lineup_b %}
+                <span class="{% if csmatch.team_a_won %}map_win{% elif csmatch.team_b_won %}map_loss{% elif csmatch.is_draw %}map_draw{% endif %}">{{ score.0 }}</span>:
+                <span class="{% if csmatch.team_a_won %}map_loss{% elif csmatch.team_b_won %}map_win{% elif csmatch.is_draw %}map_draw{% endif %}">{{ score.1 }}</span>
+                <span class="team_b">{{ csmatch.lineup_b.team }}</span>
             {% else %}
-                at {{ match.tournament.name }}
+                at {{ csmatch.tournament.name }}
             {% endif %}
 
             <small class="hide-on-small">
-                {{ match.tournament.name }}
+                {{ csmatch.tournament.name }}
             </small>
 
         </h2>
-        <h3 class="hide-on-large">{{ match.tournament.name }}</h3>
+        <h3 class="hide-on-large">{{ csmatch.tournament.name }}</h3>
 
         {% include 'csgomatches/blocks/box_matchrow_detail.html' %}
 
-        {% if match.lineup_a and match.lineup_a.lineupplayer_set.exists %}
+        {% if csmatch.lineup_a and csmatch.lineup_a.lineupplayer_set.exists %}
             <div class="lineup_a_box">
-                <h4>{% if match.lineup_a.game %}{{ match.lineup_a.game.name }}-{% endif %}Lineup {{ match.lineup_a.team.name }}</h4>
-                {% for lp in match.lineup_a.lineupplayer_set.all %}
+                <h4>{% if csmatch.lineup_a.game %}{{ csmatch.lineup_a.game.name }}-{% endif %}Lineup {{ csmatch.lineup_a.team.name }}</h4>
+                {% for lp in csmatch.lineup_a.lineupplayer_set.all %}
                     <code title="{{ lp.player.first_name }} {{ lp.player.last_name }}">{{ lp.player.ingame_name }}</code>
                 {% endfor %}
             </div>
 
         {% endif %}
 
-        {% if match.lineup_b and match.lineup_b.lineupplayer_set.exists %}
+        {% if csmatch.lineup_b and csmatch.lineup_b.lineupplayer_set.exists %}
             <div class="lineup_b_box">
-                <h4>Lineup {{ match.lineup_b.team.name }}</h4>
-                {% for lp in match.lineup_b.lineupplayer_set.all %}
+                <h4>Lineup {{ csmatch.lineup_b.team.name }}</h4>
+                {% for lp in csmatch.lineup_b.lineupplayer_set.all %}
                     <code title="{{ lp.player.first_name }} {{ lp.player.last_name }}">{{ lp.player.ingame_name }}</code>
                 {% endfor %}
             </div>
         {% endif %}
 
-        {% with matchlinks=match.externallink_set.visible %}
+        {% with matchlinks=csmatch.externallink_set.visible %}
             {% if matchlinks.exists %}
 
                 <div class="matchlinks-details">
                     <h4>Links:</h4>
                     <dl>
-                    {% for link in match.externallink_set.visible %}
+                    {% for link in csmatch.externallink_set.visible %}
                         {% ifchanged link.link_flag %}
                             <dt>
                             <img src="{% static link.get_flag_url %}" class="flag">
@@ -100,7 +100,7 @@
     <p style="font-size: small">
         Update-Intervall:
         {% for c in update_choices %}
-            <a href="{{ match.get_absolute_url }}?update={{ c }}" class="{% if update_seconds == c %}active{% endif %}">{% if c == 0 %}Aus{% else %}{{ c }}s{% endif %}</a>
+            <a href="{{ csmatch.get_absolute_url }}?update={{ c }}" class="{% if update_seconds == c %}active{% endif %}">{% if c == 0 %}Aus{% else %}{{ c }}s{% endif %}</a>
             {% if not forloop.last %} | {% endif %}
         {% endfor %}
     </p>
