@@ -1,5 +1,6 @@
 from enum import Enum
 from django.db import models
+from django.db.models import QuerySet
 from django.urls import reverse
 import requests
 
@@ -27,7 +28,7 @@ class CsTournament(global_models.Tournament):
 
 
 class CsMatch(global_models.Match):
-    tournament = models.ForeignKey(CsTournament, on_delete=models.CASCADE)
+    tournament = models.ForeignKey(CsTournament, on_delete=models.CASCADE, related_name='match_set')
 
     hltv_match_id = models.CharField(max_length=20, null=True, blank=True, help_text='For HLTV Livescore during match')
     esea_match_id = models.CharField(max_length=255, null=True, blank=True)
