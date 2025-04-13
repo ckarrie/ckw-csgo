@@ -413,7 +413,7 @@ class OneOnOneMatchMap(MatchMap):
     def save(self, *args, **kwargs):
         prev_instance = None
         if self.pk:
-            prev_instance = MatchMap.objects.get(pk=self.pk)
+            prev_instance = type(self).objects.get(pk=self.pk)
 
         super(MatchMap, self).save(*args, **kwargs)
         first_matchmap = self.match.get_first_matchmap()
