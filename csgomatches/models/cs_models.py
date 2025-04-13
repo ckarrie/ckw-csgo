@@ -28,6 +28,7 @@ class CsTournament(global_models.Tournament):
 
 
 class CsLineup(global_models.Lineup):
+    team = models.ForeignKey(global_models.Team, on_delete=models.CASCADE, related_name='lineup_set')
     class Meta(global_models.Lineup.Meta):
         verbose_name = "CS Lineup"
         verbose_name_plural = "CS Lineups"
@@ -49,7 +50,7 @@ class CsMatch(global_models.OneOnOneMatch):
     enable_99dmg = models.BooleanField(default=False)
     enable_hltv = models.BooleanField(default=True)
 
-    matchmap_set: QuerySet["CsMatchMap"]
+    matchmap_set: QuerySet['CsMatchMap']
 
     class Meta(global_models.OneOnOneMatch.Meta):
         verbose_name = "CS Match"
@@ -125,7 +126,7 @@ class CsLineupPlayer(global_models.LineupPlayer):
         super().save(*args, **kwargs)
 
 class CsMatchMap(global_models.OneOnOneMatchMap):
-    match = models.ForeignKey(CsMatch, on_delete=models.CASCADE)
+    match = models.ForeignKey(CsMatch, on_delete=models.CASCADE, related_name='matchmap_set')
     map = models.ForeignKey(CsMap, on_delete=models.CASCADE, null=True, blank=True)
     map_pick_of = models.ForeignKey(CsLineup, null=True, blank=True, on_delete=models.CASCADE)
 
