@@ -1,16 +1,17 @@
 import os
 import requests
+import importlib.resources
 import twitter
+
 from django.contrib.sites.models import Site
 from django.db import models
-from django.db.models import QuerySet
-# Create your models here.
+from django.db.models import QuerySet, Manager
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
-from . import managers
-from .utils.publishing import twitter_api
+from csgomatches import managers
+from csgomatches.utils.publishing import twitter_api
 
 
 def get_flags_choices()-> list[tuple[str, str]]:
@@ -18,12 +19,12 @@ def get_flags_choices()-> list[tuple[str, str]]:
     returns a list of tuples of all available flags by looking at png files in 'static/csgomatches/flags'
     """
     choices: list[tuple[str, str]] = []
-    base_pth = os.path.dirname(os.path.abspath(__file__))
-    flags_pth = os.path.join(base_pth, 'static/csgomatches/flags')
-    for fn in os.listdir(flags_pth):
-        if fn.endswith('.png'):
-            short_fn = fn.replace('.png', '')
-            choices.append((short_fn, short_fn))
+    with importlib.resources.path('csgomatches', 'static') as static_folder_path:
+        flags_folder_path = os.path.join(static_folder_path, 'csgomatches', 'flags')
+        for fn in os.listdir(flags_folder_path):
+            if fn.endswith('.png'):
+                short_fn = fn.replace('.png', '')
+                choices.append((short_fn, short_fn))
     choices.sort(key=lambda x: x[0])
     return choices
 
@@ -47,12 +48,12 @@ class Team(models.Model):
     hltv_id = models.IntegerField(null=True, blank=True)
     esea_team_id = models.IntegerField(null=True, blank=True)
 
-    lineup_set: QuerySet['Lineup']
+    lineup_set: managers.LineupQuerySet
 
     objects = managers.TeamManager()
 
     def get_hltv_id_from_name(self):
-        from .utils.scrapers.hltv import get_hltv_id_from_team_name
+        from csgomatches.utils.scrapers.hltv import get_hltv_id_from_team_name
         return get_hltv_id_from_team_name(team_mdl=self)
 
     def get_hltv_team_link(self):
@@ -92,6 +93,8 @@ class Lineup(models.Model):
     team_logo_url = models.URLField(null=True, blank=True)
     active_from = models.DateTimeField(help_text='Set -10 Days to avoid multiple Lineup creations')
     is_active = models.BooleanField(default=True)
+
+    lineupplayer_set: Manager['LineupPlayer']
 
     objects = managers.LineupQuerySet.as_manager()
 
