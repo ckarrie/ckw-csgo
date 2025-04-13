@@ -99,7 +99,7 @@ class MatchUpcomingViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
 
 
 class LineupViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
-    queryset = apps.get_model('csgomatches.Lineup').objects.all()
+    queryset = apps.get_model('csgomatches.CsLineup').objects.all()
     serializer_class = ser.CSGOLineupSerializer
 
     def get_view_name(self):
