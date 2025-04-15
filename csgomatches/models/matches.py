@@ -2,6 +2,7 @@ from django.db import models
 
 from csgomatches.models.base_models import BaseMatch, BaseOneOnOneMatch
 from csgomatches.models.global_models import Game
+from csgomatches.models.participants import CsParticipant
 
 class CsMatch(BaseOneOnOneMatch):
     match_type = models.CharField(
@@ -16,13 +17,13 @@ class CsMatch(BaseOneOnOneMatch):
         help_text="The time when the match starts.",
     )
     participant_1 = models.ForeignKey(
-        "csgomatches.CsLineup",
+        CsParticipant,
         on_delete=models.CASCADE,
         related_name="participant_1",
         verbose_name="Participant 1",
     )
     participant_2 = models.ForeignKey(
-        "csgomatches.CsLineup",
+        CsParticipant,
         on_delete=models.CASCADE,
         related_name="participant_2",
         verbose_name="Participant 2",
