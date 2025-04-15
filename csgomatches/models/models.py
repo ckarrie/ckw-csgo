@@ -1,6 +1,7 @@
 import os
 import requests
 import twitter
+import importlib.resources
 from django.contrib.sites.models import Site
 from django.db import models
 from django.db.models import QuerySet
@@ -9,8 +10,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
-from . import managers
-from .utils.publishing import twitter_api
+from csgomatches import managers
+from csgomatches.models.global_models import Game, Map
+from csgomatches.utils.publishing import twitter_api
 
 
 def get_flags_choices()-> list[tuple[str, str]]:
@@ -18,25 +20,14 @@ def get_flags_choices()-> list[tuple[str, str]]:
     returns a list of tuples of all available flags by looking at png files in 'static/csgomatches/flags'
     """
     choices: list[tuple[str, str]] = []
-    base_pth = os.path.dirname(os.path.abspath(__file__))
-    flags_pth = os.path.join(base_pth, 'static/csgomatches/flags')
-    for fn in os.listdir(flags_pth):
-        if fn.endswith('.png'):
-            short_fn = fn.replace('.png', '')
-            choices.append((short_fn, short_fn))
+    with importlib.resources.path('csgomatches', 'static') as static_folder_path:
+        flags_folder_path = os.path.join(static_folder_path, 'csgomatches', 'flags')
+        for fn in os.listdir(flags_folder_path):
+            if fn.endswith('.png'):
+                short_fn = fn.replace('.png', '')
+                choices.append((short_fn, short_fn))
     choices.sort(key=lambda x: x[0])
     return choices
-
-
-class Game(models.Model):
-    name = models.CharField(max_length=255, help_text='i.e. "TrackMania" or "Counter-Strike"')
-    name_short = models.CharField(max_length=4, help_text='i.e. "tm", "cs"')
-    game_logo_url = models.URLField(null=True, blank=True)
-    game_logo_width = models.IntegerField(null=True, blank=True, help_text="i.e. 50 for 50px")
-    slug = models.SlugField()
-
-    def __str__(self):
-        return self.name
 
 
 class Team(models.Model):
@@ -52,7 +43,7 @@ class Team(models.Model):
     objects = managers.TeamManager()
 
     def get_hltv_id_from_name(self):
-        from .utils.scrapers.hltv import get_hltv_id_from_team_name
+        from csgomatches.utils.scrapers.hltv import get_hltv_id_from_team_name
         return get_hltv_id_from_team_name(team_mdl=self)
 
     def get_hltv_team_link(self):
@@ -159,14 +150,6 @@ class Tournament(models.Model):
 
     class Meta:
         ordering = ['name']
-
-
-class Map(models.Model):
-    name = models.CharField(max_length=255)
-    cs_name = models.CharField(max_length=255, default='de_')
-
-    def __str__(self):
-        return self.name
 
 
 class Match(models.Model):
