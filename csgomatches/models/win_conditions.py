@@ -8,8 +8,8 @@ class BestOfWinCondition(BaseWinCondition):
     """
     Win condition for best-of matches with optional overtime.
     A winner is determined based on the scores of the participants.
-    The match can end in a draw if overtime is not enabled.
-    A game can only be won by a participant if they lead by at least 2 points.
+    The match can end in a draw if {has_draw} is true.
+    A game can only be won by a participant if they lead by at least {win_by} points.
     The overtime period will repeat indefinitely until a winner is determined.
     """
     best_of_number = models.PositiveSmallIntegerField(
