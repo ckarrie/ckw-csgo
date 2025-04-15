@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from csgomatches import managers
+from csgomatches.models.global_models import Game, Map
 from csgomatches.utils.publishing import twitter_api
 
 
@@ -27,17 +28,6 @@ def get_flags_choices()-> list[tuple[str, str]]:
                 choices.append((short_fn, short_fn))
     choices.sort(key=lambda x: x[0])
     return choices
-
-
-class Game(models.Model):
-    name = models.CharField(max_length=255, help_text='i.e. "TrackMania" or "Counter-Strike"')
-    name_short = models.CharField(max_length=4, help_text='i.e. "tm", "cs"')
-    game_logo_url = models.URLField(null=True, blank=True)
-    game_logo_width = models.IntegerField(null=True, blank=True, help_text="i.e. 50 for 50px")
-    slug = models.SlugField()
-
-    def __str__(self):
-        return self.name
 
 
 class Team(models.Model):
@@ -160,14 +150,6 @@ class Tournament(models.Model):
 
     class Meta:
         ordering = ['name']
-
-
-class Map(models.Model):
-    name = models.CharField(max_length=255)
-    cs_name = models.CharField(max_length=255, default='de_')
-
-    def __str__(self):
-        return self.name
 
 
 class Match(models.Model):
