@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy
 from polymorphic.models import PolymorphicModel
 from abc import abstractmethod
 
-from csgomatches.models.global_models import Game, Organization
+from csgomatches.models.global_models import Game, Map, Organization, WinType
 
 # Note: We're using a lot of polymorphic models here to allow for dynamic participant types.
 # This makes querying and filtering easier in the future.
@@ -194,6 +194,38 @@ class BaseOneOnOneMatch(BaseMatch):
         """
         Returns the score of the match.
         """
+        score_participant_1 = 0
+        score_participant_2 = 0
+        for match_map in self.maps:
+            winner = match_map.get_winner()
+            if not winner:
+                return score_participant_1, score_participant_2
+            if winner == WinType.PARTICIPANT_1:
+                score_participant_1 += 1
+            elif winner == WinType.PARTICIPANT_2:
+                score_participant_2 += 1
+            elif winner == WinType.DRAW:
+                score_participant_1 += 1
+                score_participant_2 += 1
+        return score_participant_1, score_participant_2
+
+    def has_ended(self) -> bool:
+        """
+        Check if the match has ended.
+        """
+        score = self.get_score()
+        match self.match_type:
+            case self.MatchType.BO1:
+                return score[0] == 1 or score[1] == 1
+            case self.MatchType.BO3:
+                return score[0] == 2 or score[1] == 2
+            case self.MatchType.BO5:
+                return score[0] == 3 or score[1] == 3
+            case self.MatchType.BO7:
+                return score[0] == 4 or score[1] == 4
+            case _:
+                raise ValueError(f"Invalid match type: {self.match_type}.")
+
 
 class BaseMatchMap(PolymorphicModel):
     """
@@ -215,7 +247,7 @@ class BaseMatchMap(PolymorphicModel):
         verbose_name="Map Start Time",
         help_text="The time when the map starts.",
     )
-    
+
     class Meta:
         abstract = True
         ordering = ["map_number"]
