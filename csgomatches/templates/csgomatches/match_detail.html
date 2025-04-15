@@ -1,6 +1,7 @@
 {% extends "csgomatches/base/base.html" %}
 
 {% load static %}
+{% load image_utils %}
 
 {% block page_title %}
     {{ match }} - {{ match.first_map_at|date:'SHORT_DATE_FORMAT' }} - {{ match.tournament.name }} - Matchdetails - Wann spielt BIG?
@@ -156,9 +157,17 @@
                     <div class="lineup__player">
 
                         {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/"|add:match.lineup_a.team.get_slug|add:"/"|add:lp.player.get_slug|add:".png" %}
-                            <img src="{% static imagePath %}"
-                                 alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
-                                 class="lineup__player-image">
+                            {% if imagePath|file_exists %}
+                                <img src="{% static imagePath %}"
+                                     alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
+                                     class="lineup__player-image">
+                            {% else %}
+                                {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/noprofile.png" %}
+                                    <img src="{% static imagePath %}"
+                                         alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
+                                         class="lineup__player-image">
+                                {% endwith %}
+                            {% endif %}
                         {% endwith %}
 
                         {{ lp.player.ingame_name }}
