@@ -1,0 +1,23 @@
+.update-sidebar {
+	color: var(--color-grey-400);
+	display: flex;
+	gap: 20px;
+
+	@include medium {
+		gap: unset;
+		justify-content: space-between;
+	}
+
+	&__interval {
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+			text-underline-offset: 2px;
+		}
+
+		&.isActive {
+			color: var(--color-grey-200);
+		}
+	}
+}

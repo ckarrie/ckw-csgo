@@ -195,19 +195,20 @@
     </div>
 {% endblock bottomContent %}
 
-{% block footer_0 %}
-    <p>
-        Update-Intervall:
-        {% for c in update_choices %}
-            <a href="{{ match.get_absolute_url }}?update={{ c }}"
-               class="{% if update_seconds == c %}active{% endif %}">
-                {% if c == 0 %}
-                    Aus
-                {% else %}
-                    {{ c }}s
-                {% endif %}
-            </a>
-            {% if not forloop.last %}|{% endif %}
-        {% endfor %}
-    </p>
-{% endblock footer_0 %}
+{% block sidebarGroupMid %}
+    {% if match.is_live %}
+        <div class="update-sidebar">
+            <div class="update-sidebar__label">Update-Intervall:</div>
+            {% for c in update_choices %}
+                <a href="{{ match.get_absolute_url }}?update={{ c }}"
+                   class="update-sidebar__interval {% if update_seconds == c %}isActive{% endif %}">
+                    {% if c == 0 %}
+                        Aus
+                    {% else %}
+                        {{ c }}s
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock sidebarGroupMid %}
