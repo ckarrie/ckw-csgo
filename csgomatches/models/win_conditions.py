@@ -155,5 +155,5 @@ class BestOfWinCondition(BaseWinCondition):
             self.win_by
         )
         if not self.name:
-            self.name = f"BO{self.best_of_number}{f'OT_BO{self.best_of_number_overtime}' if self.has_overtime else ''}_WIN_BY{self.win_by}"
+            self.name = f"BO{self.best_of_number}{f'OT_BO{self.best_of_number_overtime}' if self.has_overtime else ''}{'DRAW_POSSIBLE' if self.has_draw else ''}_WIN_BY{self.win_by}"
         super().save(*args, **kwargs)
