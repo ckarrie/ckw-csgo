@@ -4,8 +4,6 @@ from django.utils.translation import gettext_lazy
 from polymorphic.models import PolymorphicModel
 from abc import abstractmethod
 
-from csgomatches.models.global_models import Game, Map, Organization, WinType
-
 # Note: We're using a lot of polymorphic models here to allow for dynamic participant types.
 # This makes querying and filtering easier in the future.
 
@@ -15,14 +13,15 @@ class BaseParticipant(PolymorphicModel):
     Abstract model for a participant in a match.
     """
     game = models.ForeignKey(
-        Game,
+        "csgomatches.Game",
         on_delete=models.SET_NULL,
         editable=False,  # The game will be set by the subclass
+        null=True,
     )
     organization = models.ForeignKey(
-        Organization,
+        "csgomatches.Organization",
         on_delete=models.CASCADE,
-        related_name="participants",
+        related_name="%(class)ss",
     )
     name = models.CharField(
         max_length=255,
@@ -30,7 +29,6 @@ class BaseParticipant(PolymorphicModel):
     )
 
     class Meta:
-        abstract = True
         ordering = ["name"]
         verbose_name = "Participant"
         verbose_name_plural = "Participants"
@@ -45,13 +43,12 @@ class BaseLineup(BaseParticipant):
     A lineup is a collection of players that represent an organization in a match.
     """
     class Meta:
-        abstract = True
         ordering = ["name"]
         verbose_name = "Lineup"
         verbose_name_plural = "Lineups"
 
     def __str__(self):
-        return f"{self.organization.name} - {self.game.name_short}"
+        return f"{self.organization.name} - {self.game.name_short if self.game else 'Unknown Game'} - {self.name}"
 
 
 class BasePlayer(BaseParticipant):
@@ -72,7 +69,7 @@ class BasePlayer(BaseParticipant):
     lineup = models.ForeignKey(
         BaseLineup,
         on_delete=models.CASCADE,
-        related_name="players",
+        related_name="%(class)ss",
         null=True,
         blank=True,
         help_text="The lineup this player belongs to. Can be null if the player is not part of a lineup.",
@@ -94,7 +91,6 @@ class BaseWinCondition(PolymorphicModel):
     name = models.CharField(max_length=255, editable=False)
 
     class Meta:
-        abstract = True
         verbose_name = "Win Condition"
         verbose_name_plural = "Win Conditions"
         ordering = ["name"]
@@ -105,7 +101,7 @@ class BaseWinCondition(PolymorphicModel):
         Abstract method to determine if the match has ended.
         This should be implemented in subclasses.
         """
-        pass
+        raise NotImplementedError("This method should be implemented in subclasses.")
 
     @abstractmethod
     def get_winner(self, *args, **kwargs) -> Optional[BaseParticipant]:
@@ -113,8 +109,7 @@ class BaseWinCondition(PolymorphicModel):
         Abstract method to get the winner of the match.
         This should be implemented in subclasses.
         """
-        if not self.has_ended():
-            return None
+        raise NotImplementedError("This method should be implemented in subclasses.")
 
     @abstractmethod
     def save(self, *args, **kwargs):
@@ -152,14 +147,13 @@ class BaseMatch(PolymorphicModel):
     win_condition_map = models.ForeignKey(
         BaseWinCondition,
         on_delete=models.CASCADE,
-        related_name="matches",
+        related_name="%(class)ses",
         verbose_name="Map Win Condition",
         help_text="The win condition for each map of the match.",
     )
 
     class Meta:
-        abstract = True
-        ordering = ["-starts_at"]
+        ordering = ["-starting_at"]
         verbose_name = "Match"
         verbose_name_plural = "Matches"
 
@@ -177,10 +171,12 @@ class BaseOneOnOneMatch(BaseMatch):
     participant_1 = models.ForeignKey(
         BaseParticipant,
         on_delete=models.CASCADE,
+        related_name="one_on_one_matches_p1",
     )
     participant_2 = models.ForeignKey(
         BaseParticipant,
         on_delete=models.CASCADE,
+        related_name="one_on_one_matches_p2",
     )
 
     @property
@@ -194,6 +190,7 @@ class BaseOneOnOneMatch(BaseMatch):
         """
         Returns the score of the match.
         """
+        from csgomatches.models.global_models import WinType
         score_participant_1 = 0
         score_participant_2 = 0
         for match_map in self.maps:
@@ -235,10 +232,10 @@ class BaseMatchMap(PolymorphicModel):
     match = models.ForeignKey(
         BaseMatch,
         on_delete=models.CASCADE,
-        related_name="match_maps",
+        related_name="%(class)ss",
     )
     map = models.ForeignKey(
-        Map,
+        "csgomatches.Map",
         on_delete=models.CASCADE,
         related_name="maps",
     )
@@ -249,7 +246,6 @@ class BaseMatchMap(PolymorphicModel):
     )
 
     class Meta:
-        abstract = True
         ordering = ["map_number"]
         verbose_name = "Match Map"
         verbose_name_plural = "Match Maps"
