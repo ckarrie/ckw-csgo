@@ -9,8 +9,4 @@ class CsMatch(BaseOneOnOneMatch):
         # Ensure the game is set to Counter-Strike
         if not self.game:
             self.game = Game.objects.get(name_short="cs")
-
-        # set slug
-        if not self.slug:
-            self.slug = f"{self.participant_1.slug}_{self.participant_2.slug}_{self.starts_at.strftime('%Y%m%d%H%M%S')}"
         super().save(*args, **kwargs)

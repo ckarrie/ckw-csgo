@@ -1,5 +1,6 @@
 from typing import Optional, Tuple
 from django.db import models
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy
 from polymorphic.models import PolymorphicModel
 from abc import abstractmethod
@@ -35,6 +36,13 @@ class BaseParticipant(PolymorphicModel):
 
     def __str__(self):
         return f"{self.__class__.__name__} for {self.organization}"
+
+    @property
+    def slug(self) -> str:
+        """
+        Returns the slug for the participant.
+        """
+        return f"{slugify(self.name)}-{self.organization.slug}"
 
 
 class BaseLineup(BaseParticipant):
@@ -222,6 +230,15 @@ class BaseOneOnOneMatch(BaseMatch):
                 return score[0] == 4 or score[1] == 4
             case _:
                 raise ValueError(f"Invalid match type: {self.match_type}.")
+
+    def save(self, *args, **kwargs):
+        # Ensure no instances of BaseOneOnOneMatch are created
+        if type(self) is BaseOneOnOneMatch:
+            raise ValueError("BaseOneOnOneMatch cannot be instantiated directly.")
+        # Ensure the slug is set
+        if not self.slug:
+            self.slug = f"{self.participant_1.slug}_{self.participant_2.slug}_{self.starting_at.strftime('%Y%m%d%H%M%S')}"
+        super().save(*args, **kwargs)
 
 
 class BaseMatchMap(PolymorphicModel):
