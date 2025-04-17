@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
-from . import models
+from csgomatches import models
 
 
 # Inlines
@@ -27,7 +27,7 @@ class MatchMapForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         match_instance = kwargs.pop('match_instance', None)
         super().__init__(*args, **kwargs)
-        
+
         # Prepopulate 'starting_at' if this is a new instance and 'match_instance' exists
         if match_instance and not self.instance.pk:
             self.fields['starting_at'].initial = match_instance.first_map_at
