@@ -1,5 +1,3 @@
-from django.db import models
-
 from csgomatches.models.base_models import BaseOneOnOneMatch
 from csgomatches.models.global_models import Game
 

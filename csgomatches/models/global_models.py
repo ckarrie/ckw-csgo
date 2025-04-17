@@ -1,7 +1,7 @@
 from enum import Enum
 from django.db import models
 
-from csgomatches.models.base_models import BaseMatch, BaseParticipant, BaseMatchMap
+from csgomatches.models.base_models import BaseParticipant, BaseMatchMap
 
 
 class WinType(Enum):
