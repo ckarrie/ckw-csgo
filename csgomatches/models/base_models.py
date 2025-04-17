@@ -58,6 +58,12 @@ class BaseLineup(BaseParticipant):
     def __str__(self):
         return f"{self.organization.name} - {self.game.name_short if self.game else 'Unknown Game'} - {self.name}"
 
+    def save(self, *args, **kwargs):
+        # Ensure no instances of BaseLineup are created
+        if type(self) is BaseLineup:
+            raise ValueError("BaseLineup cannot be instantiated directly.")
+        super().save(*args, **kwargs)
+
 
 class BasePlayer(BaseParticipant):
     """
@@ -94,6 +100,15 @@ class BasePlayer(BaseParticipant):
             return f'{self.first_name} "{self.name}" {self.last_name}'
         return f"{self.name}"
 
+    def save(self, *args, **kwargs):
+        # Ensure no instances of BasePlayer are created
+        if type(self) is BasePlayer:
+            raise ValueError("BasePlayer cannot be instantiated directly.")
+        # Ensure the game is set to the same as the lineup
+        if self.lineup and not self.game:
+            self.game = self.lineup.game
+        super().save(*args, **kwargs)
+
 
 class BaseWinCondition(PolymorphicModel):
     name = models.CharField(max_length=255, editable=False)
@@ -126,6 +141,12 @@ class BaseWinCondition(PolymorphicModel):
         This should be implemented in subclasses.
         This is abstract to ensure the subclass implements logic to set the name.
         """
+        # Ensure no instances of BaseWinCondition are created
+        if type(self) is BaseWinCondition:
+            raise ValueError("BaseWinCondition cannot be instantiated directly.")
+        # Ensure the name is set
+        if not self.name:
+            raise ValueError("Name must be set for a WinCondition.")
         super().save(*args, **kwargs)
 
 
@@ -172,6 +193,12 @@ class BaseMatch(PolymorphicModel):
         This should be implemented in subclasses.
         This is abstract to ensure the subclass implements logic to set the slug.
         """
+        # Ensure no instances of BaseMatch are created
+        if type(self) is BaseMatch:
+            raise ValueError("BaseMatch cannot be instantiated directly.")
+        # Ensure the slug is set
+        if not self.slug:
+            raise ValueError("Slug must be set for a Match.")
         super().save(*args, **kwargs)
 
 
@@ -285,3 +312,9 @@ class BaseMatchMap(PolymorphicModel):
         Get the winner of the match map.
         """
         return self.win_condition.get_winner(self)
+
+    def save(self, *args, **kwargs):
+        # Ensure no instances of BaseMatchMap are created
+        if type(self) is BaseMatchMap:
+            raise ValueError("BaseMatchMap cannot be instantiated directly.")
+        super().save(*args, **kwargs)
