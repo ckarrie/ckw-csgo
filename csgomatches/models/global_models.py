@@ -41,6 +41,7 @@ class Map(models.Model):
     def __str__(self):
         return self.name
 
+
 class OneOnOneMatchMap(BaseMatchMap):
     score_participant_1 = models.PositiveSmallIntegerField(
         default=0,
