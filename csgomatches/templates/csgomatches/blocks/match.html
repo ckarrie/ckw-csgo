@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    <div class="matchrow__col">
+    <div class="matchrow__col matchrow__col--teams">
         <div class="matchrow__team matchrow__team--left">
             <div class="matchrow__team-name">{{ match.lineup_a.team }}</div>
             <div class="matchrow__team-logo-wrapper">
@@ -28,9 +28,7 @@
                 {% endif %}
             </div>
         </div>
-    </div>
 
-    <div class="matchrow__col">
         <div class="matchrow__score-box u-rounded">
             {% if match.is_live %}
                 {% with map=match.get_live_matchmap %}
@@ -52,9 +50,7 @@
                 </div>
             {% endif %}
         </div>
-    </div>
 
-    <div class="matchrow__col">
         <div class="matchrow__team matchrow__team--right">
             {% if match.lineup_b %}
                 <div class="matchrow__team-logo-wrapper">

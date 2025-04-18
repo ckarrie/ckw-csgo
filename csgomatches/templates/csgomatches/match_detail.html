@@ -160,13 +160,13 @@
                             {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/"|add:match.lineup_a.team.get_slug|add:"/"|add:lp.player.get_slug|add:".png" %}
                                 {% if imagePath|file_exists %}
                                     <img src="{% static imagePath %}"
-                                     alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
-                                     class="lineup__player-image">
-                            {% else %}
-                                {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/noprofile.png" %}
-                                    <img src="{% static imagePath %}"
                                          alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
                                          class="lineup__player-image">
+                                {% else %}
+                                    {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/noprofile.png" %}
+                                        <img src="{% static imagePath %}"
+                                             alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
+                                             class="lineup__player-image">
                                     {% endwith %}
                                 {% endif %}
                             {% endwith %}

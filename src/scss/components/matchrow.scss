@@ -1,7 +1,7 @@
 .matchrow {
 	display: flex;
 	align-items: center;
-	height: 72px;
+	height: 80px;
 	width: 100%;
 
 	background-color: var(--color-dark-800);
@@ -12,12 +12,27 @@
 
 	text-decoration: none;
 
+	@include medium {
+		height: 72px;
+	}
+
 	&.is-live& {
 		background: linear-gradient(90deg, var(--color-dark-800) 0%, var(--color-dark-700) 100%), #0b0b0c;
 	}
 
 	&__col {
 		flex: 0;
+
+		&--teams {
+			display: grid;
+			grid-template-areas:
+				'TEAM1 SCORE'
+				'TEAM2 SCORE';
+
+			@include medium {
+				grid-template-areas: 'TEAM1 SCORE TEAM2';
+			}
+		}
 
 		&--grow {
 			flex: 1;
@@ -68,23 +83,45 @@
 		hyphens: auto;
 
 		&--left {
-			text-align: right;
-			justify-content: end;
+			grid-area: TEAM1;
+			flex-direction: row-reverse;
+			justify-content: start;
+
+			@include medium {
+				flex-direction: row;
+				text-align: right;
+				justify-content: end;
+			}
 		}
 
 		&--right {
-			text-align: left;
+			grid-area: TEAM2;
+
+			@include medium {
+				text-align: left;
+			}
 		}
 	}
 
 	&__team-name {
-		font-size: 14px;
+		font-size: 16px;
 		font-weight: 500;
+
+		@include medium {
+			font-size: 14px;
+		}
 	}
 
 	&__team-logo-wrapper {
-		width: 40px;
-		height: 40px;
+		width: 32px;
+		height: 32px;
+		padding: 3px;
+
+		@include medium {
+			padding: unset;
+			width: 40px;
+			height: 40px;
+		}
 	}
 
 	&__team-logo {
@@ -95,15 +132,20 @@
 	}
 
 	&__score-box {
+		grid-area: SCORE;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 4px;
 		width: 105px;
-		height: 40px;
+		height: 100%;
 		margin: 0 var(--matchrow-cel-spacing);
 		background-color: var(--color-dark-700);
 		font-size: 14px;
+
+		@include medium {
+			height: 40px;
+		}
 	}
 
 	&__score {
@@ -118,15 +160,25 @@
 		}
 	}
 
+	&__score-divider {
+		@include lt-medium {
+			display: none;
+		}
+	}
+
 	&__tournament {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		width: 100%;
-		text-align: left;
-		padding: 0 var(--matchrow-cel-spacing);
-		font-size: 14px;
-		text-wrap: balance;
+		display: none;
+
+		@include medium {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			width: 100%;
+			text-align: left;
+			padding: 0 var(--matchrow-cel-spacing);
+			font-size: 14px;
+			text-wrap: balance;
+		}
 	}
 
 	&__tournament-logo-wrapper {
