@@ -156,9 +156,10 @@
                 {% for lp in match.lineup_a.lineupplayer_set.all %}
                     <div class="lineup__player">
 
-                        {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/"|add:match.lineup_a.team.get_slug|add:"/"|add:lp.player.get_slug|add:".png" %}
-                            {% if imagePath|file_exists %}
-                                <img src="{% static imagePath %}"
+                        {% if match.lineup_a.game %}
+                            {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/"|add:match.lineup_a.team.get_slug|add:"/"|add:lp.player.get_slug|add:".png" %}
+                                {% if imagePath|file_exists %}
+                                    <img src="{% static imagePath %}"
                                      alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
                                      class="lineup__player-image">
                             {% else %}
@@ -166,9 +167,10 @@
                                     <img src="{% static imagePath %}"
                                          alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
                                          class="lineup__player-image">
-                                {% endwith %}
-                            {% endif %}
-                        {% endwith %}
+                                    {% endwith %}
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
 
                         {{ lp.player.ingame_name }}
                     </div>
