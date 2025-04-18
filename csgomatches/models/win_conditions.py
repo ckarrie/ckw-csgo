@@ -1,8 +1,43 @@
 from django.db import models
 from typing import Optional
 
+from django.forms import ValidationError
+
 from csgomatches.models.base_models import BaseWinCondition
-from csgomatches.models.global_models import OneOnOneMatchMap, WinType
+from csgomatches.models.global_models import OneOnOneMatchMap, SimpleMatchMap, WinType
+
+class SimpleWinCondition(BaseWinCondition):
+    """
+    Win condition where a participant can either win or lose, based on a boolean value.
+    As the model doesn't have any fields, only one instance of this model can exist.
+    """
+    class Meta:
+        verbose_name = "Simple Win Condition"
+        verbose_name_plural = "Simple Win Conditions"
+        ordering = ["name"]
+
+    def has_ended(self, match_map: SimpleMatchMap) -> bool:
+        return match_map.is_finished
+
+    def get_winner(self, match_map: SimpleMatchMap) -> Optional[WinType]:
+        if not self.has_ended(match_map):
+            return None
+        # match has ended so we can return the participant with higher score
+        if match_map.is_won:
+            return WinType.WIN
+        else:
+            return WinType.LOSS
+
+    def clean(self):
+        # Ensure that only one instance of this model can exist
+        if SimpleWinCondition.objects.exclude(pk=self.pk).exists():
+            raise ValidationError("Only one instance of SimpleWinCondition can exist.", code="multiple_instances")
+
+    def save(self, *args, **kwargs):
+        if not self.name:
+            self.name = "SimpleWinCondition"
+        super().save(*args, **kwargs)
+
 
 class BestOfWinCondition(BaseWinCondition):
     """
@@ -38,31 +73,28 @@ class BestOfWinCondition(BaseWinCondition):
         verbose_name="Win by",
     )
 
-    def __str__(self):
-        return self.name
-
     class Meta:
-        verbose_name = "Win Condition"
-        verbose_name_plural = "Win Conditions"
+        verbose_name = "Best of Win Condition"
+        verbose_name_plural = "Best of Win Conditions"
         ordering = ["name"]
 
-    @staticmethod
-    def _validate(has_overtime: int, has_draw: int, best_of_number: int, best_of_number_overtime: Optional[int], win_by: int) -> None:
+    def clean(self) -> None:
         """
         Validate the input parameters.
         """
-        if has_overtime and has_draw:
-            raise ValueError("Match cannot have both overtime and draw.")
-        if best_of_number == 0:
-            raise ValueError("Best of number must be greater than 0.")
-        if has_overtime and not best_of_number_overtime:
-            raise ValueError("Best of number for overtime must greater than 0 if has_overtime is True.")
-        if win_by == 0:
-            raise ValueError("Win by must be greater than 0.")
-        if has_overtime and win_by <= 1:
-            raise ValueError("Win by must be greater than 1 if has_overtime is True.")
-        if has_draw and best_of_number % 2 == 1:
-            raise ValueError("Best of number must be even if has_draw is True.")
+        if self.has_overtime and self.has_draw:
+            raise ValidationError("Match cannot have both overtime and draw.", code="overtime_and_draw")
+        if self.best_of_number == 0:
+            raise ValidationError("Best of number must be greater than 0.", code="best_of_number_zero")
+        if self.has_overtime and not self.best_of_number_overtime:
+            raise ValidationError("Best of number for overtime must greater than 0 if has_overtime is True.", code="best_of_number_overtime_zero")
+        if self.win_by == 0:
+            raise ValidationError("Win by must be greater than 0.", code="win_by_zero")
+        if self.has_overtime and self.win_by <= 1:
+            raise ValidationError("Win by must be greater than 1 if has_overtime is True.", code="win_by_overtime")
+        if self.has_draw and self.best_of_number % 2 == 1:
+            raise ValidationError("Best of number must be even if has_draw is True.", code="best_of_number_draw")
+        super().clean()
 
     def has_ended(self, match_map: OneOnOneMatchMap) -> bool:
         # Validation should be done in the save method, but we do it here just in case
@@ -147,13 +179,6 @@ class BestOfWinCondition(BaseWinCondition):
 
 
     def save(self, *args, **kwargs):
-        BestOfWinCondition._validate(
-            self.has_overtime,
-            self.has_draw,
-            self.best_of_number,
-            self.best_of_number_overtime,
-            self.win_by
-        )
         if not self.name:
             self.name = f"BO{self.best_of_number}{f'OT_BO{self.best_of_number_overtime}' if self.has_overtime else ''}{'DRAW_POSSIBLE' if self.has_draw else ''}_WIN_BY{self.win_by}"
         super().save(*args, **kwargs)

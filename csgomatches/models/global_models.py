@@ -8,6 +8,8 @@ class WinType(Enum):
     PARTICIPANT_1 = "Participant 1"
     PARTICIPANT_2 = "Participant 2"
     DRAW = "Draw"
+    WIN = "Win"
+    LOSS = "Loss"
 
 
 class Game(models.Model):
@@ -51,3 +53,7 @@ class OneOnOneMatchMap(BaseMatchMap):
         default=0,
         verbose_name="Score Participant 2",
     )
+
+class SimpleMatchMap(BaseMatchMap):
+    is_finished = models.BooleanField(default=False, verbose_name="Is Finished")
+    is_won = models.BooleanField(default=False, verbose_name="Is Won")

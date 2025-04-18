@@ -90,7 +90,6 @@ class BasePlayer(BaseParticipant):
     )
 
     class Meta:
-        abstract = True
         ordering = ["name"]
         verbose_name = "Player"
         verbose_name_plural = "Players"
@@ -111,12 +110,15 @@ class BasePlayer(BaseParticipant):
 
 
 class BaseWinCondition(PolymorphicModel):
-    name = models.CharField(max_length=255, editable=False)
+    name = models.CharField(max_length=255, editable=False, unique=True)
 
     class Meta:
         verbose_name = "Win Condition"
         verbose_name_plural = "Win Conditions"
         ordering = ["name"]
+
+    def __str__(self):
+        return self.name
 
     @abstractmethod
     def has_ended(self, *args, **kwargs) -> bool:
