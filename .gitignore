@@ -6,7 +6,7 @@ ckw_csgomatches.egg-info/
 *.pyc
 
 csgomatches/utils/scrapers/push_credentials.txt
-
+csgomatches/utils/scrapers/twitch_credentials.json
 csgomatches/utils/publishing/twitter_credentials.txt
 
 csgomatches/utils/scrapers/proxies.json

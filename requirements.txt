@@ -12,3 +12,4 @@ python-telegram-bot==21.5
 python-twitter==3.5
 requests==2.32.3
 setuptools==78.1.0
+twitchAPI==4.4.0
