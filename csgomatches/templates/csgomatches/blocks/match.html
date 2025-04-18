@@ -6,7 +6,7 @@
     <div class="matchrow__col">
         <div class="matchrow__game-logo-wrapper">
             {% if match.lineup_a.game %}
-                {% with image_path="csgomatches/games/"|add:match.lineup_a.game.name_short|add:".svg" %}
+                {% with image_path="csgomatches/games/"|add:match.lineup_a.game.name_short|lower|add:".svg" %}
                     <img class="matchrow__game-logo"
                          src="{% static image_path %}"
                          alt="{{ match.lineup_a.game.name }}"
