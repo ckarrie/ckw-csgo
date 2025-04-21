@@ -48,6 +48,8 @@ ul {
 
 a {
 	color: inherit;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
