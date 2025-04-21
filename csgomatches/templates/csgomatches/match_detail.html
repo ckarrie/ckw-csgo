@@ -119,35 +119,6 @@
         </div>
     </div>
 
-    {% with matchlinks=match.externallink_set.visible %}
-        {% if matchlinks.exists %}
-            <div class="section match-links">
-                <h2 class="section__headline">Game Links</h2>
-
-                <div class="match-links__links">
-                    {% for link in match.externallink_set.visible %}
-                        <a href="{{ link.url }}"
-                           target="_blank"
-                           title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})"
-                           class="match-links__link u-rounded">
-
-                            <div class="match-links__avatar">
-                                <img alt="{{ link.link_flag }}"
-                                     src="{% static link.get_flag_url %}"
-                                     class="match-links__avatar-flag" />
-                            </div>
-
-                            <div class="match-links__content">
-                                <div class="match-links__title">{{ link.title }}</div>
-                                <div class="match-links__language">{{ link.get_link_language|default:link.link_flag }}</div>
-                            </div>
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
-    {% endwith %}
-
     {% if match.lineup_a and match.lineup_a.lineupplayer_set.exists %}
         <div class="section lineup">
             <h2 class="section__headline">Lineup</h2>
@@ -178,6 +149,57 @@
             </div>
         </div>
     {% endif %}
+
+    {% with matchlinks=match.externallink_set.visible %}
+        {% if matchlinks.exists %}
+            <div class="section match-links">
+                {% if match.externallink_set.casts %}
+                    <h2 class="section__headline">Casts & Links</h2>
+                {% else %}
+                    <h2 class="section__headline">Links</h2>
+                {% endif %}
+
+                {% if match.externallink_set.casts %}
+                    <div class="match-links__casts">
+                        {% for link in match.externallink_set.casts %}
+                            <a href="{{ link.url }}"
+                               target="_blank"
+                               title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})"
+                               class="match-links__cast u-rounded">
+
+                                <div class="match-links__avatar">
+                                    <img alt="{{ link.link_flag }}"
+                                         src="{% static link.get_flag_url %}"
+                                         class="match-links__avatar-flag" />
+                                </div>
+
+                                <div class="match-links__content">
+                                    <div class="match-links__title">{{ link.title }}</div>
+                                    <div class="match-links__language">{{ link.get_link_language|default:link.link_flag }}</div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="match-links__links">
+                    {% for link in match.externallink_set.noCasts %}
+
+                        {% ifchanged link.link_flag %}
+                            <img src="{% static link.get_flag_url %}"
+                                 alt="{{ link.get_link_language|default:link.link_flag }}"
+                                 class="match-links__flag" />
+                        {% else %}
+                        {% endifchanged %}
+                        <a href="{{ link.url }}"
+                           target="_blank"
+                           title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})"
+                           class="match-links__link">{{ link.get_link_type_display }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
 {% endblock content %}
 
 {% block bottomContent %}

@@ -1,5 +1,5 @@
 .match-links {
-	&__links {
+	&__casts {
 		display: grid;
 		gap: 16px;
 
@@ -12,7 +12,7 @@
 		}
 	}
 
-	&__link {
+	&__cast {
 		padding: 12px;
 		background-color: var(--color-dark-800);
 		display: flex;
@@ -22,6 +22,29 @@
 
 		&:hover {
 			background-color: var(--color-dark-600);
+		}
+	}
+
+	&__links {
+		display: flex;
+		align-items: center;
+	}
+
+	&__link {
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+
+		&:not(:first-child) {
+			margin-left: 10px;
+		}
+	}
+
+	&__flag {
+		&:not(:first-child) {
+			margin-left: 16px;
 		}
 	}
 
