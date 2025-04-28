@@ -241,9 +241,11 @@ class Match(models.Model):
             if last_map.has_ended():
                 return True
                 # if last_map.starting_at
-        team_a, team_b = self.get_overall_score()
-        if team_a > team_b or team_b > team_a:
-            return True
+        # Disabled for now, doesnt make sense in my optinion :)
+        # team_a, team_b = self.get_overall_score()
+        #if team_a > team_b or team_b > team_a:
+        #    return True
+
         return False
 
     def is_upcoming(self) -> bool | None:
