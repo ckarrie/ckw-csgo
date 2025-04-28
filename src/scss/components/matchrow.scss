@@ -29,7 +29,7 @@
 				'TEAM1 SCORE'
 				'TEAM2 SCORE';
 
-			@include medium {
+			@include small {
 				grid-template-areas: 'TEAM1 SCORE TEAM2';
 			}
 		}
@@ -87,7 +87,7 @@
 			flex-direction: row-reverse;
 			justify-content: start;
 
-			@include medium {
+			@include small {
 				flex-direction: row;
 				text-align: right;
 				justify-content: end;
@@ -97,7 +97,7 @@
 		&--right {
 			grid-area: TEAM2;
 
-			@include medium {
+			@include small {
 				text-align: left;
 			}
 		}
@@ -143,12 +143,27 @@
 		background-color: var(--color-dark-700);
 		font-size: 14px;
 
-		@include medium {
+		gap: 0px;
+		width: 40px;
+		font-size: 16px;
+		flex-direction: column;
+
+		@include small {
+			gap: 4px;
+			width: 105px;
+			font-size: 14px;
+			flex-direction: row;
 			height: 40px;
 		}
 	}
 
 	&__score {
+		@include lt-small {
+			flex: 1 1 50%;
+			display: flex;
+			align-items: center;
+		}
+
 		&.is-win {
 			/* color: var(--color-green);
 			color: var(--color-green); */
@@ -161,7 +176,7 @@
 	}
 
 	&__score-divider {
-		@include lt-medium {
+		@include lt-small {
 			display: none;
 		}
 	}

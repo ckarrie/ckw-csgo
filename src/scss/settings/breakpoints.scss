@@ -1,3 +1,9 @@
+@mixin lt-small() {
+	@media (width < $bp-small) {
+		@content;
+	}
+}
+
 @mixin small() {
 	@media (width >= $bp-small) {
 		@content;
