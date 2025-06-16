@@ -24,12 +24,15 @@
 		flex: 0;
 
 		&--teams {
+			margin-left: 20px;
+
 			display: grid;
 			grid-template-areas:
 				'TEAM1 SCORE'
 				'TEAM2 SCORE';
 
 			@include small {
+				margin-left: unset;
 				grid-template-areas: 'TEAM1 SCORE TEAM2';
 			}
 		}
