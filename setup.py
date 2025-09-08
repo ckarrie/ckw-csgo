@@ -19,8 +19,8 @@ setup(
     install_requires=[
         'django>=5.1',
         'requests',
-        'psycopg2-binary', 'bs4', 'python-dateutil', 'python-memcached',
-        'django_ical', 'websocket_client', 'djangorestframework>=3.15.2', 'websockets',
+        'psycopg2-binary', 'bs4', 'python-dateutil', 'pymemcache',
+        'django_ical', 'websocket_client', 'djangorestframework', 'websockets',
         'python-twitter'
     ]
 )
