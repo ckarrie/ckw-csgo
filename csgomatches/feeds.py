@@ -26,10 +26,18 @@ class UpcomingEventsFeed(ICalFeed):
         return str(item)
 
     def item_description(self, item):
-        return item.tournament.name
+        return '+++\ncover="https://www.roaringbears.de/Event_Cover.png"\n+++\n\n\n' + item.tournament.name
+
+    def item_location(self, item):
+        return item.get_block_voice_channel_display()
 
     def item_start_datetime(self, item):
         return item.first_map_at
+
+    def item_end_datetime(self, item):
+        last_map = item.get_last_matchmap()
+        if last_map:
+            return last_map.starting_at + timezone.timedelta(hours=1)
 
     def item_link(self, item):
         return item.get_absolute_url()

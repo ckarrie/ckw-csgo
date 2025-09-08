@@ -26,7 +26,7 @@
                 {% else %}
 
                 {% endifchanged %}
-                <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.get_link_type_display }}</code></a>
+                <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}"><code>{{ link.title }}</code></a>
             {% endfor %}
             {% if user.is_staff %}
                 <a class="admin-link" href="{% url 'admin:csgomatches_match_change' match.pk %}">&#x2744;</a>
@@ -35,6 +35,7 @@
                 {% else %}
                     <span class="tweet-disabled">&#128038;</span>
                 {% endif %}
+                {{ match.block_voice_channel|default:"kein VC" }}
             {% endif %}
         </small>
 

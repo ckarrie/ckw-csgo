@@ -198,6 +198,11 @@ class Match(models.Model):
     enable_99dmg = models.BooleanField(default=False)
     enable_hltv = models.BooleanField(default=True)
 
+    block_voice_channel = models.CharField(choices=(
+        ("VC 1", 'VC: Public Viewing 1'),
+        ("VC 2", 'VC: Public Viewing 2'),
+    ), max_length=100, null=True, blank=True)
+
     matchmap_set: QuerySet['MatchMap']
 
     class Meta:
@@ -213,6 +218,9 @@ class Match(models.Model):
 
     def get_first_matchmap(self) -> 'MatchMap | None':
         return self.matchmap_set.order_by('starting_at').first()
+
+    def get_last_matchmap(self) -> 'MatchMap | None':
+        return self.matchmap_set.order_by('starting_at').last()
 
     def is_live(self) -> bool | None:
         if self.has_ended():

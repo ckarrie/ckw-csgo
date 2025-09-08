@@ -1,19 +1,26 @@
 from django.urls import reverse
 from rest_framework import serializers
 from django.apps import apps
+from django.utils import timezone
 
 from . import ser_objects
 
 class CSGOTournamentSerializer(serializers.ModelSerializer):
     class Meta:
         model = apps.get_model('csgomatches.Tournament')
-        fields = ['name', 'name_alt', 'name_hltv', 'name_99dmg', 'id']
+        fields = [
+            'id', 'name', 'name_alt', 
+            #'name_hltv', 'name_99dmg'
+        ]
 
 
 class CSGOTeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = apps.get_model('csgomatches.Team')
-        fields = ['name', 'name_long', 'name_alt', 'hltv_id', 'id']
+        fields = [
+            'id', 'name', 'name_long', 'name_alt', 
+            #'hltv_id',
+        ]
 
 
 class CSGOPlayerShortSerializer(serializers.ModelSerializer):
@@ -42,12 +49,12 @@ class CSGOLineupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = apps.get_model('csgomatches.Lineup')
-        fields = ['team', 'team_logo_url', 'active_from', 'players', 'id']
+        fields = ['id', 'team', 'team_logo_url', 'active_from', 'players']
 
 class CSGOMapSerializer(serializers.ModelSerializer):
     class Meta:
         model = apps.get_model('csgomatches.Map')
-        fields = ['name', 'cs_name', 'id']
+        fields = ['id', 'name', 'cs_name']
 
 class CSGOMatchMapSerializer(serializers.ModelSerializer):
     map_pick_of = CSGOLineupSerializer(read_only=True)
@@ -55,7 +62,7 @@ class CSGOMatchMapSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = apps.get_model('csgomatches.MatchMap')
-        fields = ['rounds_won_team_a', 'rounds_won_team_b', 'starting_at', 'map_pick_of', 'played_map', 'id']
+        fields = ['id', 'rounds_won_team_a', 'rounds_won_team_b', 'starting_at', 'map_pick_of', 'played_map']
 
 
 class CSGOMatchSerializer(serializers.ModelSerializer):
@@ -64,7 +71,9 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
     lineup_b = CSGOLineupSerializer(read_only=True)
     livescore_url = serializers.SerializerMethodField(read_only=True, source='get_livescore_url')
     html_detail_url = serializers.SerializerMethodField(read_only=True, source='get_html_detail_url')
+    last_map_end = serializers.SerializerMethodField(read_only=True, source='get_last_map_end')
     matchmaps = CSGOMatchMapSerializer(many=True, source='matchmap_set')
+    block_voice_channel_display = serializers.SerializerMethodField(read_only=True, source='get_block_voice_channel_display')
 
     def get_livescore_url(self, obj):
         if obj.hltv_match_id:
@@ -77,9 +86,21 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         return request.build_absolute_uri(url)
 
+    def get_block_voice_channel_display(self, obj):
+        return obj.get_block_voice_channel_display()
+
+    def get_last_map_end(self, obj):
+        last_map = obj.get_last_matchmap()
+        if last_map:
+            return last_map.starting_at + timezone.timedelta(hours=1)
+
     class Meta:
         model = apps.get_model('csgomatches.Match')
-        fields = ['tournament', 'lineup_a', 'lineup_b', 'slug', 'bestof', 'first_map_at', 'cancelled', 'hltv_match_id', 'livescore_url', 'html_detail_url', 'matchmaps']
+        fields = [
+            'id', 'tournament', 'lineup_a', 'lineup_b', 'slug', 'bestof', 
+            'first_map_at', 'last_map_end', 'cancelled', 'hltv_match_id', 'livescore_url', 'html_detail_url', 'matchmaps',
+            'block_voice_channel_display', 'block_voice_channel'
+        ]
 
 
 class CSGOMatchMapUpdateSerializer(serializers.ModelSerializer):
