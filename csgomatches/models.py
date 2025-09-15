@@ -264,6 +264,14 @@ class Match(models.Model):
                     lineup_b_mapwins += 1
         return lineup_a_mapwins, lineup_b_mapwins
 
+    def get_game(self) -> 'Game | None':
+        if self.lineup_a:
+            if self.lineup_a.game:
+                return self.lineup_a.game
+        if self.lineup_b:
+            if self.lineup_b.game:
+                return self.lineup_b.game
+
     def team_a_won(self) -> bool:
         if self.cancelled == 1:
             return True
@@ -346,6 +354,7 @@ class MatchMap(models.Model):
     starting_at = models.DateTimeField()
     delay_minutes = models.IntegerField(default=0)
     map_nr = models.IntegerField(null=True)
+    map_pick_of_team = models.IntegerField(default=0, choices=((0, 'Decider'), (1, 'Team A'), (2, 'Team B')))
     map_pick_of = models.ForeignKey(Lineup, null=True, blank=True, on_delete=models.CASCADE)
     unplayed = models.BooleanField(default=False)
     # defwin_reason = models.CharField(max_length=255, null=True, blank=True)
@@ -437,12 +446,17 @@ class MatchMap(models.Model):
         if self.pk:
             prev_instance = MatchMap.objects.get(pk=self.pk)
 
+        if self.map_pick_of_team == 1:
+            self.map_pick_of = self.match.lineup_a
+        if self.map_pick_of_team == 2:
+            self.map_pick_of = self.match.lineup_b
+
         super(MatchMap, self).save(*args, **kwargs)
         first_matchmap = self.match.get_first_matchmap()
         if first_matchmap:
             self.match.first_map_at = first_matchmap.starting_at
             self.match.save()
-        self.send_tweet(prev_instance=prev_instance)
+        #self.send_tweet(prev_instance=prev_instance)
 
     class Meta:
         ordering = ['starting_at']

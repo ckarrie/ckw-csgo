@@ -19,9 +19,11 @@ class LineupInline(admin.TabularInline):
 
 class MatchMapInline(admin.TabularInline):
     model = models.MatchMap
+    fields = ['played_map', 'map_nr', 'rounds_won_team_a', 'rounds_won_team_b', 'starting_at', 'map_pick_of_team']
     extra = 0
     verbose_name = 'Map'
     verbose_name_plural = 'Match Maps'
+    show_change_link = True
 
 
 class ExternalLinkInline(admin.TabularInline):

@@ -41,19 +41,29 @@ urlpatterns = [
         name="match_history"
     ),
     path(
+        '<int:pk>',
+        cache_page(timeout=CACHE_MATCHDETAIL_TIME)(views.MatchDetailView.as_view()),
+        name="match_details_pk_int"
+    ),
+    path(
         '<slug:slug>',
         cache_page(timeout=CACHE_MATCHDETAIL_TIME)(views.MatchDetailView.as_view()),
         name="match_details"
     ),
+    #path(
+    #    '@<int:pk>',
+    #    cache_page(timeout=CACHE_MATCHDETAIL_TIME)(views.MatchDetailView.as_view()),
+    #    name="match_details_pk_at"
+    #),
     path(
         'feeds/big_upcoming.ics',
-        cache_page(timeout=CACHE_INDEX_TIME)(feeds.UpcomingEventsFeed()),
+        cache_page(timeout=CACHE_MATCHDETAIL_TIME)(feeds.UpcomingEventsFeed()),
         name='ics_upcoming_big'
     ),
     # FilteredUpcomingEventsFeed
     path(
         'feeds/big_upcoming_cs.ics',
-        cache_page(timeout=CACHE_INDEX_TIME)(feeds.FilteredUpcomingEventsFeed()),
+        cache_page(timeout=CACHE_MATCHDETAIL_TIME)(feeds.FilteredUpcomingEventsFeed()),
         name='ics_upcoming_big_cs'
     ),
     path(

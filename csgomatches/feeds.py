@@ -20,13 +20,26 @@ class UpcomingEventsFeed(ICalFeed):
         ).order_by('first_map_at')
 
     def item_title(self, item):
+        score_a, score_b = item.get_overall_score()
         if item.is_live() or item.has_ended():
-            score_a, score_b = item.get_overall_score()
-            return f"{item} - {score_a}:{score_b}"
-        return str(item)
+            #score_a, score_b = item.get_overall_score()
+            current_matchmap = None
+            current_map_name = ''
+            for mm in item.matchmap_set.all():
+                if mm.played_map:
+                    current_map_name = mm.played_map.name
+                if mm.is_live():
+                    return f"{item} - {current_map_name} {mm.rounds_won_team_a}:{mm.rounds_won_team_b} ({score_a}:{score_b})"
+        return f"{item} - {score_a}:{score_b}"
+        #return str(item)
 
     def item_description(self, item):
-        return '+++\ncover="https://www.roaringbears.de/Event_Cover.png"\n+++\n\n\n' + item.tournament.name
+        d = {
+            'cover_url': "https://www.roaringbears.de/Event_Cover.png",
+            'item_url': 'https://wannspieltbig.de/' + item.slug,
+            'event': item.tournament.name,
+        }
+        return '+++\ncover="{cover_url}"\n+++\n\n\n{event}\n\n{item_url}'.format(**d)
 
     def item_location(self, item):
         return item.get_block_voice_channel_display()

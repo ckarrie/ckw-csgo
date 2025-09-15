@@ -26,7 +26,7 @@
         <span class="played_map">{{ mm.played_map|default_if_none:"-" }}</span>
         <br/>
         {% if mm.map_pick_of %}
-            <span class="map_pick no-wrap" title="Map pick von {{ mm.map_pick_of }}">({{ mm.map_pick_of }})</span><br/>
+            <span class="map_pick no-wrap" title="Map pick von {{ mm.map_pick_of }}">({{ mm.map_pick_of.team.name }})</span><br/>
         {% endif %}
     </div>
 </div>
