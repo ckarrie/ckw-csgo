@@ -5,7 +5,8 @@ import requests
 import websockets
 from bs4 import BeautifulSoup
 
-from ... import models
+from csgomatches import models
+from csgomatches.models import CsLineup
 
 
 def get_hltv_team_name_from_id(hltv_id: int):
@@ -25,7 +26,7 @@ def get_hltv_team_name_from_id(hltv_id: int):
     return team_name
 
 
-def get_hltv_id_from_team_name(team_mdl: models.Team, return_team_json=False):
+def get_hltv_id_from_team_name(team_mdl: models.Team|CsLineup, return_team_json=False):
     db_names = []
     if team_mdl:
         db_names.append(team_mdl.name)
