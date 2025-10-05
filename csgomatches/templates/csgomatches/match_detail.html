@@ -71,9 +71,9 @@
         <div class="match-maps__maps-wrapper">
             {% for mm in match.matchmap_set.all %}
                 <div class="match-maps__map u-rounded {% if mm.unplayed %}is-unplayed{% endif %} {% if mm.is_live %}is-live{% endif %} {% if mm.has_ended %}has-ended{% endif %}">
-                    {% with mapImageName=mm.played_map.mapImageName %}
-                        {% if mapImageName %}
-                            {% with imagePath="csgomatches/maps/"|add:mapImageName|add:".jpg" %}
+                    {% with csMapImageName=mm.played_map.csMapImageName %}
+                        {% if csMapImageName %}
+                            {% with imagePath="csgomatches/maps/"|add:csMapImageName|add:".jpg" %}
                                 <div class="match-maps__map-image-wrapper">
 
                                     <img alt="{{ mm.played_map }}"
