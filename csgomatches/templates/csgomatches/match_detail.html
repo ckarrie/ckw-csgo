@@ -1,107 +1,238 @@
-{% extends 'csgomatches/base/base.html' %}
+{% extends "csgomatches/base/base.html" %}
 
 {% load static %}
+{% load image_utils %}
 
 {% block page_title %}
-    {{ match }} - {{ match.first_map_at|date:"SHORT_DATE_FORMAT" }} - {{ match.tournament.name }} - Matchdetails - Wann spielt BIG?
-{% endblock %}
+    {{ match }} - {{ match.first_map_at|date:'SHORT_DATE_FORMAT' }} - {{ match.tournament.name }} - Matchdetails - Wann spielt BIG?
+{% endblock page_title %}
 
 {% block meta %}
     {% if match.is_live %}
-        {% if update_seconds %}
-            <meta http-equiv="refresh" content="{{ update_seconds }}">
-        {% endif %}
+        {% if update_seconds %}<meta http-equiv="refresh" content="{{ update_seconds }}" />{% endif %}
     {% elif match.is_upcoming %}
-        <meta http-equiv="refresh" content="60">
+        <meta http-equiv="refresh" content="60" />
     {% endif %}
-{% endblock %}
-
-{% block content_header_h1 %}
-    <a href="{% url 'match_upcoming' %}">Wann spielt <span class="white">BIG</span>?</a>
-{% endblock %}
+{% endblock meta %}
 
 {% block content %}
-    <div class="matches">
-        <h2>
-            <span class="bo">{{ match.first_map_at|date:'d.m.y H:i' }}</span>
-            <span class="team_a">{{ match.lineup_a.team }}</span>
-            {% if match.lineup_b %}
-                <span class="{% if match.team_a_won %}map_win{% elif match.team_b_won %}map_loss{% elif match.is_draw %}map_draw{% endif %}">{{ score.0 }}</span>:
-                <span class="{% if match.team_a_won %}map_loss{% elif match.team_b_won %}map_win{% elif match.is_draw %}map_draw{% endif %}">{{ score.1 }}</span>
-                <span class="team_b">{{ match.lineup_b.team }}</span>
-            {% else %}
-                at {{ match.tournament.name }}
-            {% endif %}
-
-            <small class="hide-on-small">
-                {{ match.tournament.name }}
-            </small>
-
-        </h2>
-        <h3 class="hide-on-large">{{ match.tournament.name }}</h3>
-
-        {% include 'csgomatches/blocks/box_matchrow_detail.html' %}
-
-        {% if match.lineup_a and match.lineup_a.lineupplayer_set.exists %}
-            <div class="lineup_a_box">
-                <h4>{% if match.lineup_a.game %}{{ match.lineup_a.game.name }}-{% endif %}Lineup {{ match.lineup_a.team.name }}</h4>
-                {% for lp in match.lineup_a.lineupplayer_set.all %}
-                    <code title="{{ lp.player.first_name }} {{ lp.player.last_name }}">{{ lp.player.ingame_name }}</code>
-                {% endfor %}
+    <div class="boxed match-summary">
+        <div class="match-summary__team">
+            <div class="match-summary__logo-wrapper u-rounded">
+                {% if match.lineup_a.team_logo_url %}
+                    <img class="match-summary__logo"
+                         src="{{ match.lineup_a.team_logo_url }}"
+                         alt="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}"
+                         title="{{ match.lineup_a.team.name_long|default:match.lineup_a.team.name }}" />
+                {% endif %}
             </div>
+            <div class="match-summary__name">{{ match.lineup_a.team }}</div>
+        </div>
 
-        {% endif %}
-
-        {% if match.lineup_b and match.lineup_b.lineupplayer_set.exists %}
-            <div class="lineup_b_box">
-                <h4>Lineup {{ match.lineup_b.team.name }}</h4>
-                {% for lp in match.lineup_b.lineupplayer_set.all %}
-                    <code title="{{ lp.player.first_name }} {{ lp.player.last_name }}">{{ lp.player.ingame_name }}</code>
-                {% endfor %}
+        <div class="match-summary__details">
+            <div class="match-summary__date u-show-at-medium">{{ match.first_map_at|date:'M d, Y - H:i' }}</div>
+            <div class="match-summary__date u-show-lt-medium">{{ match.first_map_at|date:'d.m.y - H:i' }}</div>
+            <div class="match-summary__score">
+                {% if match.team_a_won %}
+                    <span class="match-summary__score--win">{{ score.0 }}</span><span>:</span><span class="match-summary__score--loss">{{ score.1 }}</span>
+                {% elif match.team_b_won %}
+                    <span class="match-summary__score--loss">{{ score.0 }}</span><span>:</span><span class="match-summary__score--win">{{ score.1 }}</span>
+                {% else %}
+                    <span class="match-summary__score--draw">{{ score.0 }}</span><span>:</span><span class="match-summary__score--draw">{{ score.1 }}</span>
+                {% endif %}
             </div>
-        {% endif %}
+            <div class="match-summary__best-of">
+                {% if match.bestof == 1 %}
+                    Best of one
+                {% elif match.bestof == 2 %}
+                    Best of two
+                {% elif match.bestof == 3 %}
+                    Best of three
+                {% endif %}
+            </div>
+        </div>
 
-        {% with matchlinks=match.externallink_set.visible %}
-            {% if matchlinks.exists %}
-
-                <div class="matchlinks-details">
-                    <h4>Links:</h4>
-                    <dl>
-                    {% for link in match.externallink_set.visible %}
-                        {% ifchanged link.link_flag %}
-                            <dt>
-                            <img src="{% static link.get_flag_url %}" class="flag">
-                            </dt>
-                        {% else %}
-
-                        {% endifchanged %}
-                        <dd>
-                        <a href="{{ link.url }}" target="_blank" title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})" class="{% if link.link_type == 'twitch_cast' %}twitch_cast{% endif %}">
-                            <code>{{ link.get_link_type_display }} ({{ link.title }})</code>
-                        </a>
-                        </dd>
-
-                    {% endfor %}
-                    </dl>
-                </div>
-            {% endif %}
-        {% endwith %}
+        <div class="match-summary__team">
+            <div class="match-summary__logo-wrapper u-rounded">
+                {% if match.lineup_b.team_logo_url %}
+                    <img class="match-summary__logo"
+                         src="{{ match.lineup_b.team_logo_url }}"
+                         alt="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}"
+                         title="{{ match.lineup_b.team.name_long|default:match.lineup_b.team.name }}" />
+                {% endif %}
+            </div>
+            <div class="match-summary__name">{{ match.lineup_b.team }}</div>
+        </div>
     </div>
-    <p>&nbsp;</p>
-{% endblock %}
 
-{% block navigation %}
-    <ul class="navigation">
-        <li class="active"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
-    </ul>
-{% endblock %}
+    <div class="section match-maps" data-bo="{{ match.bestof }}">
+        <h2 class="section__headline">Maps</h2>
 
-{% block footer_0 %}
-    <p style="font-size: small">
-        Update-Intervall:
-        {% for c in update_choices %}
-            <a href="{{ match.get_absolute_url }}?update={{ c }}" class="{% if update_seconds == c %}active{% endif %}">{% if c == 0 %}Aus{% else %}{{ c }}s{% endif %}</a>
-            {% if not forloop.last %} | {% endif %}
-        {% endfor %}
-    </p>
-{% endblock %}
+        <div class="match-maps__maps-wrapper">
+            {% for mm in match.matchmap_set.all %}
+                <div class="match-maps__map u-rounded {% if mm.unplayed %}is-unplayed{% endif %} {% if mm.is_live %}is-live{% endif %} {% if mm.has_ended %}has-ended{% endif %}">
+                    {% with csMapImageName=mm.played_map.csMapImageName %}
+                        {% if csMapImageName %}
+                            {% with imagePath="csgomatches/maps/"|add:csMapImageName|add:".jpg" %}
+                                <div class="match-maps__map-image-wrapper">
+
+                                    <img alt="{{ mm.played_map }}"
+                                         src="{% static imagePath %}"
+                                         class="match-maps__map-image" />
+                                </div>
+                            {% endwith %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <div class="match-maps__content">
+                        {% if mm.is_live %}<div class="match-maps__live">LIVE</div>{% endif %}
+
+                        <div class="match-maps__logo-wrapper">
+                            {% if mm.map_pick_of %}
+                                {% if mm.map_pick_of.team_logo_url %}
+                                    <img class="match-maps__logo"
+                                         src="{{ mm.map_pick_of.team_logo_url }}"
+                                         alt="{{ mm.map_pick_of.team.name_long|default:mm.map_pick_of.team.name }}"
+                                         title="{{ mm.map_pick_of.team.name_long|default:mm.map_pick_of.team.name }}" />
+                                {% else %}
+                                    <div class="match-maps__no-logo">?</div>
+                                {% endif %}
+                            {% else %}
+                                <div class="match-maps__decider">Decider</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="match-maps__scores">
+                            <div class="match-maps__score {% if mm.team_a_won %}is-win{% endif %}{% if mm.team_b_won %}is-loss{% endif %}">
+                                {{ mm.rounds_won_team_a }}
+                            </div>
+                            <div>:</div>
+                            <div class="match-maps__score {% if mm.team_b_won %}is-win{% endif %}{% if mm.team_a_won %}is-loss{% endif %}">
+                                {{ mm.rounds_won_team_b }}
+                            </div>
+                        </div>
+
+                        <div class="match-maps__map-name">{{ mm.played_map|default:"-" }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if match.lineup_a and match.lineup_a.lineupplayer_set.exists %}
+        <div class="section lineup">
+            <h2 class="section__headline">Lineup</h2>
+
+            <div class="lineup__player-wrapper">
+                {% for lp in match.lineup_a.lineupplayer_set.all %}
+                    <div class="lineup__player">
+
+                        {% if match.lineup_a.game %}
+                            {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/"|add:match.lineup_a.team.get_slug|add:"/"|add:lp.player.get_slug|add:".png" %}
+                                {% if imagePath|file_exists %}
+                                    <img src="{% static imagePath %}"
+                                         alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
+                                         class="lineup__player-image">
+                                {% else %}
+                                    {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/noprofile.png" %}
+                                        <img src="{% static imagePath %}"
+                                             alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
+                                             class="lineup__player-image">
+                                    {% endwith %}
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+
+                        {{ lp.player.ingame_name }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% with matchlinks=match.externallink_set.visible %}
+        {% if matchlinks.exists %}
+            <div class="section match-links">
+                {% if match.externallink_set.casts %}
+                    <h2 class="section__headline">Casts & Links</h2>
+                {% else %}
+                    <h2 class="section__headline">Links</h2>
+                {% endif %}
+
+                {% if match.externallink_set.casts %}
+                    <div class="match-links__casts">
+                        {% for link in match.externallink_set.casts %}
+                            <a href="{{ link.url }}"
+                               target="_blank"
+                               title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})"
+                               class="match-links__cast u-rounded">
+
+                                <div class="match-links__avatar">
+                                    <img alt="{{ link.link_flag }}"
+                                         src="{% static link.get_flag_url %}"
+                                         class="match-links__avatar-flag" />
+                                </div>
+
+                                <div class="match-links__content">
+                                    <div class="match-links__title">{{ link.title }}</div>
+                                    <div class="match-links__language">{{ link.get_link_language|default:link.link_flag }}</div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="match-links__links">
+                    {% for link in match.externallink_set.noCasts %}
+
+                        {% ifchanged link.link_flag %}
+                            <img src="{% static link.get_flag_url %}"
+                                 alt="{{ link.get_link_language|default:link.link_flag }}"
+                                 class="match-links__flag" />
+                        {% else %}
+                        {% endifchanged %}
+                        <a href="{{ link.url }}"
+                           target="_blank"
+                           title="{{ link.get_link_type_display }}: {{ link.title }} ({{ link.url }})"
+                           class="match-links__link">{{ link.get_link_type_display }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+{% endblock content %}
+
+{% block bottomContent %}
+    <div class="boxed archive">
+        <ul class="archive__list">
+            <li class="archive__list-item">
+                <a class="archive__link {% if current_view == "index" %}is-active{% endif %}"
+                   href="{% url "match_upcoming" %}">Kommende Matches</a>
+            </li>
+            {% for date in date_list %}
+                <li class="archive__list-item">
+                    <a class="archive__link {% if year.year == date.year %}is-active{% endif %}"
+                       href="{% url "match_history" year=date.year %}">{{ date|date:"Y" }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock bottomContent %}
+
+{% block sidebarGroupMid %}
+    {% if match.is_live %}
+        <div class="update-sidebar">
+            <div class="update-sidebar__label">Update-Intervall:</div>
+            {% for c in update_choices %}
+                <a href="{{ match.get_absolute_url }}?update={{ c }}"
+                   class="update-sidebar__interval {% if update_seconds == c %}isActive{% endif %}">
+                    {% if c == 0 %}
+                        Aus
+                    {% else %}
+                        {{ c }}s
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock sidebarGroupMid %}

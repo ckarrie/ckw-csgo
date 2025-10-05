@@ -1,0 +1,33 @@
+.sidebar {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 20px;
+
+	&__group {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+
+		@include only-small() {
+			grid-column: span 2;
+		}
+	}
+
+	@include small() {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	@include medium() {
+		grid-template-columns: 1fr 1fr 1fr;
+	}
+
+	@include small-lt-large() {
+		> * {
+			height: auto !important;
+		}
+	}
+
+	@include large() {
+		grid-template-columns: 1fr;
+	}
+}

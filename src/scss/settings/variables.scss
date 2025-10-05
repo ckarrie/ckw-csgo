@@ -1,0 +1,39 @@
+/* BREAKPOINTS */
+$bp-small: 700px;
+$bp-medium: 900px;
+$bp-large: 1240px;
+
+:root {
+	/* COLORS */
+	--color-white: #fff;
+
+	--color-black: #000;
+
+	--color-dark-600: #1e1e1e;
+	--color-dark-700: #151515;
+	--color-dark-800: #0b0b0c;
+
+	--color-grey-400: #333333;
+	--color-grey-300: #666666;
+	--color-grey-200: #d9d9d9;
+
+	--color-blue: #586aea;
+	--color-red: #fa2020;
+	--color-green: #20fa2b;
+
+	--gradient-dark: linear-gradient(180deg, var(--color-dark-200) 0%, var(--color-dark-300) 100%);
+
+	/* TYPOGRAPHY */
+	--font-ff-default: 'Overused-Grotesk', Arial, Helvetica, sans-serif;
+	--font-ff-heavy: 'Radhiumz', Arial, Helvetica, sans-serif;
+
+	/* MATCHROW */
+	--matchrow-cel-spacing: 12px;
+
+	/* GRID */
+	--padding-inline: 25px;
+	--content-max-width: 1300px;
+
+	/* UTILS */
+	--border-radius: 10px;
+}

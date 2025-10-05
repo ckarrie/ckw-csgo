@@ -1,0 +1,36 @@
+.archive {
+	&__list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16px 32px;
+		width: 100%;
+
+		@include medium() {
+			justify-content: end;
+		}
+	}
+
+	&__list-item {
+		display: block;
+		&:first-child {
+			margin-right: auto;
+			width: 100%;
+
+			@include medium() {
+				width: auto;
+			}
+		}
+	}
+
+	&__link {
+		text-decoration: none;
+
+		&.is-active {
+			font-weight: 600;
+		}
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+}

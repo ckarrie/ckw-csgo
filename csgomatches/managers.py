@@ -9,8 +9,13 @@ class TeamManager(models.Manager):
             models.Q(name_alt__iexact=name)
         ).first()
 
+class ExternalLinkQuerySet(models.QuerySet):
+    def casts(self):
+        return self.filter(link_type__in=['twitch_cast'])
 
-class ExternalLinkManager(models.Manager):
+    def noCasts(self):
+        return self.exclude(link_type__in=['twitch_cast'])
+
     def visible(self):
         all_links = self.all()
         exclude_ids = []
@@ -22,6 +27,18 @@ class ExternalLinkManager(models.Manager):
             return all_links.exclude(id__in=exclude_ids)
         return all_links
 
+class ExternalLinkManager(models.Manager):
+    def get_queryset(self):
+        return ExternalLinkQuerySet(self.model, using=self._db)
+
+    def casts(self):
+        return self.get_queryset().visible().casts()
+
+    def noCasts(self):
+        return self.get_queryset().noCasts()
+
+    def visible(self):
+        return self.get_queryset().visible()
 
 class LineupQuerySet(models.QuerySet):
     def search_lineups(self, name, hltv_id=None):

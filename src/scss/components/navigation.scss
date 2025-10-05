@@ -1,0 +1,24 @@
+.navigation {
+	display: none;
+
+	@include medium() {
+		display: flex;
+	}
+
+	&__list {
+		display: flex;
+		gap: 32px;
+	}
+
+	&__link {
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+
+		&.is-active {
+			font-weight: 600;
+		}
+	}
+}

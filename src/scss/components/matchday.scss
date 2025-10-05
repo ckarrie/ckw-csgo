@@ -1,0 +1,11 @@
+.matchday {
+	&__matches {
+		position: relative;
+		flex-direction: column;
+		gap: 12px 0;
+
+		@include medium() {
+			display: flex;
+		}
+	}
+}

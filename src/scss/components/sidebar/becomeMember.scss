@@ -1,0 +1,10 @@
+.become-member-sidebar {
+	flex-direction: column;
+	gap: 45px;
+
+	&__image {
+		height: 216px;
+		aspect-ratio: 150 / 216;
+		align-self: center;
+	}
+}

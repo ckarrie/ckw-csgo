@@ -2,6 +2,7 @@ import os
 import requests
 import twitter
 import importlib.resources
+import pycountry
 from django.contrib.sites.models import Site
 from django.db import models
 from django.db.models import QuerySet
@@ -29,6 +30,12 @@ def get_flags_choices()-> list[tuple[str, str]]:
     choices.sort(key=lambda x: x[0])
     return choices
 
+def country_code_to_language(code):
+    try:
+        language = pycountry.languages.get(alpha_2=code.lower())
+        return language.name if language else False
+    except AttributeError:
+        return False
 
 class Team(models.Model):
     #game = models.ForeignKey(Game, on_delete=models.SET_NULL, null=True)
@@ -41,6 +48,9 @@ class Team(models.Model):
     lineup_set: QuerySet['Lineup']
 
     objects = managers.TeamManager()
+
+    def get_slug(self):
+        return slugify(self.name)
 
     def get_hltv_id_from_name(self):
         from csgomatches.utils.scrapers.hltv import get_hltv_id_from_team_name
@@ -63,6 +73,9 @@ class Player(models.Model):
     last_name = models.CharField(max_length=255)
     hltv_id = models.IntegerField(null=True, blank=True)
     esea_user_id = models.IntegerField(null=True, blank=True)
+
+    def get_slug(self):
+        return slugify(self.ingame_name)
 
     def __str__(self):
         return f'{self.first_name} "{self.ingame_name}" {self.last_name}'
@@ -197,6 +210,15 @@ class Match(models.Model):
     def get_first_matchmap(self) -> 'MatchMap | None':
         return self.matchmap_set.order_by('map_nr').first()
 
+    def get_live_matchmap(self) -> 'MatchMap | None':
+        for mmap in self.matchmap_set.order_by('map_nr'):
+            if mmap.is_live():
+                return mmap
+            return False
+
+    def get_previous_match(self) -> 'Match | None':
+        return Match.objects.filter(first_map_at__gt=self.first_map_at).order_by('first_map_at').first()
+
     def is_live(self) -> bool | None:
         if self.has_ended():
             return False
@@ -219,9 +241,11 @@ class Match(models.Model):
             if last_map.has_ended():
                 return True
                 # if last_map.starting_at
-        team_a, team_b = self.get_overall_score()
-        if team_a > team_b or team_b > team_a:
-            return True
+        # Disabled for now, doesnt make sense in my optinion :)
+        # team_a, team_b = self.get_overall_score()
+        #if team_a > team_b or team_b > team_a:
+        #    return True
+
         return False
 
     def is_upcoming(self) -> bool | None:
@@ -447,6 +471,9 @@ class ExternalLink(models.Model):
     title = models.CharField(max_length=255)
     url = models.URLField()
     objects = managers.ExternalLinkManager()
+
+    def get_link_language(self) -> str:
+        return country_code_to_language(self.link_flag)
 
     def get_flag_url(self) -> str:
         return f'csgomatches/flags/{self.link_flag}.png'

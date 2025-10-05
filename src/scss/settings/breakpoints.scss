@@ -1,0 +1,41 @@
+@mixin lt-small() {
+	@media (width < $bp-small) {
+		@content;
+	}
+}
+
+@mixin small() {
+	@media (width >= $bp-small) {
+		@content;
+	}
+}
+
+@mixin only-small() {
+	@media ($bp-small <= width < $bp-medium) {
+		@content;
+	}
+}
+
+@mixin medium() {
+	@media (width >= $bp-medium) {
+		@content;
+	}
+}
+
+@mixin lt-medium() {
+	@media (width < $bp-medium) {
+		@content;
+	}
+}
+
+@mixin large() {
+	@media (width >= $bp-large) {
+		@content;
+	}
+}
+
+@mixin small-lt-large() {
+	@media ($bp-small <= width < $bp-large) {
+		@content;
+	}
+}

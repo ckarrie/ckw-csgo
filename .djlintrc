@@ -1,0 +1,5 @@
+{
+	"blank_line_after_tag": "load,extends",
+	"ignore": "H006",
+	"max_blank_lines": 1
+}

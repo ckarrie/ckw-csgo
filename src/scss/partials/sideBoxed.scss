@@ -1,0 +1,7 @@
+.side-boxed {
+	display: flex;
+	gap: 16px;
+	padding: 16px;
+	background-color: var(--color-dark-700);
+	@include rounded;
+}

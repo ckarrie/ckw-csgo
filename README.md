@@ -56,6 +56,10 @@ INSTALLED_APPS = [
     'csgomatches',           # Add
 ]
 
+# Add
+# 'csgomatches.context_processors.games'
+# to TEAMPLATES context_processors
+
 ROOT_URLCONF = 'csgomatches.urls'
 
 LANGUAGE_CODE = 'de'
@@ -103,6 +107,50 @@ User.objects.create_superuser(username="devuser", password="devuser", email="exa
 ```shell
 python wsb/manage.py runserver 0.0.0.0:9001
 ```
-Open Browser: 
+Open Browser:
 - Frontend: http://127.0.0.1:9001
 - Django-Admin: http://127.0.0.1:9001/admin/
+
+
+---
+# Temporary Frontend-Dev notes
+
+### 1. Install Django Vite and setup like described
+```shell
+pip install django-vite
+```
+
+
+```python
+#settings.py
+
+DJANGO_VITE = {
+  "default": {
+    "dev_mode": True
+  }
+}
+```
+```python
+#settings.py
+DJANGO_VITE = {
+  "default": {
+    "dev_mode": True, # set False when on Production
+    "manifest_path": BASE_DIR.parent / "ckw-csgo" / "csgomatches" / "static" / "manifest.json",
+  }
+}
+```
+
+### 2. Install node packages
+```shell
+npm install
+```
+
+### 3. Run dev server for development
+```shell
+npm run dev
+```
+
+### 4. Run this command for building (Remember to set dev_mode to False in settings.py)
+```shell
+npm run build
+```

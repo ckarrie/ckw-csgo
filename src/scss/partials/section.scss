@@ -1,0 +1,25 @@
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 16px;
+	background-color: var(--color-dark-700);
+	@include rounded;
+
+	@include medium {
+		padding: 28px;
+		gap: 16px;
+	}
+
+	&__headline {
+		font-family: var(--font-ff-heavy);
+		text-transform: uppercase;
+		font-size: 20px;
+		font-weight: bold;
+		line-height: 1;
+
+		@include medium {
+			font-size: 28px;
+		}
+	}
+}

@@ -15,6 +15,8 @@ from . import models
 
 from csgomatches.utils.scrapers import faceit
 
+from datetime import date, timedelta
+
 def get_random_background_image_url():
     images = [
         static("csgomatches/backgrounds/IMG_6232.webp"),
@@ -62,7 +64,8 @@ class IndexView(generic.ListView):
         ctx.update({
             'date_list': self.model.objects.all().dates('first_map_at', 'year', order='DESC'),
             'current_view': 'index',
-            'bg_url': get_random_background_image_url(),
+            'today': date.today(),
+            'tomorrow': date.today() + timedelta(days=1),
             'statistics': statistics
         })
         return ctx
@@ -80,9 +83,7 @@ class YearArchiveView(generic.YearArchiveView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super(YearArchiveView, self).get_context_data(*args, **kwargs)
-        ctx.update({
-            'bg_url': get_random_background_image_url()
-        })
+        ctx.update({})
         return ctx
 
 
@@ -102,7 +103,6 @@ class MatchDetailView(generic.DetailView):
             update = update_choices[-1]
         ctx.update({
             'score': self.object.get_overall_score(),
-            'bg_url': get_random_background_image_url(),
             'update_seconds': update,
             'update_choices': update_choices
         })
@@ -132,7 +132,6 @@ class LiveStreamsView(generic.TemplateView):
         ctx.update(**{
             #'url': drf_api_url,
             'livestreams_list': resp,
-            'bg_url': get_random_background_image_url(),
             'nicknames': faceit_nicknames,
             'hubs': faceit.get_hubs(),
             'update_seconds': 30,
@@ -153,9 +152,7 @@ class StaticPageDetailView(generic.DetailView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super(StaticPageDetailView, self).get_context_data(*args, **kwargs)
-        ctx.update({
-            'bg_url': get_random_background_image_url()
-        })
+        ctx.update({})
         return ctx
 
     def get_template_names(self):

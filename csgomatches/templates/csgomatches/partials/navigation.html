@@ -1,0 +1,12 @@
+<nav class="navigation">
+    <ul class="navigation__list">
+        {% with matchGame=match.lineup_a.game.name_short|lower %}
+            {% for game in games %}
+                <li class="navigation__item">
+                    <a href="{% url 'match_upcoming' %}"
+                       class="navigation__link  {% if matchGame == game.name_short|lower %}is-active{% endif %}">{{ game.name }}</a>
+                </li>
+            {% endfor %}
+        {% endwith %}
+    </ul>
+</nav>

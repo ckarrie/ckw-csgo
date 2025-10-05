@@ -1,0 +1,258 @@
+.matchrow {
+	display: flex;
+	align-items: center;
+	height: 80px;
+	width: 100%;
+
+	background-color: var(--color-dark-800);
+	border-radius: var(--border-radius);
+
+	padding-left: 10px;
+	padding-right: 28px;
+
+	text-decoration: none;
+
+	@include medium {
+		height: 72px;
+	}
+
+	&.is-live& {
+		background: linear-gradient(90deg, var(--color-dark-800) 0%, var(--color-dark-700) 100%), #0b0b0c;
+	}
+
+	&__col {
+		flex: 0;
+
+		&--teams {
+			margin-left: 20px;
+
+			display: grid;
+			grid-template-areas:
+				'TEAM1 SCORE'
+				'TEAM2 SCORE';
+
+			@include small {
+				margin-left: unset;
+				grid-template-areas: 'TEAM1 SCORE TEAM2';
+			}
+		}
+
+		&--grow {
+			flex: 1;
+		}
+	}
+
+	&__game-logo-wrapper {
+		position: relative;
+
+		width: 47px;
+		height: 30px;
+		margin-right: 11px;
+
+		&:after {
+			content: '';
+			position: absolute;
+			display: block;
+			width: 2px;
+			height: 48px;
+			top: 50%;
+			right: -11px;
+			transform: translateY(-50%);
+			background-color: var(--color-grey-400);
+		}
+	}
+
+	&__game-logo {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+
+		&:before {
+			content: '';
+			position: absolute;
+			display: block;
+			width: 100%;
+			height: 100%;
+			background-color: var(--color-dark-800);
+		}
+	}
+
+	&__team {
+		display: flex;
+		align-items: center;
+
+		gap: 8px;
+		width: 120px;
+		hyphens: auto;
+
+		&--left {
+			grid-area: TEAM1;
+			flex-direction: row-reverse;
+			justify-content: start;
+
+			@include small {
+				flex-direction: row;
+				text-align: right;
+				justify-content: end;
+			}
+		}
+
+		&--right {
+			grid-area: TEAM2;
+
+			@include small {
+				text-align: left;
+			}
+		}
+	}
+
+	&__team-name {
+		font-size: 16px;
+		font-weight: 500;
+
+		@include medium {
+			font-size: 14px;
+		}
+	}
+
+	&__team-logo-wrapper {
+		width: 32px;
+		height: 32px;
+		padding: 3px;
+
+		@include medium {
+			padding: unset;
+			width: 40px;
+			height: 40px;
+		}
+	}
+
+	&__team-logo {
+		height: 100%;
+		width: 100%;
+		object-fit: contain;
+		margin-right: 8px;
+	}
+
+	&__score-box {
+		grid-area: SCORE;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 4px;
+		width: 105px;
+		height: 100%;
+		margin: 0 var(--matchrow-cel-spacing);
+		background-color: var(--color-dark-700);
+		font-size: 14px;
+
+		gap: 0px;
+		width: 40px;
+		font-size: 16px;
+		flex-direction: column;
+
+		@include small {
+			gap: 4px;
+			width: 105px;
+			font-size: 14px;
+			flex-direction: row;
+			height: 40px;
+		}
+	}
+
+	&__score {
+		@include lt-small {
+			flex: 1 1 50%;
+			display: flex;
+			align-items: center;
+		}
+
+		&.is-win {
+			/* color: var(--color-green);
+			color: var(--color-green); */
+		}
+
+		&.is-lose {
+			color: var(--color-red);
+			color: var(--color-grey-300);
+		}
+	}
+
+	&__score-divider {
+		@include lt-small {
+			display: none;
+		}
+	}
+
+	&__tournament {
+		display: none;
+
+		@include medium {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			width: 100%;
+			text-align: left;
+			padding: 0 var(--matchrow-cel-spacing);
+			font-size: 14px;
+			text-wrap: balance;
+		}
+	}
+
+	&__tournament-logo-wrapper {
+		width: 40px;
+		height: 40px;
+		flex-shrink: 0;
+	}
+
+	&__tournament-logo {
+		height: 100%;
+		width: 100%;
+		object-fit: contain;
+		margin-right: 8px;
+	}
+
+	&__status {
+		font-size: 14px;
+		width: 60px;
+		display: flex;
+		justify-content: end;
+	}
+
+	&__live {
+		position: relative;
+		padding-left: 10px;
+		&:before {
+			content: '';
+			position: absolute;
+			width: 4px;
+			height: 4px;
+			border-radius: 50%;
+			top: 50%;
+			left: 0;
+			transform: translateY(-50%);
+
+			animation-name: pulse;
+			animation-duration: 2s;
+			animation-iteration-count: infinite;
+
+			background: #fa2020;
+			box-shadow: 0px 0px 25px var(--color-red);
+		}
+	}
+}
+
+@keyframes pulse {
+	0% {
+		opacity: 0;
+	}
+	40% {
+		opacity: 1;
+	}
+	70% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}

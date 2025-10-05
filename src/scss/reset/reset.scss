@@ -1,0 +1,60 @@
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	font: inherit; /* Get rid of all font sizes and heights */
+}
+
+html {
+	color-scheme: dark light; /* Default dark */
+	hanging-punctuation: first last; /* Not supported in Chrome */
+}
+
+body {
+	min-height: 100vh;
+	font-size: 16px;
+}
+
+/* Media responsive */
+img,
+picture,
+svg,
+video {
+	display: block;
+	max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	text-wrap: balance;
+}
+
+p {
+	text-wrap: pretty; /* Prevents orphans on lines */
+}
+
+ul {
+	list-style: none;
+}
+
+a {
+	color: inherit;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	:has(:target) {
+		scroll-behavior: smooth;
+		scroll-padding-top: 3rem;
+	}
+}

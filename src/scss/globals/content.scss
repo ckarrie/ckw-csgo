@@ -1,0 +1,17 @@
+.content-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 20px;
+	width: 100%;
+
+	@include large() {
+		grid-template-columns: 1fr 310px;
+		align-items: start;
+	}
+}
+
+.content {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}

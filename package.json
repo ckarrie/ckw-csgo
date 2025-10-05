@@ -1,0 +1,24 @@
+{
+	"name": "ckw-csgo",
+	"private": true,
+	"version": "1.0.0",
+	"type": "module",
+	"scripts": {
+		"start": "vite",
+		"dev": "vite",
+		"build": "vite build"
+	},
+	"devDependencies": {
+		"autoprefixer": "^10.4.21",
+		"fs-extra": "^11.3.0",
+		"postcss": "^8.5.3",
+		"postcss-advanced-variables": "^5.0.0",
+		"postcss-import": "^16.1.0",
+		"postcss-import-ext-glob": "^2.1.1",
+		"postcss-nested": "^7.0.2",
+		"postcss-nested-ancestors": "^3.0.0",
+		"postcss-pxtorem": "^6.1.0",
+		"postcss-sassy-mixins": "^2.1.0",
+		"vite": "^6.2.0"
+	}
+}
