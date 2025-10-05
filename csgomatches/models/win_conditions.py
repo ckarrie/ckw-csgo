@@ -1,5 +1,5 @@
 from django.db import models
-from typing import Optional
+from typing import Optional, List, Tuple
 
 from django.forms import ValidationError
 
@@ -78,22 +78,68 @@ class BestOfWinCondition(BaseWinCondition):
         verbose_name_plural = "Best of Win Conditions"
         ordering = ["name"]
 
+    @classmethod
+    def _collect_validation_errors(
+        cls,
+        has_overtime: bool,
+        has_draw: bool,
+        best_of_number: Optional[int],
+        best_of_number_overtime: Optional[int],
+        win_by: Optional[int],
+    ) -> List[Tuple[str, str]]:
+        errors: List[Tuple[str, str]] = []
+        if has_overtime and has_draw:
+            errors.append(("Match cannot have both overtime and draw.", "overtime_and_draw"))
+        if best_of_number is None or best_of_number <= 0:
+            errors.append(("Best of number must be greater than 0.", "best_of_number_zero"))
+        if win_by is None or win_by <= 0:
+            errors.append(("Win by must be greater than 0.", "win_by_zero"))
+        if has_overtime:
+            if best_of_number_overtime is None or best_of_number_overtime <= 0:
+                errors.append((
+                    "Best of number for overtime must greater than 0 if has_overtime is True.",
+                    "best_of_number_overtime_zero",
+                ))
+            if win_by is not None and win_by <= 1:
+                errors.append(("Win by must be greater than 1 if has_overtime is True.", "win_by_overtime"))
+        if has_draw and best_of_number is not None and best_of_number % 2 == 1:
+            errors.append(("Best of number must be even if has_draw is True.", "best_of_number_draw"))
+        return errors
+
+    @classmethod
+    def _validate(
+        cls,
+        has_overtime: bool,
+        has_draw: bool,
+        best_of_number: Optional[int],
+        best_of_number_overtime: Optional[int],
+        win_by: Optional[int],
+    ) -> None:
+        errors = cls._collect_validation_errors(
+            has_overtime,
+            has_draw,
+            best_of_number,
+            best_of_number_overtime,
+            win_by,
+        )
+        if errors:
+            raise ValueError(errors[0][0])
+
     def clean(self) -> None:
         """
         Validate the input parameters.
         """
-        if self.has_overtime and self.has_draw:
-            raise ValidationError("Match cannot have both overtime and draw.", code="overtime_and_draw")
-        if self.best_of_number == 0:
-            raise ValidationError("Best of number must be greater than 0.", code="best_of_number_zero")
-        if self.has_overtime and not self.best_of_number_overtime:
-            raise ValidationError("Best of number for overtime must greater than 0 if has_overtime is True.", code="best_of_number_overtime_zero")
-        if self.win_by == 0:
-            raise ValidationError("Win by must be greater than 0.", code="win_by_zero")
-        if self.has_overtime and self.win_by <= 1:
-            raise ValidationError("Win by must be greater than 1 if has_overtime is True.", code="win_by_overtime")
-        if self.has_draw and self.best_of_number % 2 == 1:
-            raise ValidationError("Best of number must be even if has_draw is True.", code="best_of_number_draw")
+        errors = self._collect_validation_errors(
+            self.has_overtime,
+            self.has_draw,
+            self.best_of_number,
+            self.best_of_number_overtime,
+            self.win_by,
+        )
+        if errors:
+            raise ValidationError(
+                [ValidationError(message, code=code) for message, code in errors]
+            )
         super().clean()
 
     def has_ended(self, match_map: OneOnOneMatchMap) -> bool:
@@ -179,6 +225,13 @@ class BestOfWinCondition(BaseWinCondition):
 
 
     def save(self, *args, **kwargs):
+        BestOfWinCondition._validate(
+            self.has_overtime,
+            self.has_draw,
+            self.best_of_number,
+            self.best_of_number_overtime,
+            self.win_by,
+        )
         if not self.name:
             self.name = f"BO{self.best_of_number}{f'OT_BO{self.best_of_number_overtime}' if self.has_overtime else ''}{'DRAW_POSSIBLE' if self.has_draw else ''}_WIN_BY{self.win_by}"
         super().save(*args, **kwargs)
