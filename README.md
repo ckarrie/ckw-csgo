@@ -150,7 +150,7 @@ npm install
 npm run dev
 ```
 
-### 4. Run this command for building
+### 4. Run this command for building (Remember to set dev_mode to False in settings.py)
 ```shell
 npm run build
 ```
