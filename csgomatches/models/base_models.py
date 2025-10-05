@@ -23,10 +23,12 @@ class BaseParticipant(PolymorphicModel):
         "csgomatches.Organization",
         on_delete=models.CASCADE,
         related_name="%(class)ss",
+        null=True,
+        blank=True,
+        help_text="The organization this participant represents. Can be null for free agents.",
     )
     name = models.CharField(
         max_length=255,
-        verbose_name="Participant Name (Lineup / Ingame Name)",
     )
 
     class Meta:
