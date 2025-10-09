@@ -4,6 +4,7 @@ Django==5.1.1
 django-ical==1.9.2
 django-polymorphic==3.1.0
 django-recurrence==1.11.1
+django-vite==3.1.0
 djangorestframework==3.15.2
 icalendar==5.0.13
 python-dateutil==2.9.0.post0
