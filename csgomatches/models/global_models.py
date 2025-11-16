@@ -41,7 +41,7 @@ class Map(models.Model):
     ingame_name = models.CharField(max_length=255, default='de_', null=True, blank=True)
 
     def csMapImageName(self) -> bool:
-        return self.ingame_name if self.ingame_name.startswith("de_") else False
+        return self.ingame_name if self.ingame_name.startswith("de_") and self.ingame_name != "de_" else False
 
     def __str__(self):
         return self.name
