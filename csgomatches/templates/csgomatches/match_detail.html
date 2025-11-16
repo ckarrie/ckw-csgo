@@ -16,7 +16,7 @@
 {% endblock meta %}
 
 {% block content %}
-    <div class="boxed match-summary">
+    <div class="boxed match-summary" data-match-id="{{ match.id }}">
         <div class="match-summary__team">
             <div class="match-summary__logo-wrapper u-rounded">
                 {% if match.lineup_a.team_logo_url %}
