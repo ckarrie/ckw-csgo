@@ -16,7 +16,7 @@
 {% endblock meta %}
 
 {% block content %}
-    <div class="boxed match-summary">
+    <div class="boxed match-summary" data-match-id="{{ match.id }}">
         <div class="match-summary__team">
             <div class="match-summary__logo-wrapper u-rounded">
                 {% if match.lineup_a.team_logo_url %}
@@ -71,18 +71,18 @@
         <div class="match-maps__maps-wrapper">
             {% for mm in match.matchmap_set.all %}
                 <div class="match-maps__map u-rounded {% if mm.unplayed %}is-unplayed{% endif %} {% if mm.is_live %}is-live{% endif %} {% if mm.has_ended %}has-ended{% endif %}">
-                    {% with csMapImageName=mm.played_map.csMapImageName %}
-                        {% if csMapImageName %}
-                            {% with imagePath="csgomatches/maps/"|add:csMapImageName|add:".jpg" %}
-                                <div class="match-maps__map-image-wrapper">
+                    <div class="match-maps__map-image-wrapper">
+                        {% with csMapImageName=mm.played_map.csMapImageName %}
+                            {% if csMapImageName %}
+                                {% with imagePath="csgomatches/maps/"|add:csMapImageName|add:".jpg" %}
 
                                     <img alt="{{ mm.played_map }}"
                                          src="{% static imagePath %}"
                                          class="match-maps__map-image" />
-                                </div>
-                            {% endwith %}
-                        {% endif %}
-                    {% endwith %}
+                                {% endwith %}
+                            {% endif %}
+                        {% endwith %}
+                    </div>
 
                     <div class="match-maps__content">
                         {% if mm.is_live %}<div class="match-maps__live">LIVE</div>{% endif %}
@@ -126,15 +126,15 @@
             <div class="lineup__player-wrapper">
                 {% for lp in match.lineup_a.lineupplayer_set.all %}
                     <div class="lineup__player">
-
                         {% if match.lineup_a.game %}
+                            {% comment %}Get image for player{% endcomment %}
                             {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/"|add:match.lineup_a.team.get_slug|add:"/"|add:lp.player.get_slug|add:".png" %}
                                 {% if imagePath|file_exists %}
                                     <img src="{% static imagePath %}"
                                          alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
                                          class="lineup__player-image">
                                 {% else %}
-                                    {% with imagePath="csgomatches/teams/"|add:match.lineup_a.game.slug|add:"/noprofile.png" %}
+                                    {% with imagePath="csgomatches/teams/"|add:"/noprofile.png" %}
                                         <img src="{% static imagePath %}"
                                              alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
                                              class="lineup__player-image">
