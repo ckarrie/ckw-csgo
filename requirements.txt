@@ -1,6 +1,6 @@
 beautifulsoup4==4.12.3
 bs4==0.0.2
-Django==5.1.1
+Django==5.1.5
 django-ical==1.9.2
 django-recurrence==1.11.1
 djangorestframework==3.15.2
