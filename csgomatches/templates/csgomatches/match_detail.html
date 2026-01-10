@@ -93,6 +93,9 @@
 {% block navigation %}
     <ul class="navigation">
         <li class="active"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
+        {% if user.is_staff %}
+            <li class=""><a href="{% url 'admin:csgomatches_match_change' object.id %}">Admin-Edit</a></li>
+        {% endif %}
     </ul>
 {% endblock %}
 
