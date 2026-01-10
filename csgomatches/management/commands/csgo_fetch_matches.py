@@ -112,7 +112,7 @@ class Command(BaseCommand):
                 response = requests.get(y_url)
                 response_json = response.json()
             except JSONDecodeError as json_error:
-                print(f"[crawl_y0fl0w_de] ERROR reading {y_url}, content={str(json_error}"))
+                print(f"[crawl_y0fl0w_de] ERROR reading {y_url}, content={str(json_error)}")
                 continue
                 # raise json_error
 
