@@ -237,16 +237,19 @@ class Match(models.Model):
         return self.first_map_at < timezone.now()
 
     def has_ended(self) -> bool:
-        if self.cancelled > 0:
-            return True
-        last_map = self.matchmap_set.order_by('map_nr').last()
-        if last_map:
-            if last_map.has_ended():
-                return True
-                # if last_map.starting_at
+        # If one team already reached the required number of map wins for this best-of,
+        # the match has ended.
         team_a, team_b = self.get_overall_score()
-        if team_a > team_b or team_b > team_a:
+        required_wins = (self.bestof // 2) + 1
+        if team_a >= required_wins or team_b >= required_wins:
             return True
+
+        # If at least `bestof` maps are present and all of them have ended,
+        # consider the match finished (covers BO2 and cases where all scheduled maps were played).
+        maps = list(self.matchmap_set.order_by('map_nr'))
+        if maps and len(maps) >= self.bestof and all(mm.has_ended() for mm in maps):
+            return True
+
         return False
 
     def is_upcoming(self) -> bool | None:
