@@ -7,8 +7,8 @@ from random_user_agent.user_agent import UserAgent
 
 
 DEBUG = False
-RUN_ONCE = False
-django_matches = [2389194]
+RUN_ONCE = True # exit after one result
+django_matches = [2388905] # https://www.hltv.org/matches/2388905/9ine-vs-big-academy-iem-rio-2026-closed-qualifier with multiple overtimes
 
 
 class HLTVClient(Client):    
@@ -56,9 +56,19 @@ def get_match_score(hltv_match_id):
                 if event_name == 'score':
                     mapscore_data = event_data.get('mapScores', {})
                     map_ids = mapscore_data.keys()
-                    for map_id in map_ids:
-                        score_team_a = mapscore_data.get(map_id, {}).get('firstHalf', {}).get('ctScore', 0) + mapscore_data.get(map_id, {}).get('secondHalf', {}).get('tScore', 0)
-                        score_team_b = mapscore_data.get(map_id, {}).get('firstHalf', {}).get('tScore', 0) + mapscore_data.get(map_id, {}).get('secondHalf', {}).get('ctScore', 0)
+                    print(f"map_ids={map_ids}")
+                    for map_id in map_ids:                        
+                        fh_ct = mapscore_data.get(map_id, {}).get('firstHalf', {}).get('ctScore', 0)
+                        fh_t = mapscore_data.get(map_id, {}).get('firstHalf', {}).get('tScore', 0)
+                        sh_ct = mapscore_data.get(map_id, {}).get('secondHalf', {}).get('ctScore', 0)
+                        sh_t = mapscore_data.get(map_id, {}).get('secondHalf', {}).get('tScore', 0)
+                        ot_ct = mapscore_data.get(map_id, {}).get('overtime', {}).get('ctScore', 0)
+                        ot_t = mapscore_data.get(map_id, {}).get('overtime', {}).get('tScore', 0)
+                        
+                        print(f"First Half: CT {fh_ct} - T {fh_t}, Second Half: CT {sh_ct} - T {sh_t}")
+                        score_team_a = fh_ct + sh_t + ot_ct
+                        score_team_b = fh_t + sh_ct + ot_t                
+                        
                         map_name = mapscore_data.get(map_id, {}).get('map', 'unknown')
                         print(f"Match {hltv_match_id} - Map: {map_id} ({map_name}), Score: Team A {score_team_a} - Team B {score_team_b}")
                 if RUN_ONCE:
