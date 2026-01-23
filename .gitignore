@@ -1,6 +1,7 @@
 
 .idea/
-
+dist/
+build/
 ckw_csgomatches.egg-info/
 
 *.pyc
