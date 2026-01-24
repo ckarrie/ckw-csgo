@@ -49,8 +49,8 @@ class WSBProxy:
             print(f" [fetch_wannspieltbig_matches] Error fetching matches: {e}")
             return None
         
-    def filter_hltv_matches(self, matches):
-        #print(" [filter_hltv_matches] === Scores @ Wannspieltbig.de ===")
+    def filter_wsb_matches(self, matches):
+        #print(" [filter_wsb_matches] === Scores @ Wannspieltbig.de ===")
         hltv_matches = []
         skipped_ended_matches = []
         skipped_missing_enemy_team_matches = []
@@ -76,13 +76,14 @@ class WSBProxy:
             if hltv_match_id is not None and (team_a_id in HLTV_BIG_TEAMS_IDS or team_b_id in HLTV_BIG_TEAMS_IDS):
                 hltv_matches.append(match)
         
-        print(f" [filter_hltv_matches] Skipped {len(skipped_ended_matches)} ended matches.")
-        print(f" [filter_hltv_matches] Skipped {len(skipped_missing_enemy_team_matches)} matches with missing enemy team.") 
-        print(f" [filter_hltv_matches] Filtered {len(hltv_matches)} HLTV matches involving BIG teams.")
+        print(f" [filter_wsb_matches] Skipped {len(skipped_ended_matches)} ended matches.")
+        print(f" [filter_wsb_matches] Skipped {len(skipped_missing_enemy_team_matches)} matches with missing enemy team.") 
+        print(f" [filter_wsb_matches] Filtered {len(hltv_matches)} HLTV matches involving BIG teams.")
         for match in hltv_matches:
-            print(f" [filter_hltv_matches]  - HLTV Match ID: {match.get('hltv_match_id')}, Teams: {match.get('lineup_a', {}).get('team', {}).get('name')} vs {match.get('lineup_b', {}).get('team', {}).get('name')}")
+            print(f" [filter_wsb_matches]  - HLTV Match ID: {match.get('hltv_match_id')}, Teams: {match.get('lineup_a', {}).get('team', {}).get('name')} vs {match.get('lineup_b', {}).get('team', {}).get('name')}")
             for matchmap in match.get('matchmaps', []):
-                print(f" [filter_hltv_matches]    - Map {matchmap.get('map_nr')}: {matchmap.get('map_name')}, Score: {matchmap.get('rounds_won_team_a')} - {matchmap.get('rounds_won_team_b')}")
+                played_map = matchmap.get('played_map', {}).get('cs_name', '?')
+                print(f" [filter_wsb_matches]    - Map {matchmap.get('map_nr')} ({played_map}): Score: {matchmap.get('rounds_won_team_a')} - {matchmap.get('rounds_won_team_b')}")
         return hltv_matches
     
     def fetch_hltv_livescore(self, hltv_match_id):
@@ -101,6 +102,7 @@ class WSBProxy:
             event_name, event_data = sio.receive(timeout=15)
             if event_name == 'score':
                 mapscore_data = event_data.get('mapScores', {})
+                #print(f" [fetch_hltv_livescore] Event Data for Match {hltv_match_id}: {event_data}")
                 map_ids = mapscore_data.keys()
                 if DEBUG:
                     print(f" [fetch_hltv_livescore]  HLTV map_ids={map_ids}")
@@ -189,26 +191,27 @@ class WSBProxy:
                     hltv_rounds_a = hltv_map_score.get(big_team_id, 0)
                     hltv_rounds_b = hltv_map_score.get(other_team_id, 0)
                     if (wsb_rounds_a != hltv_rounds_a) or (wsb_rounds_b != hltv_rounds_b):
-                        print(f" [compare_and_update_scores] Score mismatch for Match HLTV ID {hltv_match_id} Map {map_nr}, WSB MatchmapID {matchmap_id}: WSB {wsb_rounds_a}-{wsb_rounds_b} vs HLTV {hltv_rounds_a}-{hltv_rounds_b}. Updating WSB...")
+                        print(f" [compare_and_update_scores] Score Update for Map {map_nr}: WSB {wsb_rounds_a}-{wsb_rounds_b} vs HLTV {hltv_rounds_a}-{hltv_rounds_b}. Updating WSB...")
                         self.update_wannspieltbig_matchmap(
                             matchmap_id=matchmap_id,
                             rounds_won_team_a=hltv_rounds_a,
                             rounds_won_team_b=hltv_rounds_b
                         )
                     else:
-                        print(f" [compare_and_update_scores] Scores match for Match HLTV ID {hltv_match_id} Map {map_nr}, WSB MatchmapID {matchmap_id}: {wsb_rounds_a}-{wsb_rounds_b}. No update needed.")
+                        print(f" [compare_and_update_scores] Scores for Map {map_nr}: {wsb_rounds_a}-{wsb_rounds_b}. No update needed.")
                 else:
-                    print(f" [compare_and_update_scores] No HLTV score data for Match HLTV ID {hltv_match_id} Map {map_nr}, WSB MatchmapID {matchmap_id}.")
+                    print(f" [compare_and_update_scores] No HLTV score for Map {map_nr}.")
             
 
     def loop(self, interval=60):
         while True:
+            start_time = time.time()
             print("=== WSB Proxy Loop ===")
             # Step 1: Fetch matches from Wannspieltbig.de
             wsb_matches = self.fetch_wannspieltbig_matches()            
             
             # Step 2: Filter matches to those with HLTV IDs involving BIG teams
-            hltv_matches = self.filter_hltv_matches(wsb_matches) if wsb_matches else []
+            hltv_matches = self.filter_wsb_matches(wsb_matches) if wsb_matches else []
             
             # Step 3: For each HLTV match, fetch live score data
             scores_from_hltv_by_matchid = {}
@@ -220,7 +223,9 @@ class WSBProxy:
             
             # Step 4: Compare scores and log differences
             self.compare_and_update_scores(scores_from_hltv_by_matchid, hltv_matches)
-            print(f" [loop] Sleeping for {interval} seconds before next fetch...")
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            print(f" [loop] Loop iteration took {elapsed_time:.2f} seconds. Sleeping for {interval} seconds before next fetch. Stop with Ctrl+C.")
             time.sleep(interval)
 
 if __name__ == '__main__':
@@ -232,4 +237,9 @@ if __name__ == '__main__':
     auth_user = args.auth_user
     auth_pass = args.auth_pass
     proxy = WSBProxy(auth_user, auth_pass)
-    proxy.loop(interval=args.interval)  # Fetch every 1 minutes
+    try:
+        print("Starting WSB Proxy...")
+        proxy.loop(interval=args.interval)  # Fetch every 1 minutes
+    except KeyboardInterrupt:
+        print("Stopping WSB Proxy...")
+    
