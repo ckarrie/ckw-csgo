@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ "django-5.1" ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
