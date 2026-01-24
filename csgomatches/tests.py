@@ -62,13 +62,11 @@ class TournamentModelTest(TestCase):
     def setUp(self):
         self.tournament = models.Tournament.objects.create(
             name="ESL Pro League",
-            name_short="EPL"
         )
 
     def test_tournament_creation(self):
         """Test that a tournament can be created"""
         self.assertEqual(self.tournament.name, "ESL Pro League")
-        self.assertEqual(self.tournament.name_short, "EPL")
 
     def test_tournament_str(self):
         """Test the string representation of a tournament"""
@@ -88,7 +86,6 @@ class MatchModelTest(TestCase):
         self.team_b = models.Team.objects.create(name="Team B")
         self.tournament = models.Tournament.objects.create(
             name="Test Tournament",
-            name_short="TT"
         )
 
         self.lineup_a = models.Lineup.objects.create(
@@ -144,7 +141,6 @@ class MatchMapModelTest(TestCase):
         self.team_b = models.Team.objects.create(name="Team B")
         self.tournament = models.Tournament.objects.create(
             name="Test Tournament",
-            name_short="TT"
         )
         self.map_obj = models.Map.objects.create(
             name="Mirage",
@@ -204,7 +200,6 @@ class IndexViewTest(TestCase):
         self.team_b = models.Team.objects.create(name="Team B")
         self.tournament = models.Tournament.objects.create(
             name="Test Tournament",
-            name_short="TT"
         )
 
         self.lineup_a = models.Lineup.objects.create(
