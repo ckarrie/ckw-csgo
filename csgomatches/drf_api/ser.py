@@ -19,7 +19,7 @@ class CSGOTeamSerializer(serializers.ModelSerializer):
         model = apps.get_model('csgomatches.Team')
         fields = [
             'id', 'name', 'name_long', 'name_alt', 
-            #'hltv_id',
+            'hltv_id',
         ]
 
 
