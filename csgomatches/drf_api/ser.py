@@ -106,7 +106,7 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'tournament', 'lineup_a', 'lineup_b', 'slug', 'bestof', 'game',
             'first_map_at', 'last_map_end', 'cancelled', 'hltv_match_id', 'livescore_url', 'html_detail_url', 'matchmaps',
-            'block_voice_channel_display', 'block_voice_channel'
+            'block_voice_channel_display', 'block_voice_channel', 'has_ended',
         ]
 
 
