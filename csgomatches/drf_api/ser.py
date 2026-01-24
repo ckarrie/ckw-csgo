@@ -75,7 +75,7 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
     matchmaps = CSGOMatchMapSerializer(many=True, source='matchmap_set')
     block_voice_channel_display = serializers.SerializerMethodField(read_only=True, source='get_block_voice_channel_display')
     game = serializers.SerializerMethodField(read_only=True, source='get_game')
-    has_ended = serializers.SerializerMethodField(read_only=True, source='has_ended')
+    has_ended = serializers.BooleanField(read_only=True)
 
     def get_livescore_url(self, obj):
         if obj.hltv_match_id:
@@ -106,7 +106,7 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'tournament', 'lineup_a', 'lineup_b', 'slug', 'bestof', 'game',
             'first_map_at', 'last_map_end', 'cancelled', 'hltv_match_id', 'livescore_url', 'html_detail_url', 'matchmaps',
-            'block_voice_channel_display', 'block_voice_channel', 'has_ended',
+            'block_voice_channel_display', 'block_voice_channel', 'has_ended'
         ]
 
 
