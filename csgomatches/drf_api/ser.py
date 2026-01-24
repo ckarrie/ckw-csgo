@@ -75,6 +75,7 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
     matchmaps = CSGOMatchMapSerializer(many=True, source='matchmap_set')
     block_voice_channel_display = serializers.SerializerMethodField(read_only=True, source='get_block_voice_channel_display')
     game = serializers.SerializerMethodField(read_only=True, source='get_game')
+    has_ended = serializers.SerializerMethodField(read_only=True, source='has_ended')
 
     def get_livescore_url(self, obj):
         if obj.hltv_match_id:
