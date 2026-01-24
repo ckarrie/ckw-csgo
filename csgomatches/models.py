@@ -318,36 +318,6 @@ class Match(models.Model):
             url = reverse('match_livescore-detail', kwargs={'pk': self.hltv_match_id})
             return request.build_absolute_uri(url)
 
-    def update_hltv_livescore(self, request) -> None:
-        # Guard clause in case lineup_a is None
-        if not self.lineup_a:
-            return
-
-        url = self.get_livescore_url(request=request)
-        if url:
-            response = requests.get(url=url, params={'format': 'json'}).json()
-            maps = response.get('maps', [])
-            for map_data in maps:
-                map_nr = map_data.get('map_nr')
-                mm_obj = self.matchmap_set.filter(map_nr=map_nr).first()
-                if mm_obj:
-                    mm_obj.played_map = Map.objects.filter(
-                        models.Q(name=map_data.get('map_name')) |
-                        models.Q(cs_name=map_data.get('map_name'))
-                    ).first()
-                    score_a, score_b = map_data.get('score_a'), map_data.get('score_b')
-                    swap_score = False
-                    team_a_hltv_id = response.get('team_a_id')
-                    if team_a_hltv_id != self.lineup_a.team.hltv_id:
-                        swap_score = True
-
-                    if swap_score:
-                        score_b, score_a = score_a, score_b
-
-                    mm_obj.rounds_won_team_a = score_a
-                    mm_obj.rounds_won_team_b = score_b
-                    mm_obj.save()
-
 
 class MatchMap(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)

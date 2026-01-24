@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.utils.safestring import mark_safe
+from django.template.loader import render_to_string
 from django.views.decorators.cache import cache_page
 from rest_framework import viewsets, mixins, pagination, views, routers, renderers, permissions, authentication
 from django.apps import apps
@@ -37,10 +37,7 @@ class CSGOView(views.APIView):
 class CSGOAPIRootView(CSGOView, routers.APIRootView):
     def get_view_description(self, html=False):
         if html:
-            return mark_safe('<p>Willkommen! API made by <a href="https://karrie.software" target="_blank">'
-                             'karrie.software</a> with the power of '
-                             '<a href="https://www.django-rest-framework.org/">'
-                             'django-rest-framework.org</a><p>')
+            return render_to_string('csgomatches/rest_framework/api_description.html')
         return "Willkommen"
 
     def get_view_name(self):

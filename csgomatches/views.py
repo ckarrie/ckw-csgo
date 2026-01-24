@@ -101,7 +101,6 @@ class MatchDetailView(generic.DetailView):
             update = int(self.request.GET.get('update') or update_choices[1])
             if update not in update_choices:
                 update = update_choices[0]
-            #self.object.update_hltv_livescore(request=self.request)
         elif self.object.is_upcoming():
             update = update_choices[-1]
         ctx.update({
@@ -120,7 +119,7 @@ class LiveStreamsView(generic.TemplateView):
         ctx = super(LiveStreamsView, self).get_context_data(*args, **kwargs)
         drf_api_url = models.reverse('fpl-list')
         full_drf_api_url = self.request.build_absolute_uri(drf_api_url)
-        resp = requests.get(full_drf_api_url).json()
+        resp = requests.get(full_drf_api_url, timeout=10).json()
         faceit_nicknames = faceit.get_nicknames()
         nicknames_with_streams = OrderedDict()
         for nn in faceit_nicknames:
