@@ -43,15 +43,22 @@ class WSBProxy:
             response = requests.get(WSB_API_MATCHES_URL, timeout=10)
             response.raise_for_status()
             matches_data = response.json().get('results', [])
+            print(f" [fetch_wannspieltbig_matches] Fetched {len(matches_data)} matches from WSB.")
             return matches_data
         except requests.RequestException as e:
-            print(f"Error fetching matches: {e}")
+            print(f" [fetch_wannspieltbig_matches] Error fetching matches: {e}")
             return None
         
     def filter_hltv_matches(self, matches):
-        print("=== Scores @ Wannspieltbig.de ===")
+        #print(" [filter_hltv_matches] === Scores @ Wannspieltbig.de ===")
         hltv_matches = []
+        skipped_ended_matches = []
+        skipped_missing_enemy_team_matches = []
         for match in matches:
+            has_ended = match.get('has_ended', False)
+            if has_ended:
+                skipped_ended_matches.append(match)
+                continue
             lineup_a = match.get('lineup_a', {})
             lineup_b = match.get('lineup_b', {})
             if lineup_a:
@@ -62,20 +69,24 @@ class WSBProxy:
                 team_b_id = lineup_b.get('team', {}).get('hltv_id')
             else:
                 team_b_id = None
+                skipped_missing_enemy_team_matches.append(match)   
+                continue
 
             hltv_match_id = match.get('hltv_match_id')
             if hltv_match_id is not None and (team_a_id in HLTV_BIG_TEAMS_IDS or team_b_id in HLTV_BIG_TEAMS_IDS):
                 hltv_matches.append(match)
         
-        print(f"Filtered {len(hltv_matches)} HLTV matches involving BIG teams.")
+        print(f" [filter_hltv_matches] Skipped {len(skipped_ended_matches)} ended matches.")
+        print(f" [filter_hltv_matches] Skipped {len(skipped_missing_enemy_team_matches)} matches with missing enemy team.") 
+        print(f" [filter_hltv_matches] Filtered {len(hltv_matches)} HLTV matches involving BIG teams.")
         for match in hltv_matches:
-            print(f" - HLTV Match ID: {match.get('hltv_match_id')}, Teams: {match.get('lineup_a', {}).get('team', {}).get('name')} vs {match.get('lineup_b', {}).get('team', {}).get('name')}")
+            print(f" [filter_hltv_matches]  - HLTV Match ID: {match.get('hltv_match_id')}, Teams: {match.get('lineup_a', {}).get('team', {}).get('name')} vs {match.get('lineup_b', {}).get('team', {}).get('name')}")
             for matchmap in match.get('matchmaps', []):
-                print(f"   - Map {matchmap.get('map_nr')}: {matchmap.get('map_name')}, Score: {matchmap.get('rounds_won_team_a')} - {matchmap.get('rounds_won_team_b')}")
+                print(f" [filter_hltv_matches]    - Map {matchmap.get('map_nr')}: {matchmap.get('map_name')}, Score: {matchmap.get('rounds_won_team_a')} - {matchmap.get('rounds_won_team_b')}")
         return hltv_matches
     
     def fetch_hltv_livescore(self, hltv_match_id):
-        print("=== Scores @ HLTV.org ===")
+        print(" [fetch_hltv_livescore] === Scores @ HLTV.org ===")
         score_by_map_and_teamid = {}
         with HLTVSimpleClient() as sio:
             ua = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; pl; rv:1.9.2) Gecko/20100115 Firefox/3.6'
@@ -147,15 +158,54 @@ class WSBProxy:
         except requests.RequestException as e:
             print(f" [update_wannspieltbig_matchmap] Error updating matchmap {matchmap_id}: {e}")
             return None
+        
+    def compare_and_update_scores(self, scores_from_hltv_by_matchid, hltv_matches):
+        for match in hltv_matches:
+            hltv_match_id = match['hltv_match_id']
+            wsb_matchmaps = match.get('matchmaps', [])
+            hltv_scores = scores_from_hltv_by_matchid.get(hltv_match_id, {})
+            big_team_id = None
+            other_team_id = None
+            for team_id in HLTV_BIG_TEAMS_IDS:
+                if team_id in [match.get('lineup_a', {}).get('team', {}).get('hltv_id'),
+                                match.get('lineup_b', {}).get('team', {}).get('hltv_id')]:
+                    big_team_id = team_id
+                    break
+
+            for map_nr in hltv_scores.keys():
+                for team_id in hltv_scores[map_nr].keys():
+                    if team_id != big_team_id:
+                        other_team_id = team_id
+                        break
+
+            print(f" [compare_and_update_scores] Hltv Scores for Match ID {hltv_match_id}: {hltv_scores}, BIG Team ID: {big_team_id}, Other Team ID: {other_team_id} ")
+            for wsb_map in wsb_matchmaps:
+                map_nr = wsb_map.get('map_nr')
+                wsb_rounds_a = wsb_map.get('rounds_won_team_a', 0)
+                wsb_rounds_b = wsb_map.get('rounds_won_team_b', 0)
+                hltv_map_score = hltv_scores.get(map_nr, {})
+                matchmap_id = wsb_map.get('id')
+                if hltv_map_score:
+                    hltv_rounds_a = hltv_map_score.get(big_team_id, 0)
+                    hltv_rounds_b = hltv_map_score.get(other_team_id, 0)
+                    if (wsb_rounds_a != hltv_rounds_a) or (wsb_rounds_b != hltv_rounds_b):
+                        print(f" [compare_and_update_scores] Score mismatch for Match HLTV ID {hltv_match_id} Map {map_nr}, WSB MatchmapID {matchmap_id}: WSB {wsb_rounds_a}-{wsb_rounds_b} vs HLTV {hltv_rounds_a}-{hltv_rounds_b}. Updating WSB...")
+                        self.update_wannspieltbig_matchmap(
+                            matchmap_id=matchmap_id,
+                            rounds_won_team_a=hltv_rounds_a,
+                            rounds_won_team_b=hltv_rounds_b
+                        )
+                    else:
+                        print(f" [compare_and_update_scores] Scores match for Match HLTV ID {hltv_match_id} Map {map_nr}, WSB MatchmapID {matchmap_id}: {wsb_rounds_a}-{wsb_rounds_b}. No update needed.")
+                else:
+                    print(f" [compare_and_update_scores] No HLTV score data for Match HLTV ID {hltv_match_id} Map {map_nr}, WSB MatchmapID {matchmap_id}.")
+            
 
     def loop(self, interval=60):
         while True:
+            print("=== WSB Proxy Loop ===")
             # Step 1: Fetch matches from Wannspieltbig.de
-            wsb_matches = self.fetch_wannspieltbig_matches()
-            if wsb_matches is not None:
-                print(f"Fetched {len(wsb_matches)} matches from WSB.")
-            else:
-                print("Failed to fetch matches.")
+            wsb_matches = self.fetch_wannspieltbig_matches()            
             
             # Step 2: Filter matches to those with HLTV IDs involving BIG teams
             hltv_matches = self.filter_hltv_matches(wsb_matches) if wsb_matches else []
@@ -166,48 +216,11 @@ class WSBProxy:
                 hltv_match_id=match['hltv_match_id']
                 score_from_hltv = self.fetch_hltv_livescore(hltv_match_id)
                 scores_from_hltv_by_matchid[hltv_match_id] = score_from_hltv
-            print(f"Collected scores from HLTV for {len(scores_from_hltv_by_matchid)} matches.")
+            print(f" [loop] Collected scores from HLTV for {len(scores_from_hltv_by_matchid)} matches.")
             
             # Step 4: Compare scores and log differences
-            for match in hltv_matches:
-                hltv_match_id = match['hltv_match_id']
-                wsb_matchmaps = match.get('matchmaps', [])
-                hltv_scores = scores_from_hltv_by_matchid.get(hltv_match_id, {})
-                big_team_id = None
-                other_team_id = None
-                for team_id in HLTV_BIG_TEAMS_IDS:
-                    if team_id in [match.get('lineup_a', {}).get('team', {}).get('hltv_id'),
-                                   match.get('lineup_b', {}).get('team', {}).get('hltv_id')]:
-                        big_team_id = team_id
-                        break
-
-                for map_nr in hltv_scores.keys():
-                    for team_id in hltv_scores[map_nr].keys():
-                        if team_id != big_team_id:
-                            other_team_id = team_id
-                            break
-
-                print(f"Hltv Scores for Match ID {hltv_match_id}: {hltv_scores}, BIG Team ID: {big_team_id}, Other Team ID: {other_team_id} ")
-                for wsb_map in wsb_matchmaps:
-                    map_nr = wsb_map.get('map_nr')
-                    wsb_rounds_a = wsb_map.get('rounds_won_team_a', 0)
-                    wsb_rounds_b = wsb_map.get('rounds_won_team_b', 0)
-                    hltv_map_score = hltv_scores.get(map_nr, {})
-                    if hltv_map_score:
-                        hltv_rounds_a = hltv_map_score.get(big_team_id, 0)
-                        hltv_rounds_b = hltv_map_score.get(other_team_id, 0)
-                        if (wsb_rounds_a != hltv_rounds_a) or (wsb_rounds_b != hltv_rounds_b):
-                            print(f"Score mismatch for Match HLTV ID {hltv_match_id} Map {map_nr}: WSB {wsb_rounds_a}-{wsb_rounds_b} vs HLTV {hltv_rounds_a}-{hltv_rounds_b}. Updating WSB...")
-                            self.update_wannspieltbig_matchmap(
-                                matchmap_id=wsb_map['id'],
-                                rounds_won_team_a=hltv_rounds_a,
-                                rounds_won_team_b=hltv_rounds_b
-                            )
-                        else:
-                            print(f"Scores match for Match HLTV ID {hltv_match_id} Map {map_nr}: {wsb_rounds_a}-{wsb_rounds_b}. No update needed.")
-                    else:
-                        print(f"No HLTV score data for Match HLTV ID {hltv_match_id} Map {map_nr}.")
-            
+            self.compare_and_update_scores(scores_from_hltv_by_matchid, hltv_matches)
+            print(f" [loop] Sleeping for {interval} seconds before next fetch...")
             time.sleep(interval)
 
 if __name__ == '__main__':
