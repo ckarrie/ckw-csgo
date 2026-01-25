@@ -340,8 +340,44 @@ class MatchMap(models.Model):
     def get_next_map(self) -> 'MatchMap | None':
         return self.match.matchmap_set.filter(map_nr__gt=self.map_nr).order_by('map_nr').first()
 
+    #def has_ended(self) -> bool:
+    #    return (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2
+    
     def has_ended(self) -> bool:
-        return (self.rounds_won_team_a >= 13 or self.rounds_won_team_b >= 13) and abs(self.rounds_won_team_a - self.rounds_won_team_b) >= 2
+        """Determine if the match map has ended based on rounds won by each team."""
+        
+        a = self.rounds_won_team_a
+        b = self.rounds_won_team_b
+
+        # https://gemini.google.com/app/0d22abd3ea430279?hl=de
+        # 1. Reguläre Spielzeit (MR13)
+        if a < 13 and b < 13:
+            return False
+        
+        # Der klassische Sieg vor der Overtime (z.B. 13:0 bis 13:11)
+        if (a == 13 or b == 13) and abs(a - b) >= 2:
+            return True
+
+        # 2. Overtime-Logik
+        # Wenn es 12:12 steht, beginnt die Overtime.
+        # In MR3 Overtime gewinnt man bei 16, 19, 22...
+        # Die Formel für die benötigten Punkte ist: 13 + (Anzahl_Overtimes * 3)
+        if a >= 12 and b >= 12:
+            # Bei Gleichstand geht es immer weiter
+            if a == b:
+                return False
+            
+            max_score = max(a, b)
+            min_score = min(a, b)
+            
+            # Bestimme, in welchem Overtime-Zyklus wir uns befinden
+            # Ein Zyklus (6 Runden) endet bei 15, 18, 21... (wenn Differenz >= 2)
+            # Wir prüfen, ob der Führende die Zielgerade der aktuellen OT erreicht hat.
+            ot_rounds = max_score - 12
+            if ot_rounds % 3 == 1 and max_score - min_score >= 2:
+                return True
+                
+        return False
 
     def is_live(self):
         prev = self.get_prev_map()
