@@ -1,4 +1,4 @@
-# Wansspieltbig Apps
+# Wannspieltbig Apps
 
 ## WSB_Proxy
 
