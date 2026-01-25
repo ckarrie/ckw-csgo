@@ -349,6 +349,9 @@ class MatchMap(models.Model):
         a = self.rounds_won_team_a
         b = self.rounds_won_team_b
 
+        if self.unplayed or self.cancelled:
+            return True 
+
         # https://gemini.google.com/app/0d22abd3ea430279?hl=de
         # 1. Reguläre Spielzeit (MR13)
         if a < 13 and b < 13:
