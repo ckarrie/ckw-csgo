@@ -82,8 +82,11 @@ class WSBProxy:
         for match in hltv_matches:
             print(f" [filter_wsb_matches]  - HLTV Match ID: {match.get('hltv_match_id')}, Teams: {match.get('lineup_a', {}).get('team', {}).get('name')} vs {match.get('lineup_b', {}).get('team', {}).get('name')}")
             for matchmap in match.get('matchmaps', []):
-                played_map = matchmap.get('played_map', {}).get('cs_name', '?')
-                print(f" [filter_wsb_matches]    - Map {matchmap.get('map_nr')} ({played_map}): Score: {matchmap.get('rounds_won_team_a')} - {matchmap.get('rounds_won_team_b')}")
+                played_map = matchmap.get('played_map', {})
+                map_name = '?'
+                if played_map:
+                    map_name = played_map.get('cs_name', '?')
+                print(f" [filter_wsb_matches]    - Map {matchmap.get('map_nr')} ({map_name}): Score: {matchmap.get('rounds_won_team_a')} - {matchmap.get('rounds_won_team_b')}")
         return hltv_matches
     
     def fetch_hltv_livescore(self, hltv_match_id):
