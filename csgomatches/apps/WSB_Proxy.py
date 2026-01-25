@@ -1,9 +1,19 @@
 import requests
 import json
 import time
-import socketio
+import logging
+import sys
 from socketio import SimpleClient, Client
 import argparse
+
+
+logging.basicConfig(
+    stream=sys.stdout, 
+    level=logging.INFO, 
+    format='%(asctime)s | %(funcName)30s | %(levelname)s | %(message)s', 
+    #log_colors={'DEBUG':    'cyan','INFO':     'green',	'WARNING':  'yellow','ERROR':    'red',	'CRITICAL': 'red,bg_white',	}
+)
+logger = logging.getLogger(__name__)
 
 # Static variables
 DEBUG = False
@@ -18,12 +28,12 @@ HLTV_BIG_TEAMS_IDS = [
 class HLTVClient(Client):    
     def _handle_eio_message(self, data):
         if DEBUG:
-            print(f"HLTVSocketClient received data: {data}")
+            logger.debug(f"HLTVSocketClient received data: {data}")
         try:
             return super()._handle_eio_message(data)
         except json.JSONDecodeError:
             if DEBUG:
-                print("JSON-Error received in _handle_eio_message")
+                logger.error("JSON-Error received in _handle_eio_message")
             else:
                 pass
 
@@ -43,10 +53,10 @@ class WSBProxy:
             response = requests.get(WSB_API_MATCHES_URL, timeout=10)
             response.raise_for_status()
             matches_data = response.json().get('results', [])
-            print(f" [fetch_wannspieltbig_matches] Fetched {len(matches_data)} matches from WSB.")
+            logger.info(f"Fetched {len(matches_data)} matches from WSB.")
             return matches_data
         except requests.RequestException as e:
-            print(f" [fetch_wannspieltbig_matches] Error fetching matches: {e}")
+            logger.error(f"Error fetching matches: {e}")
             return None
         
     def filter_wsb_matches(self, matches):
@@ -76,21 +86,21 @@ class WSBProxy:
             if hltv_match_id is not None and (team_a_id in HLTV_BIG_TEAMS_IDS or team_b_id in HLTV_BIG_TEAMS_IDS):
                 hltv_matches.append(match)
         
-        print(f" [filter_wsb_matches] Skipped {len(skipped_ended_matches)} ended matches.")
-        print(f" [filter_wsb_matches] Skipped {len(skipped_missing_enemy_team_matches)} matches with missing enemy team.") 
-        print(f" [filter_wsb_matches] Filtered {len(hltv_matches)} HLTV matches involving BIG teams.")
+        logger.info(f"Skipped {len(skipped_ended_matches)} ended matches.")
+        logger.info(f"Skipped {len(skipped_missing_enemy_team_matches)} matches with missing enemy team.") 
+        logger.info(f"Filtered {len(hltv_matches)} HLTV matches involving BIG teams.")
         for match in hltv_matches:
-            print(f" [filter_wsb_matches]  - HLTV Match ID: {match.get('hltv_match_id')}, Teams: {match.get('lineup_a', {}).get('team', {}).get('name')} vs {match.get('lineup_b', {}).get('team', {}).get('name')}")
+            logger.info(f" - HLTV Match ID: {match.get('hltv_match_id')}, Teams: {match.get('lineup_a', {}).get('team', {}).get('name')} vs {match.get('lineup_b', {}).get('team', {}).get('name')}")
             for matchmap in match.get('matchmaps', []):
                 played_map = matchmap.get('played_map', {})
                 map_name = '?'
                 if played_map:
                     map_name = played_map.get('cs_name', '?')
-                print(f" [filter_wsb_matches]    - Map {matchmap.get('map_nr')} ({map_name}): Score: {matchmap.get('rounds_won_team_a')} - {matchmap.get('rounds_won_team_b')}")
+                logger.info(f"   - Map {matchmap.get('map_nr')} ({map_name}): Score: {matchmap.get('rounds_won_team_a')} - {matchmap.get('rounds_won_team_b')}")
         return hltv_matches
     
     def fetch_hltv_livescore(self, hltv_match_id):
-        print(" [fetch_hltv_livescore] === Scores @ HLTV.org ===")
+        logger.info("=== Scores @ HLTV.org ===")
         score_by_map_and_teamid = {}
         with HLTVSimpleClient() as sio:
             ua = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; pl; rv:1.9.2) Gecko/20100115 Firefox/3.6'
@@ -99,16 +109,14 @@ class WSBProxy:
                 'User-Agent': ua,
             }
             sio.connect('https://scorebot-lb.hltv.org', headers=headers, transports="websocket")
-            if DEBUG:
-                print(f" [fetch_hltv_livescore] HLTV connection infos: sid={sio.sid}, transport={sio.transport}, user_agent={ua}")
+            logger.debug(f"HLTV connection infos: sid={sio.sid}, transport={sio.transport}, user_agent={ua}")
             sio.emit("readyForScores", data=json.dumps({"token": "", "listIds": [hltv_match_id]}))
             event_name, event_data = sio.receive(timeout=15)
             if event_name == 'score':
                 mapscore_data = event_data.get('mapScores', {})
                 #print(f" [fetch_hltv_livescore] Event Data for Match {hltv_match_id}: {event_data}")
                 map_ids = mapscore_data.keys()
-                if DEBUG:
-                    print(f" [fetch_hltv_livescore]  HLTV map_ids={map_ids}")
+                logger.debug(f" [fetch_hltv_livescore]  HLTV map_ids={map_ids}")
                 for map_id in map_ids:                        
                     fh_ct = mapscore_data.get(map_id, {}).get('firstHalf', {}).get('ctScore', 0)
                     fh_ct_teamid = mapscore_data.get(map_id, {}).get('firstHalf', {}).get('ctTeamDbId', 'unknown')
@@ -130,14 +138,14 @@ class WSBProxy:
                         fh_t_teamid: (fh_t, sh_ct, ot_ct)
                     }
 
-                    print(f" [fetch_hltv_livescore] Map Half Scores: {map_half_scores}")
+                    logger.info(f"Map Half Scores: {map_half_scores}")
 
                     score_by_map_and_teamid[int(map_id)] = {
                         fh_ct_teamid: map_score_by_teamid[fh_ct_teamid],
                         fh_t_teamid: map_score_by_teamid[fh_t_teamid],
                         'map_name': map_name
                     }
-                    print(f" [fetch_hltv_livescore] Match {hltv_match_id} - Map: {map_id} ({map_name}), Score: CT-Team {fh_ct_teamid} {map_score_by_teamid[fh_ct_teamid]} - T-Team {fh_t_teamid} {map_score_by_teamid[fh_t_teamid]}")
+                    logger.info(f"Match {hltv_match_id} - Map: {map_id} ({map_name}), Score: CT-Team {fh_ct_teamid} {map_score_by_teamid[fh_ct_teamid]} - T-Team {fh_t_teamid} {map_score_by_teamid[fh_t_teamid]}")
             sio.disconnect()
         return score_by_map_and_teamid
     
@@ -146,7 +154,7 @@ class WSBProxy:
             'rounds_won_team_a': rounds_won_team_a,
             'rounds_won_team_b': rounds_won_team_b
         }
-        print(f" [update_wannspieltbig_matchmap] Updating WSB MatchMap ID {matchmap_id} with payload: {payload}")
+        logger.info(f"Updating WSB MatchMap ID {matchmap_id} with payload: {payload}")
         
         try:
             
@@ -158,10 +166,10 @@ class WSBProxy:
             )
             response.raise_for_status()
             updated_data = response.json()
-            print(f" [update_wannspieltbig_matchmap] Updated WSB MatchMap ID {matchmap_id} with scores {rounds_won_team_a}-{rounds_won_team_b}.")
+            logger.info(f"Updated WSB MatchMap ID {matchmap_id} with scores {rounds_won_team_a}-{rounds_won_team_b}.")
             return updated_data
         except requests.RequestException as e:
-            print(f" [update_wannspieltbig_matchmap] Error updating matchmap {matchmap_id}: {e}")
+            logger.error(f"Error updating matchmap {matchmap_id}: {e}")
             return None
         
     def compare_and_update_scores(self, scores_from_hltv_by_matchid, hltv_matches):
@@ -183,7 +191,7 @@ class WSBProxy:
                         other_team_id = team_id
                         break
 
-            print(f" [compare_and_update_scores] Hltv Scores for Match ID {hltv_match_id}: {hltv_scores}, BIG Team ID: {big_team_id}, Other Team ID: {other_team_id} ")
+            logger.info(f"Hltv Scores for Match ID {hltv_match_id}: {hltv_scores}, BIG Team ID: {big_team_id}, Other Team ID: {other_team_id} ")
             for wsb_map in wsb_matchmaps:
                 map_nr = wsb_map.get('map_nr')
                 wsb_rounds_a = wsb_map.get('rounds_won_team_a', 0)
@@ -194,22 +202,22 @@ class WSBProxy:
                     hltv_rounds_a = hltv_map_score.get(big_team_id, 0)
                     hltv_rounds_b = hltv_map_score.get(other_team_id, 0)
                     if (wsb_rounds_a != hltv_rounds_a) or (wsb_rounds_b != hltv_rounds_b):
-                        print(f" [compare_and_update_scores] Score Update for Map {map_nr}: WSB {wsb_rounds_a}-{wsb_rounds_b} vs HLTV {hltv_rounds_a}-{hltv_rounds_b}. Updating WSB...")
+                        logger.warning(f"Score Update for Map {map_nr}: WSB {wsb_rounds_a}-{wsb_rounds_b} vs HLTV {hltv_rounds_a}-{hltv_rounds_b}. Updating WSB...")
                         self.update_wannspieltbig_matchmap(
                             matchmap_id=matchmap_id,
                             rounds_won_team_a=hltv_rounds_a,
                             rounds_won_team_b=hltv_rounds_b
                         )
                     else:
-                        print(f" [compare_and_update_scores] Scores for Map {map_nr}: {wsb_rounds_a}-{wsb_rounds_b}. No update needed.")
+                        logger.info(f"Scores for Map {map_nr}: {wsb_rounds_a}-{wsb_rounds_b}. No update needed.")
                 else:
-                    print(f" [compare_and_update_scores] No HLTV score for Map {map_nr}.")
+                    logger.info(f"No HLTV score for Map {map_nr}.")
             
 
     def loop(self, interval=60):
         while True:
             start_time = time.time()
-            print("=== WSB Proxy Loop ===")
+            logger.info("=== WSB Proxy Loop ===")
             # Step 1: Fetch matches from Wannspieltbig.de
             wsb_matches = self.fetch_wannspieltbig_matches()            
             
@@ -222,13 +230,13 @@ class WSBProxy:
                 hltv_match_id=match['hltv_match_id']
                 score_from_hltv = self.fetch_hltv_livescore(hltv_match_id)
                 scores_from_hltv_by_matchid[hltv_match_id] = score_from_hltv
-            print(f" [loop] Collected scores from HLTV for {len(scores_from_hltv_by_matchid)} matches.")
+            logger.info(f"Collected scores from HLTV for {len(scores_from_hltv_by_matchid)} matches.")
             
             # Step 4: Compare scores and log differences
             self.compare_and_update_scores(scores_from_hltv_by_matchid, hltv_matches)
             end_time = time.time()
             elapsed_time = end_time - start_time
-            print(f" [loop] Loop iteration took {elapsed_time:.2f} seconds. Sleeping for {interval} seconds before next fetch. Stop with Ctrl+C.")
+            logger.info(f"Loop iteration took {elapsed_time:.2f} seconds. Sleeping for {interval} seconds before next fetch. Stop with Ctrl+C.")
             time.sleep(interval)
 
 if __name__ == '__main__':
@@ -236,12 +244,18 @@ if __name__ == '__main__':
     parser.add_argument('--interval', type=int, default=60, help='Interval in seconds between fetches (default: 60)')
     parser.add_argument('--auth_user', type=str, required=True, help='Username for WSB API authentication')
     parser.add_argument('--auth_pass', type=str, required=True, help='Password for WSB API authentication')
+    parser.add_argument('--debug', action='store_true', help='Enable debug logging')
+
     args = parser.parse_args()
     auth_user = args.auth_user
     auth_pass = args.auth_pass
+    if args.debug:
+        DEBUG = True
+        logger.setLevel(logging.DEBUG)
+    
     proxy = WSBProxy(auth_user, auth_pass)
     try:
-        print("Starting WSB Proxy...")
+        logger.info("Starting WSB Proxy...")
         proxy.loop(interval=args.interval)  # Fetch every 1 minutes
     except KeyboardInterrupt:
         print("Stopping WSB Proxy...")
