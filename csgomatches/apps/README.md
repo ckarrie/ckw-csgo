@@ -2,6 +2,10 @@
 
 ## WSB_Proxy
 
+### Version naming scheme
+
+`WSB_Proxy.<YEAR>.<MONTH>.<RELEASE NR>.bin`
+
 ### Generating binary
 
 ```bash
