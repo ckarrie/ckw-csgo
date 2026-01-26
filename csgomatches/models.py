@@ -191,7 +191,7 @@ class Match(models.Model):
         )
     )
     hltv_match_id = models.CharField(max_length=20, null=True, blank=True, help_text='For HLTV Livescore during match')
-    esea_match_id = models.CharField(max_length=255, null=True, blank=True)
+    esea_match_id = models.CharField(max_length=255, null=True, blank=True, help_text='ESEA/Faceit Match ID')
     enable_tweet = models.BooleanField(default=True)
     last_tweet = models.DateTimeField(null=True, blank=True)
     last_tweet_id = models.CharField(max_length=255, null=True, blank=True)
@@ -352,7 +352,7 @@ class MatchMap(models.Model):
         if self.unplayed or self.cancelled:
             return True 
 
-        # https://gemini.google.com/app/0d22abd3ea430279?hl=de
+        # https://gemini.google.com/share/030d913778aa
         # 1. Reguläre Spielzeit (MR13)
         if a < 13 and b < 13:
             return False

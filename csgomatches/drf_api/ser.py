@@ -105,7 +105,7 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
         model = apps.get_model('csgomatches.Match')
         fields = [
             'id', 'tournament', 'lineup_a', 'lineup_b', 'slug', 'bestof', 'game',
-            'first_map_at', 'last_map_end', 'cancelled', 'hltv_match_id', 'livescore_url', 'html_detail_url', 'matchmaps',
+            'first_map_at', 'last_map_end', 'cancelled', 'hltv_match_id', 'esea_match_id', 'livescore_url', 'html_detail_url', 'matchmaps',
             'block_voice_channel_display', 'block_voice_channel', 'has_ended'
         ]
 
