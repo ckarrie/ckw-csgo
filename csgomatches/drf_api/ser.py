@@ -111,9 +111,20 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
 
 
 class CSGOMatchMapUpdateSerializer(serializers.ModelSerializer):
+    played_map_name = serializers.CharField(max_length=206, write_only=True)
+
+    def update(self, instance, validated_data):
+        played_map_name = validated_data.pop('played_map_name', None)
+        if played_map_name:
+            played_map_obj = apps.get_model('csgomatches.Map').objects.filter(cs_name__iexact=played_map_name).first()
+            if played_map_obj:
+                instance.played_map = played_map_obj
+        return super().update(instance, validated_data)
+
+
     class Meta:
         model = apps.get_model('csgomatches.MatchMap')
-        fields = ['map_nr', 'rounds_won_team_a', 'rounds_won_team_b',]
+        fields = ['map_nr', 'rounds_won_team_a', 'rounds_won_team_b', 'unplayed', 'played_map_name']
 
 
 class HLTVMapSerializer(serializers.Serializer):

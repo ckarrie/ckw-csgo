@@ -17,13 +17,19 @@ logger = logging.getLogger(__name__)
 
 # Static variables
 DEBUG = False
-WSB_API_MATCHES_URL = "https://wannspieltbig.de/api/match_livescore/"
+#WSB_API_MATCHES_URL = "https://wannspieltbig.de/api/match_livescore/"
+WSB_API_MATCHES_URL = "https://wannspieltbig.de/api/match_upcoming"
 WSB_API_MATCHMAP_UPDATE_URL = "https://wannspieltbig.de/api/matchmap_update/"
 HLTV_BIG_TEAMS_IDS = [
     7532, # BIG Main
     10254, # BIG Academy
     11718 # BIG Equipa
 ]
+
+FACEIT_BIG_TEAMS_IDS = [
+    'af894ef4-0b65-4e87-97d4-415967de35b3', # faction_id BIG Equipa @ ESEA
+]
+
 
 class HLTVClient(Client):    
     def _handle_eio_message(self, data):
@@ -44,9 +50,11 @@ class HLTVSimpleClient(SimpleClient):
 
 
 class WSBProxy:
-    def __init__(self, auth_user=None, auth_pass=None):
+    def __init__(self, auth_user=None, auth_pass=None, faceit_api_key=None, test_hltv_match_id=None):
         self.auth_user = auth_user
         self.auth_pass = auth_pass
+        self.faceit_api_key = faceit_api_key
+        self.test_hltv_match_id = test_hltv_match_id
 
     def fetch_wannspieltbig_matches(self):
         try:
@@ -62,6 +70,7 @@ class WSBProxy:
     def filter_wsb_matches(self, matches):
         #print(" [filter_wsb_matches] === Scores @ Wannspieltbig.de ===")
         hltv_matches = []
+        faceit_matches = []
         skipped_ended_matches = []
         skipped_missing_enemy_team_matches = []
         for match in matches:
@@ -80,15 +89,24 @@ class WSBProxy:
             else:
                 team_b_id = None
                 skipped_missing_enemy_team_matches.append(match)   
-                continue
+                if not DEBUG:
+                    continue
 
+            # HLTV Match ID filter
             hltv_match_id = match.get('hltv_match_id')
             if hltv_match_id is not None and (team_a_id in HLTV_BIG_TEAMS_IDS or team_b_id in HLTV_BIG_TEAMS_IDS):
                 hltv_matches.append(match)
+
+            # ESEA/Faceit Match ID filter
+            esea_match_id = match.get('esea_match_id')
+            if self.faceit_api_key and esea_match_id:
+                faceit_matches.append(match)
+            if self.faceit_api_key is None and esea_match_id:
+                logger.warning("Faceit API Key not provided, skipping Faceit matches processing.")
         
         logger.info(f"Skipped {len(skipped_ended_matches)} ended matches.")
         logger.info(f"Skipped {len(skipped_missing_enemy_team_matches)} matches with missing enemy team.") 
-        logger.info(f"Filtered {len(hltv_matches)} HLTV matches involving BIG teams.")
+        logger.info(f"Filtered {len(hltv_matches)} HLTV matches and {len(faceit_matches)} FACEIT matches involving BIG teams.")
         for match in hltv_matches:
             logger.info(f" - HLTV Match ID: {match.get('hltv_match_id')}, Teams: {match.get('lineup_a', {}).get('team', {}).get('name')} vs {match.get('lineup_b', {}).get('team', {}).get('name')}")
             for matchmap in match.get('matchmaps', []):
@@ -97,7 +115,7 @@ class WSBProxy:
                 if played_map:
                     map_name = played_map.get('cs_name', '?')
                 logger.info(f"   - Map {matchmap.get('map_nr')} ({map_name}): Score: {matchmap.get('rounds_won_team_a')} - {matchmap.get('rounds_won_team_b')}")
-        return hltv_matches
+        return hltv_matches, faceit_matches
     
     def fetch_hltv_livescore(self, hltv_match_id):
         logger.info("=== Scores @ HLTV.org ===")
@@ -114,7 +132,8 @@ class WSBProxy:
             event_name, event_data = sio.receive(timeout=15)
             if event_name == 'score':
                 mapscore_data = event_data.get('mapScores', {})
-                #print(f" [fetch_hltv_livescore] Event Data for Match {hltv_match_id}: {event_data}")
+                if hltv_match_id == self.test_hltv_match_id:
+                    logger.info(f"Test HLTV Match ID {hltv_match_id}: Data from HLTV: {event_data}")
                 map_ids = mapscore_data.keys()
                 logger.debug(f" [fetch_hltv_livescore]  HLTV map_ids={map_ids}")
                 for map_id in map_ids:                        
@@ -143,21 +162,38 @@ class WSBProxy:
                     score_by_map_and_teamid[int(map_id)] = {
                         fh_ct_teamid: map_score_by_teamid[fh_ct_teamid],
                         fh_t_teamid: map_score_by_teamid[fh_t_teamid],
+                        'unplayed': mapscore_data.get(map_id, {}).get('defaultWin', False),
                         'map_name': map_name
                     }
                     logger.info(f"Match {hltv_match_id} - Map: {map_id} ({map_name}), Score: CT-Team {fh_ct_teamid} {map_score_by_teamid[fh_ct_teamid]} - T-Team {fh_t_teamid} {map_score_by_teamid[fh_t_teamid]}")
             sio.disconnect()
         return score_by_map_and_teamid
     
-    def update_wannspieltbig_matchmap(self, matchmap_id, rounds_won_team_a, rounds_won_team_b):
+    def fetch_faceit_livescore(self, esea_match_id):
+        logger.info("=== Scores @ Faceit.com / ESEA.net ===")
+        headers = {"Authorization": f"Bearer {self.faceit_api_key}"}
+        resp = requests.get(f"https://open.faceit.com/data/v4/matches/{esea_match_id}", timeout=10, headers=headers)
+        #resp = requests.get(f"https://open.faceit.com/data/v4/matches/{esea_match_id}/stats", timeout=10, headers=headers)
+        if resp.status_code == 200:
+            match_data = resp.json()
+            if match_data.get('best_of') == 1:
+                logger.info(f"Match {esea_match_id} is a BO1, match_data: {match_data.keys()}")
+        else:
+            logger.error(f"Error fetching Faceit match stats for Match ID {esea_match_id}: Status Code {resp.status_code}")
+
+            # Further processing can be done here as needed
+
+    
+    def update_wannspieltbig_matchmap(self, matchmap_id, rounds_won_team_a, rounds_won_team_b, unplayed=False, played_map_name=None):
         payload = {
             'rounds_won_team_a': rounds_won_team_a,
-            'rounds_won_team_b': rounds_won_team_b
+            'rounds_won_team_b': rounds_won_team_b,
+            'unplayed': unplayed,
+            'played_map_name': played_map_name
         }
         logger.info(f"Updating WSB MatchMap ID {matchmap_id} with payload: {payload}")
         
-        try:
-            
+        try:            
             response = requests.put(
                 f"{WSB_API_MATCHMAP_UPDATE_URL}{matchmap_id}/",
                 auth=(self.auth_user, self.auth_pass),
@@ -206,7 +242,9 @@ class WSBProxy:
                         self.update_wannspieltbig_matchmap(
                             matchmap_id=matchmap_id,
                             rounds_won_team_a=hltv_rounds_a,
-                            rounds_won_team_b=hltv_rounds_b
+                            rounds_won_team_b=hltv_rounds_b,
+                            unplayed=hltv_map_score.get('unplayed', False),
+                            played_map_name=hltv_map_score.get('map_name', None)
                         )
                     else:
                         logger.info(f"Scores for Map {map_nr}: {wsb_rounds_a}-{wsb_rounds_b}. No update needed.")
@@ -222,7 +260,14 @@ class WSBProxy:
             wsb_matches = self.fetch_wannspieltbig_matches()            
             
             # Step 2: Filter matches to those with HLTV IDs involving BIG teams
-            hltv_matches = self.filter_wsb_matches(wsb_matches) if wsb_matches else []
+            hltv_matches, faceit_matches = self.filter_wsb_matches(wsb_matches) if wsb_matches else []
+            if self.test_hltv_match_id:
+                if self.test_hltv_match_id not in [m['hltv_match_id'] for m in hltv_matches]:
+                    logger.info(f"Adding test HLTV Match ID {self.test_hltv_match_id} to processing list.")
+                    hltv_matches.append({
+                        'hltv_match_id': self.test_hltv_match_id,
+                        'matchmaps': []
+                    })
             
             # Step 3: For each HLTV match, fetch live score data
             scores_from_hltv_by_matchid = {}
@@ -231,6 +276,10 @@ class WSBProxy:
                 score_from_hltv = self.fetch_hltv_livescore(hltv_match_id)
                 scores_from_hltv_by_matchid[hltv_match_id] = score_from_hltv
             logger.info(f"Collected scores from HLTV for {len(scores_from_hltv_by_matchid)} matches.")
+
+            for match in faceit_matches:
+                esea_match_id=match['esea_match_id']
+                score_from_faceit = self.fetch_faceit_livescore(esea_match_id)
             
             # Step 4: Compare scores and log differences
             self.compare_and_update_scores(scores_from_hltv_by_matchid, hltv_matches)
@@ -244,6 +293,8 @@ if __name__ == '__main__':
     parser.add_argument('--interval', type=int, default=60, help='Interval in seconds between fetches (default: 60)')
     parser.add_argument('--auth_user', type=str, required=True, help='Username for WSB API authentication')
     parser.add_argument('--auth_pass', type=str, required=True, help='Password for WSB API authentication')
+    parser.add_argument('--test_hltv_match_id', type=int, required=False, help='HLTV Match ID for testing purposes')
+    parser.add_argument('--faceit_api_key', type=str, required=False, help='API Key for Faceit API')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
 
     args = parser.parse_args()
@@ -253,7 +304,7 @@ if __name__ == '__main__':
         DEBUG = True
         logger.setLevel(logging.DEBUG)
     
-    proxy = WSBProxy(auth_user, auth_pass)
+    proxy = WSBProxy(auth_user, auth_pass, faceit_api_key=args.faceit_api_key, test_hltv_match_id=args.test_hltv_match_id)
     try:
         logger.info("Starting WSB Proxy...")
         proxy.loop(interval=args.interval)  # Fetch every 1 minutes
