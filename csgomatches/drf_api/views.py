@@ -84,11 +84,13 @@ class MatchViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
 
 
 class MatchUpcomingViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
-    queryset = apps.get_model('csgomatches.Match').objects.filter(first_map_at__gte=timezone.now())
+    queryset = apps.get_model('csgomatches.Match').objects.filter(
+        first_map_at__gte=timezone.now() - timezone.timedelta(days=1)
+    )
     serializer_class = ser.CSGOMatchSerializer
 
     def get_view_name(self):
-        return 'Matches (upcoming)'
+        return 'Matches (today and upcoming)'
 
     @method_decorator(cache_page(10))
     def list(self, request, *args, **kwargs):
