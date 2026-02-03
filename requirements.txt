@@ -9,7 +9,7 @@ bidict==0.23.1
 bs4==0.0.2
 certifi==2026.1.4
 charset-normalizer==3.4.4
-Django==6.0.1
+Django==6.0.2
 django-ical==1.9.2
 django-recurrence==1.14
 djangorestframework==3.16.1
