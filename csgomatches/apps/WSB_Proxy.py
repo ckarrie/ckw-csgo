@@ -231,9 +231,10 @@ class WSBProxy:
         payload = {
             'rounds_won_team_a': rounds_won_team_a,
             'rounds_won_team_b': rounds_won_team_b,
-            'unplayed': unplayed,
-            'played_map_name': played_map_name
+            'unplayed': unplayed
         }
+        if played_map_name:
+            payload['played_map_name'] = played_map_name
         logger.info(f"Updating WSB MatchMap ID {matchmap_id} with payload: {payload}")
         
         try:            
