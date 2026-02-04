@@ -5,10 +5,12 @@ from django.views.decorators.cache import cache_page
 from rest_framework import viewsets, mixins, pagination, views, routers, renderers, permissions, authentication
 from django.apps import apps
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 
 from . import ser
 from . import ser_objects
 from . import renderer as cs_renderer
+from . import filters as cs_filters
 
 from csgomatches.utils.scrapers.faceit import check_hubs_for_matches
 
@@ -88,9 +90,11 @@ class MatchUpcomingViewSet(CSGOView, viewsets.ReadOnlyModelViewSet):
         first_map_at__gte=timezone.now() - timezone.timedelta(days=1)
     )
     serializer_class = ser.CSGOMatchSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = cs_filters.MatchTeamFilter
 
     def get_view_name(self):
-        return 'Matches (today and upcoming)'
+        return 'Matches (today and upcoming), filterable by team name and game'
 
     @method_decorator(cache_page(10))
     def list(self, request, *args, **kwargs):
