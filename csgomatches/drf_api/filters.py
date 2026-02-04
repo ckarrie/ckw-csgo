@@ -10,7 +10,7 @@ class MatchTeamFilter(django_filters.FilterSet):
 
     class Meta:
         model = apps.get_model('csgomatches.Match')
-        fields = ['lineup_a', 'lineup_b']
+        fields = ['lineup_a__team__name', 'lineup_a__game__name_short']
 
     def filter_by_team(self, queryset, name, value):
         # Filtert in beiden Feldern gleichzeitig
