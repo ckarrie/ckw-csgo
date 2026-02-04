@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',  # Add
+    'django_filters',        # Add
     'rest_framework',        # Add
     'csgomatches',           # Add
 ]
