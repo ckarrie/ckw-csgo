@@ -5,6 +5,7 @@ import logging
 import sys
 from socketio import SimpleClient, Client
 import argparse
+from random_user_agent.user_agent import UserAgent
 
 
 logging.basicConfig(
@@ -16,9 +17,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Static variables
+RANDOM_UA = UserAgent().get_random_user_agent()
 DEBUG = False
 #WSB_API_MATCHES_URL = "https://wannspieltbig.de/api/match_livescore/"
-WSB_API_MATCHES_URL = "https://wannspieltbig.de/api/match_upcoming"
+WSB_API_MATCHES_URL = "https://wannspieltbig.de/api/match_upcoming/"
 WSB_API_MATCHMAP_UPDATE_URL = "https://wannspieltbig.de/api/matchmap_update/"
 HLTV_BIG_TEAMS_IDS = [
     7532, # BIG Main
@@ -28,6 +30,7 @@ HLTV_BIG_TEAMS_IDS = [
 
 FACEIT_BIG_TEAMS_IDS = [
     'af894ef4-0b65-4e87-97d4-415967de35b3', # faction_id BIG Equipa @ ESEA
+    'c40aceae-ecb7-47c1-9c6a-fa0efe3d6f36', # BIG Main @ Faceit
 ]
 
 
@@ -39,7 +42,7 @@ class HLTVClient(Client):
             return super()._handle_eio_message(data)
         except json.JSONDecodeError:
             if DEBUG:
-                logger.error("JSON-Error received in _handle_eio_message")
+                logger.warning("JSON-Error received in _handle_eio_message, ignoring...")
             else:
                 pass
 
@@ -77,6 +80,7 @@ class WSBProxy:
             has_ended = match.get('has_ended', False)
             if has_ended:
                 skipped_ended_matches.append(match)
+                logger.debug(f"Skipping ended match: HLTV Match ID {match.get('hltv_match_id')}")
                 continue
             lineup_a = match.get('lineup_a', {})
             lineup_b = match.get('lineup_b', {})
@@ -89,8 +93,8 @@ class WSBProxy:
             else:
                 team_b_id = None
                 skipped_missing_enemy_team_matches.append(match)   
-                if not DEBUG:
-                    continue
+                logger.debug(f"Skipping match with missing enemy team: HLTV Match ID {match.get('hltv_match_id')}")
+                continue
 
             # HLTV Match ID filter
             hltv_match_id = match.get('hltv_match_id')
@@ -121,13 +125,14 @@ class WSBProxy:
         logger.info("=== Scores @ HLTV.org ===")
         score_by_map_and_teamid = {}
         with HLTVSimpleClient() as sio:
-            ua = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; pl; rv:1.9.2) Gecko/20100115 Firefox/3.6'
+            #ua = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; pl; rv:1.9.2) Gecko/20100115 Firefox/3.6'
+            
             headers = {
                 #'User-Agent': UserAgent().get_random_user_agent(),
-                'User-Agent': ua,
+                'User-Agent': RANDOM_UA,
             }
             sio.connect('https://scorebot-lb.hltv.org', headers=headers, transports="websocket")
-            logger.debug(f"HLTV connection infos: sid={sio.sid}, transport={sio.transport}, user_agent={ua}")
+            logger.debug(f"HLTV connection infos: sid={sio.sid}, transport={sio.transport}, user_agent={headers['User-Agent']}")
             sio.emit("readyForScores", data=json.dumps({"token": "", "listIds": [hltv_match_id]}))
             event_name, event_data = sio.receive(timeout=15)
             if event_name == 'score':
@@ -172,12 +177,50 @@ class WSBProxy:
     def fetch_faceit_livescore(self, esea_match_id):
         logger.info("=== Scores @ Faceit.com / ESEA.net ===")
         headers = {"Authorization": f"Bearer {self.faceit_api_key}"}
-        resp = requests.get(f"https://open.faceit.com/data/v4/matches/{esea_match_id}", timeout=10, headers=headers)
-        #resp = requests.get(f"https://open.faceit.com/data/v4/matches/{esea_match_id}/stats", timeout=10, headers=headers)
+        try:
+            resp = requests.get(f"https://open.faceit.com/data/v4/matches/{esea_match_id}", timeout=10, headers=headers)
+        except requests.ReadTimeout:
+            logger.error(f"Timeout fetching Faceit match stats for Match ID {esea_match_id}")
+            return None
         if resp.status_code == 200:
             match_data = resp.json()
             if match_data.get('best_of') == 1:
-                logger.info(f"Match {esea_match_id} is a BO1, match_data: {match_data.keys()}")
+                logger.debug(f"Match {esea_match_id} is a BO1, match_data: {match_data}")
+                match_status = match_data.get('status')
+                logger.info(f" - Fetching Faceit match status: {match_status}")
+                #print(f" - Teams: {match_data.get('teams', {})}")
+                if match_data.get('teams', {}):
+                    team_a = match_data.get('teams', {}).get('faction1', {})
+                    team_b = match_data.get('teams', {}).get('faction2', {})
+                    logger.info(f" - Teams: {team_a.get('name')} vs {team_b.get('name')}")
+                    logger.debug(f"   - Team A: {team_a.get('name')} (ID: {team_a.get('faction_id')})")
+                    logger.debug(f"   - Team B: {team_b.get('name')} (ID: {team_b.get('faction_id')})")
+
+                    if team_a.get('faction_id') in FACEIT_BIG_TEAMS_IDS or team_b.get('faction_id') in FACEIT_BIG_TEAMS_IDS:
+                        logger.info(f" - BIG Team involved in Match ID {esea_match_id}. Fetching stats...")
+                        big_faction = 'faction1' if team_a.get('faction_id') in FACEIT_BIG_TEAMS_IDS else 'faction2'
+                        other_faction = 'faction2' if big_faction == 'faction1' else 'faction1'
+                        score = match_data.get('results', {}).get('score', {})
+                        logger.debug(f"   - Results : {match_data.get('results', {})}")
+                        voted_maps = match_data.get('voting', {}).get('map', {}).get('pick', [])
+                        logger.info(f"   - Voted Maps : {voted_maps}")
+                        played_map = None
+                        if voted_maps:
+                            played_map = voted_maps[0]
+                        if len(voted_maps) > 1:
+                            logger.error(f"   - More than one map voted ({voted_maps}), need implementation for multi-map matches!")
+
+                        return {
+                            'rounds_won_team_a': score.get(big_faction, 0),
+                            'rounds_won_team_b': score.get(other_faction, 0),
+                            'map_name': played_map
+                        }
+                    else:
+                        logger.error(f" - No BIG Team involved in Match ID {esea_match_id}. Skipping stats fetch. Missing Team ID in FACEIT_BIG_TEAMS_IDS.")
+                        logger.error(f"   - Team A: {team_a.get('name')} (ID: {team_a.get('faction_id')})")
+                        logger.error(f"   - Team B: {team_b.get('name')} (ID: {team_b.get('faction_id')})")
+                        return None
+                    
         else:
             logger.error(f"Error fetching Faceit match stats for Match ID {esea_match_id}: Status Code {resp.status_code}")
 
@@ -268,6 +311,8 @@ class WSBProxy:
                         'hltv_match_id': self.test_hltv_match_id,
                         'matchmaps': []
                     })
+
+            logger.debug(f"Filtered HLTV Matches: {hltv_matches}")
             
             # Step 3: For each HLTV match, fetch live score data
             scores_from_hltv_by_matchid = {}
@@ -280,6 +325,17 @@ class WSBProxy:
             for match in faceit_matches:
                 esea_match_id=match['esea_match_id']
                 score_from_faceit = self.fetch_faceit_livescore(esea_match_id)
+                if score_from_faceit:
+                    matchmaps = match.get('matchmaps', [])
+                    if matchmaps:
+                        matchmap_id = matchmaps[0].get('id')
+                        self.update_wannspieltbig_matchmap(
+                            matchmap_id=matchmap_id,
+                            rounds_won_team_a=score_from_faceit['rounds_won_team_a'],
+                            rounds_won_team_b=score_from_faceit['rounds_won_team_b'],
+                            unplayed=False,
+                            played_map_name=score_from_faceit['map_name']
+                        )
             
             # Step 4: Compare scores and log differences
             self.compare_and_update_scores(scores_from_hltv_by_matchid, hltv_matches)
@@ -294,7 +350,7 @@ if __name__ == '__main__':
     parser.add_argument('--auth_user', type=str, required=True, help='Username for WSB API authentication')
     parser.add_argument('--auth_pass', type=str, required=True, help='Password for WSB API authentication')
     parser.add_argument('--test_hltv_match_id', type=int, required=False, help='HLTV Match ID for testing purposes')
-    parser.add_argument('--faceit_api_key', type=str, required=False, help='API Key for Faceit API')
+    parser.add_argument('--faceit_api_key', type=str, required=False, help='API Key for Faceit API, see https://developers.faceit.com/apps')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
 
     args = parser.parse_args()
