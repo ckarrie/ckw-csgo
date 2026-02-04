@@ -16,5 +16,5 @@ class MatchTeamFilter(django_filters.FilterSet):
         # Filtert in beiden Feldern gleichzeitig
         return queryset.filter(
             Q(lineup_a__team__name__iexact=value) | 
-            Q(lineup_a__team__name__iexact=value)
+            Q(lineup_b__team__name__iexact=value)
         )
