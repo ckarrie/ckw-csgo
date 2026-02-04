@@ -111,7 +111,12 @@ class CSGOMatchSerializer(serializers.ModelSerializer):
 
 
 class CSGOMatchMapUpdateSerializer(serializers.ModelSerializer):
-    played_map_name = serializers.CharField(max_length=206, write_only=True, required=False)
+    played_map_name = serializers.CharField(max_length=206, required=False, source='get_played_map_name')
+
+    def get_played_map_name(self, obj):
+        if obj.played_map:
+            return obj.played_map.cs_name
+        return None
 
     def update(self, instance, validated_data):
         played_map_name = validated_data.pop('played_map_name', None)
