@@ -10,6 +10,8 @@ api_urlpatterns = router.urls
 from . import feeds
 from . import views
 
+app_name = 'csgomatches'
+
 if settings.DEBUG:
     CACHE_INDEX_TIME = 0
     CACHE_MATCHDETAIL_TIME = 0
