@@ -6,6 +6,7 @@ import sys
 from socketio import SimpleClient, Client
 import argparse
 from random_user_agent.user_agent import UserAgent
+from datetime import datetime
 
 
 logging.basicConfig(
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 RANDOM_UA = UserAgent().get_random_user_agent()
 DEBUG = False
 #WSB_API_MATCHES_URL = "https://wannspieltbig.de/api/match_livescore/"
-WSB_API_MATCHES_URL = "https://wannspieltbig.de/api/match_upcoming/"
+WSB_API_MATCHES_URL = "https://wannspieltbig.de/api/match_upcoming/?game=cs"
 WSB_API_MATCHMAP_UPDATE_URL = "https://wannspieltbig.de/api/matchmap_update/"
 HLTV_BIG_TEAMS_IDS = [
     7532, # BIG Main
@@ -76,14 +77,16 @@ class WSBProxy:
         faceit_matches = []
         skipped_ended_matches = []
         skipped_missing_enemy_team_matches = []
+        not_today_matches = []
         for match in matches:
             has_ended = match.get('has_ended', False)
-            if has_ended:
-                skipped_ended_matches.append(match)
-                logger.debug(f"Skipping ended match: HLTV Match ID {match.get('hltv_match_id')}")
-                continue
             lineup_a = match.get('lineup_a', {})
             lineup_b = match.get('lineup_b', {})
+            if has_ended:
+                skipped_ended_matches.append(match)
+                logger.debug(f"Skipping ended match: Match Slug {match.get('slug')}")
+                continue
+            
             if lineup_a:
                 team_a_id = lineup_a.get('team', {}).get('hltv_id')
             else:
@@ -93,8 +96,18 @@ class WSBProxy:
             else:
                 team_b_id = None
                 skipped_missing_enemy_team_matches.append(match)   
-                logger.debug(f"Skipping match with missing enemy team: HLTV Match ID {match.get('hltv_match_id')}")
+                logger.debug(f"Skipping match with missing enemy team: Match Slug {match.get('slug')}")
                 continue
+
+            # Filter matches not scheduled for today based on 'first_map_at' field
+            first_map_at_str = match.get('first_map_at')
+            if first_map_at_str:
+                first_map_at = datetime.fromisoformat(first_map_at_str)
+                now = datetime.now()
+                if first_map_at.date() != now.date():
+                    not_today_matches.append(match)
+                    logger.debug(f"Skipping match not scheduled for today: Match Slug {match.get('slug')}, Scheduled Date: {first_map_at.date()}")
+                    continue
 
             # HLTV Match ID filter
             hltv_match_id = match.get('hltv_match_id')
@@ -110,6 +123,7 @@ class WSBProxy:
         
         logger.info(f"Skipped {len(skipped_ended_matches)} ended matches.")
         logger.info(f"Skipped {len(skipped_missing_enemy_team_matches)} matches with missing enemy team.") 
+        logger.info(f"Skipped {len(not_today_matches)} matches not scheduled for today.")
         logger.info(f"Filtered {len(hltv_matches)} HLTV matches and {len(faceit_matches)} FACEIT matches involving BIG teams.")
         for match in hltv_matches:
             logger.info(f" - HLTV Match ID: {match.get('hltv_match_id')}, Teams: {match.get('lineup_a', {}).get('team', {}).get('name')} vs {match.get('lineup_b', {}).get('team', {}).get('name')}")
