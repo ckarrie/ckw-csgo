@@ -3,7 +3,7 @@ import json
 import time
 import logging
 import sys
-from socketio import SimpleClient, Client
+from socketio import SimpleClient, Client, exceptions as socketio_exceptions
 import argparse
 from random_user_agent.user_agent import UserAgent
 from datetime import datetime
@@ -127,7 +127,8 @@ class WSBProxy:
         logger.info(f"Filtered {len(hltv_matches)} HLTV matches and {len(faceit_matches)} FACEIT matches involving BIG teams.")
         for match in hltv_matches:
             logger.info(f" - HLTV Match ID: {match.get('hltv_match_id')}, Teams: {match.get('lineup_a', {}).get('team', {}).get('name')} vs {match.get('lineup_b', {}).get('team', {}).get('name')}")
-            for matchmap in match.get('matchmaps', []):
+            matchmaps = match.get('matchmaps', [])
+            for matchmap in matchmaps:
                 played_map = matchmap.get('played_map', {})
                 map_name = '?'
                 if played_map:
@@ -136,19 +137,27 @@ class WSBProxy:
         return hltv_matches, faceit_matches
     
     def fetch_hltv_livescore(self, hltv_match_id):
+        global RANDOM_UA
         logger.info("=== Scores @ HLTV.org ===")
         score_by_map_and_teamid = {}
         with HLTVSimpleClient() as sio:
-            #ua = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; pl; rv:1.9.2) Gecko/20100115 Firefox/3.6'
-            
+            #ua = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; pl; rv:1.9.2) Gecko/20100115 Firefox/3.6'            
             headers = {
                 #'User-Agent': UserAgent().get_random_user_agent(),
                 'User-Agent': RANDOM_UA,
             }
-            sio.connect('https://scorebot-lb.hltv.org', headers=headers, transports="websocket")
+            try:
+                sio.connect('https://scorebot-lb.hltv.org', headers=headers, transports="websocket")
+            except socketio_exceptions.ConnectionError as e:
+                logger.error(f"Connection error while connecting to HLTV scorebot: {e}")                
+                RANDOM_UA = UserAgent().get_random_user_agent()
+                logger.info(f"Retrying with new User-Agent.")
+                return score_by_map_and_teamid
+            
             logger.debug(f"HLTV connection infos: sid={sio.sid}, transport={sio.transport}, user_agent={headers['User-Agent']}")
             sio.emit("readyForScores", data=json.dumps({"token": "", "listIds": [hltv_match_id]}))
             event_name, event_data = sio.receive(timeout=15)
+            
             if event_name == 'score':
                 mapscore_data = event_data.get('mapScores', {})
                 if hltv_match_id == self.test_hltv_match_id:
@@ -247,7 +256,10 @@ class WSBProxy:
             'rounds_won_team_b': rounds_won_team_b,
             'unplayed': unplayed
         }
+        
         if played_map_name:
+            # unsure what to set
+            payload['get_played_map_name'] = played_map_name
             payload['played_map_name'] = played_map_name
         logger.info(f"Updating WSB MatchMap ID {matchmap_id} with payload: {payload}")
         
@@ -316,9 +328,12 @@ class WSBProxy:
             logger.info("=== WSB Proxy Loop ===")
             # Step 1: Fetch matches from Wannspieltbig.de
             wsb_matches = self.fetch_wannspieltbig_matches()            
-            
+            hltv_matches, faceit_matches = [], []
             # Step 2: Filter matches to those with HLTV IDs involving BIG teams
-            hltv_matches, faceit_matches = self.filter_wsb_matches(wsb_matches) if wsb_matches else []
+            filtered_wsb_matches = self.filter_wsb_matches(wsb_matches) if wsb_matches else []
+            if filtered_wsb_matches:
+                hltv_matches, faceit_matches = filtered_wsb_matches
+                
             if self.test_hltv_match_id:
                 if self.test_hltv_match_id not in [m['hltv_match_id'] for m in hltv_matches]:
                     logger.info(f"Adding test HLTV Match ID {self.test_hltv_match_id} to processing list.")
