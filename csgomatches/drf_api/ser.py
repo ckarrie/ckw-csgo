@@ -119,14 +119,11 @@ class CSGOMatchMapUpdateSerializer(serializers.ModelSerializer):
         return None
 
     def update(self, instance, validated_data):
-        played_map_name = validated_data.pop('played_map_name', None)
+        played_map_name = validated_data.pop('get_played_map_name', None)
         if played_map_name:
             played_map_obj = apps.get_model('csgomatches.Map').objects.filter(cs_name__iexact=played_map_name).first()
             if played_map_obj:
-                print(f"Found map object for name '{played_map_name}': {played_map_obj}")
                 instance.played_map = played_map_obj
-            else:
-                print(f"No map object found for name '{played_map_name}'")
         return super().update(instance, validated_data)
 
 
