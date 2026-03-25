@@ -259,8 +259,10 @@ class WSBProxy:
         
         if played_map_name:
             # unsure what to set
-            payload['get_played_map_name'] = played_map_name
-            payload['played_map_name'] = played_map_name
+            payload.update({
+                'get_played_map_name': played_map_name,
+                'played_map_name': played_map_name
+            })
         logger.info(f"Updating WSB MatchMap ID {matchmap_id} with payload: {payload}")
         
         try:            

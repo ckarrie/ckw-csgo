@@ -499,7 +499,7 @@ class ExternalLink(models.Model):
         return f'csgomatches/flags/{self.link_flag}.png'
 
     def __str__(self):
-        return '{self.title}: {self.match}'
+        return f'{self.match}: {self.url}'
 
     class Meta:
         ordering = ['match', 'link_flag', 'link_type']
