@@ -32,6 +32,7 @@ HLTV_BIG_TEAMS_IDS = [
 FACEIT_BIG_TEAMS_IDS = [
     'af894ef4-0b65-4e87-97d4-415967de35b3', # faction_id BIG Equipa @ ESEA
     'c40aceae-ecb7-47c1-9c6a-fa0efe3d6f36', # BIG Main @ Faceit
+    'b952ce48-9633-4b3e-a721-f64c7c652f7f', # BIG Academy @ Faceit
 ]
 
 
