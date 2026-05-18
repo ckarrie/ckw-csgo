@@ -52,6 +52,12 @@ urlpatterns = [
         cache_page(timeout=CACHE_MATCHDETAIL_TIME)(views.MatchDetailView.as_view()),
         name="match_details"
     ),
+    # allow urls like wannspieltbig.de/matches/<ID>-<Slug> - but ignore the slug for lookup, only use the ID    
+    path(
+        '<int:pk>-<slug:slug>',
+        cache_page(timeout=CACHE_MATCHDETAIL_TIME)(views.MatchDetailView.as_view()),
+        name="match_details_pk_slug"
+    ),
     #path(
     #    '@<int:pk>',
     #    cache_page(timeout=CACHE_MATCHDETAIL_TIME)(views.MatchDetailView.as_view()),

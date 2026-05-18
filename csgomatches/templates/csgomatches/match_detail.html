@@ -107,4 +107,7 @@
             {% if not forloop.last %} | {% endif %}
         {% endfor %}
     </p>
+    <p style="font-size: small;">
+        Permalink: <a href="{{ request.build_absolute_uri }}{{ match.get_absolute_url_with_id }}">{{ request.build_absolute_uri }}{{ match.get_absolute_url_with_id }}</a> 
+    </p>
 {% endblock %}
