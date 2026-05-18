@@ -12,3 +12,4 @@ csgomatches/utils/publishing/twitter_credentials.txt
 
 csgomatches/utils/scrapers/proxies.json
 csgomatches/utils/scrapers/proxies*.json
+django_wsb_project/db.sqlite3
