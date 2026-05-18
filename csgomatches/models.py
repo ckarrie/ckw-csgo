@@ -312,6 +312,9 @@ class Match(models.Model):
 
     def get_absolute_url(self) -> str:
         return reverse('match_details', kwargs={'slug': self.slug})
+    
+    def get_absolute_url_with_id(self) -> str:
+        return reverse('match_details_pk_int', kwargs={'pk': self.pk})    
 
     def get_livescore_url(self, request):
         if self.hltv_match_id:
