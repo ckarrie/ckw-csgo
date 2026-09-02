@@ -1,11 +1,15 @@
 import asyncio
 import json
+import logging
 
 import requests
 import websockets
 from bs4 import BeautifulSoup
 
 from ... import models
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_hltv_team_name_from_id(hltv_id: int):
@@ -137,24 +141,26 @@ async def get_hlvt_score(match_id: int = 2338003):
     ws_str2 = '61:42["readyForMatch","{\\"token\\":\\"\\",\\"listID\\":\\"' + str(match_id) + '"\\}"]'
     ws_str2 = '61:42["readyForScores","{\\"token\\":\\"\\",\\"listIds\\":[' + str(match_id) + ']}"]'
     results = {}
-    async with websockets.connect(uri) as websocket:
-
-        ret = await websocket.recv()
-        if DEBUGGING:
-            print(1, ret)
-        ret = await websocket.recv()
-        if DEBUGGING:
-            print(2, ret)
-        if DEBUGGING:
-            print(4, "Sending ", ws_str2)
-        s = await websocket.send(ws_str2)
-        if DEBUGGING:
-            print(5, "Send", s)
-            print("Waiting for data")
-        ret = await asyncio.wait_for(websocket.recv(), timeout=1)
-        if ret.startswith("42["):
-            ret = ret.replace("42[", "[")
-            results = json.loads(ret)
+    try:
+        async with websockets.connect(uri, open_timeout=5) as websocket:
+            ret = await websocket.recv()
+            if DEBUGGING:
+                print(1, ret)
+            ret = await websocket.recv()
+            if DEBUGGING:
+                print(2, ret)
+            if DEBUGGING:
+                print(4, "Sending ", ws_str2)
+            s = await websocket.send(ws_str2)
+            if DEBUGGING:
+                print(5, "Send", s)
+                print("Waiting for data")
+            ret = await asyncio.wait_for(websocket.recv(), timeout=1)
+            if ret.startswith("42["):
+                ret = ret.replace("42[", "[")
+                results = json.loads(ret)
+    except (OSError, asyncio.TimeoutError, websockets.exceptions.WebSocketException):
+        logger.warning("HLTV score service unavailable for match %s", match_id)
 
     return results
 

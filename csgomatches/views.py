@@ -76,6 +76,7 @@ class MonthArchiveView(generic.MonthArchiveView):
     model = models.Match
     date_field = 'first_map_at'
     allow_future = True
+    allow_empty = True
     date_list_period = 'month'
 
     def get_month(self):
