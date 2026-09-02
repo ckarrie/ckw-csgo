@@ -75,6 +75,7 @@ class IndexView(generic.ListView):
 class MonthArchiveView(generic.MonthArchiveView):
     model = models.Match
     date_field = 'first_map_at'
+    month_format = '%m'
     allow_future = True
     allow_empty = True
     date_list_period = 'month'
