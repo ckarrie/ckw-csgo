@@ -676,7 +676,7 @@
             <li class="{% if current_view == 'index' %}active{% endif %}"><a href="{% url 'match_upcoming' %}">Kommende Matches</a></li>
             <!--<li class=""><a class="livestream" href="sdf">Live</a> </li>-->
             {% for date in date_list %}
-                <li class="{% if year.year == date.year %}active{% endif %}"><a href="{% url 'match_history' year=date.year %}">{{ date|date:"Y" }}</a></li>
+                <li class="{% if month.year == date.year and month.month == date.month %}active{% endif %}"><a href="{% url 'match_history_month' year=date.year month=date.month %}">{{ date|date:"F Y" }}</a></li>
             {% endfor %}
         </ul>
 

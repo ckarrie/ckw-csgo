@@ -64,7 +64,7 @@ class IndexView(generic.ListView):
             ).order_by('-starting_at').first(),
         }
         ctx.update({
-            'date_list': self.model.objects.all().dates('first_map_at', 'year', order='DESC'),
+            'date_list': self.model.objects.all().dates('first_map_at', 'month', order='DESC'),
             'current_view': 'index',
             'bg_url': get_random_background_image_url(),
             'statistics': statistics
@@ -72,18 +72,20 @@ class IndexView(generic.ListView):
         return ctx
 
 
-class YearArchiveView(generic.YearArchiveView):
+class MonthArchiveView(generic.MonthArchiveView):
     model = models.Match
     date_field = 'first_map_at'
-    make_object_list = True
     allow_future = True
-    date_list_period = 'year'
+    date_list_period = 'month'
+
+    def get_month(self):
+        return self.kwargs.get('month', 12)
 
     def get_date_list(self, queryset, date_type=None, ordering='ASC'):
-        return self.model.objects.all().dates('first_map_at', 'year', order='DESC')
+        return self.model.objects.all().dates('first_map_at', 'month', order='DESC')
 
     def get_context_data(self, *args, **kwargs):
-        ctx = super(YearArchiveView, self).get_context_data(*args, **kwargs)
+        ctx = super(MonthArchiveView, self).get_context_data(*args, **kwargs)
         ctx.update({
             'bg_url': get_random_background_image_url()
         })

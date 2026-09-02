@@ -39,8 +39,13 @@ urlpatterns = [
     ),
     path(
         'archive/<int:year>/',
-        cache_page(timeout=CACHE_ARCHIVE_TIME)(views.YearArchiveView.as_view()),
+        cache_page(timeout=CACHE_ARCHIVE_TIME)(views.MonthArchiveView.as_view()),
         name="match_history"
+    ),
+    path(
+        'archive/<int:year>/<int:month>/',
+        cache_page(timeout=CACHE_ARCHIVE_TIME)(views.MonthArchiveView.as_view()),
+        name="match_history_month"
     ),
     path(
         '<int:pk>',
