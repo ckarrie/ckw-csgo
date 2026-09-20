@@ -11,7 +11,7 @@ certifi==2026.1.4
 charset-normalizer==3.4.4
 -e git+https://github.com/ckarrie/ckw-csgo/@a145c06274c90bcb86ee1cd978ea5df0b5ec9acb#egg=ckw_csgomatches
 colorlog==6.10.1
-Django==6.0.2
+Django==6.0.5
 django-filter==25.2
 django-ical==1.9.2
 django-recurrence==1.14
