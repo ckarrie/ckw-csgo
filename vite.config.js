@@ -46,7 +46,7 @@ export default defineConfig(mode => {
 	const env = loadEnv(mode, process.cwd(), '');
 
 	const INPUT_DIR = './src';
-	const OUTPUT_DIR = './../ckw-csgo/csgomatches/static';
+	const OUTPUT_DIR = resolve(__dirname, 'csgomatches/static');
 
 	return {
 		plugins,
