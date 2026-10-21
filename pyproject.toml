@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ckw_csgomatches"
+description = "Django CS:GO Matches Manager"
+readme = "README.md"
+authors = [{ name = "Christian Karrié", email = "christian@karrie.info" }]
+requires-python = ">=3.10"
+dynamic = ["version"]
+dependencies = [
+    "django>=5.1",
+    "djangorestframework",
+    "django-polymorphic",
+    "django-ical",
+    "django-vite",
+    "requests",
+    "beautifulsoup4",
+    "python-dateutil",
+    "python-twitter",
+    "twitchAPI",
+    "websockets",
+    "pycountry",
+    # production cache backend (PyMemcacheCache); local dev uses LocMemCache
+    "pymemcache",
+]
+
+[project.urls]
+Homepage = "http://ccm.app/"
+
+[tool.setuptools.dynamic]
+version = { attr = "csgomatches.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["csgomatches*"]
+
+[tool.setuptools.package-data]
+csgomatches = ["templates/**/*", "static/**/*"]
