@@ -1,10 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "csgomatches/base/base.html" %}
 
-</body>
-</html>
+{% block page_title %}{{ object.slug|title }} - Wannspieltbig.de{% endblock page_title %}
+
+{% block content %}
+    <div class="boxed section-title">
+        <h2 class="section-title__headline">{{ object.slug|title }}</h2>
+    </div>
+
+    <div class="section static-page">
+        <div class="static-page__content">
+            {% block static_page_content %}
+            {% endblock static_page_content %}
+        </div>
+    </div>
+{% endblock content %}

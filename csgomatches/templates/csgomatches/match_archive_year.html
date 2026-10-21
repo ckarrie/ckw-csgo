@@ -9,62 +9,25 @@
         <h2 class="section-title__headline">Match-Archiv {{ year.year }}</h2>
     </div>
 
-    {% for match in object_list %}
-        {% if forloop.first %}
-            <div class="section matchday">
-                <h2 class="section__headline">
-                    {% include "csgomatches/partials/relativeDate.html" with date=match.first_map_at dateFormat="j. M Y" %}
-                </h2>
-                <div class="matchday__matches">
-                {% else %}
-                    {% with match.get_previous_match as prev_match %}
-                        {% if match.first_map_at|date:"Y-m-d" != prev_match.first_map_at|date:"Y-m-d" %}
-                        </div>
-                    </div>
-                    <div class="section matchday">
-                        <h2 class="section__headline">
-                            {% include "csgomatches/partials/relativeDate.html" with date=match.first_map_at dateFormat="j. M Y" %}
-                        </h2>
-                        <div class="matchday__matches">
-                        {% endif %}
-                    {% endwith %}
-                {% endif %}
-
-                {% include "csgomatches/blocks/match.html" with match=match %}
-
-                {% if forloop.last %}
-                </div>
+    {% regroup object_list by first_map_at|date:"Y-m-d" as days %}
+    {% for day in days %}
+        <div class="section matchday">
+            <h2 class="section__headline">
+                {% include "csgomatches/partials/relativeDate.html" with date=day.list.0.first_map_at dateFormat="j. M Y" %}
+            </h2>
+            <div class="matchday__matches">
+                {% for match in day.list %}
+                    {% include "csgomatches/blocks/match.html" with match=match %}
+                {% endfor %}
             </div>
-        {% endif %}
-    {% endfor %}
-
-    {% comment "old design" %}
-    <div class="matches">
-        {% for match in object_list %}
-        {% include 'csgomatches/blocks/match.html' %}
-        {% empty %}
-        <div class="row">
+        </div>
+    {% empty %}
+        <div class="section">
             <p>Keine Matches im Archiv von {{ year.year }} gefunden.</p>
         </div>
-        {% endfor %}
-
-    </div>
-    {% endcomment %}
+    {% endfor %}
 {% endblock content %}
 
 {% block bottomContent %}
-    <div class="boxed archive">
-        <ul class="archive__list">
-            <li class="archive__list-item">
-                <a class="archive__link {% if current_view == 'index' %}is-active{% endif %}"
-                   href="{% url 'match_upcoming' %}">Kommende Matches</a>
-            </li>
-            {% for date in date_list %}
-                <li class="archive__list-item">
-                    <a class="archive__link {% if year.year == date.year %}is-active{% endif %}"
-                       href="{% url 'match_history' year=date.year %}">{{ date|date:'Y' }}</a>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
+    {% include "csgomatches/partials/archive.html" %}
 {% endblock bottomContent %}

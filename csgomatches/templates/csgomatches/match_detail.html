@@ -42,13 +42,7 @@
                 {% endif %}
             </div>
             <div class="match-summary__best-of">
-                {% if match.bestof == 1 %}
-                    Best of one
-                {% elif match.bestof == 2 %}
-                    Best of two
-                {% elif match.bestof == 3 %}
-                    Best of three
-                {% endif %}
+                {% if match.bestof %}Best of {{ match.bestof }}{% endif %}
             </div>
         </div>
 
@@ -134,11 +128,9 @@
                                          alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
                                          class="lineup__player-image">
                                 {% else %}
-                                    {% with imagePath="csgomatches/teams/"|add:"/noprofile.png" %}
-                                        <img src="{% static imagePath %}"
-                                             alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
-                                             class="lineup__player-image">
-                                    {% endwith %}
+                                    <img src="{% static 'csgomatches/teams/noprofile.png' %}"
+                                         alt="{{ lp.player.first_name }} {{ lp.player.last_name }}"
+                                         class="lineup__player-image">
                                 {% endif %}
                             {% endwith %}
                         {% endif %}
@@ -203,20 +195,7 @@
 {% endblock content %}
 
 {% block bottomContent %}
-    <div class="boxed archive">
-        <ul class="archive__list">
-            <li class="archive__list-item">
-                <a class="archive__link {% if current_view == "index" %}is-active{% endif %}"
-                   href="{% url "match_upcoming" %}">Kommende Matches</a>
-            </li>
-            {% for date in date_list %}
-                <li class="archive__list-item">
-                    <a class="archive__link {% if year.year == date.year %}is-active{% endif %}"
-                       href="{% url "match_history" year=date.year %}">{{ date|date:"Y" }}</a>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
+    {% include "csgomatches/partials/archive.html" %}
 {% endblock bottomContent %}
 
 {% block sidebarGroupMid %}

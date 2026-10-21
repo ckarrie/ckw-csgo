@@ -3,6 +3,12 @@
 	background-color: var(--color-blue);
 	flex-direction: column;
 
+	&__image {
+		height: 216px;
+		aspect-ratio: 150 / 216;
+		align-self: center;
+	}
+
 	&__button {
 		margin-top: auto;
 	}

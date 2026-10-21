@@ -29,6 +29,27 @@
         </li>
 
         <li class="meta-sidebar__list-item">
+            <a class="meta-sidebar__link"
+               href="{% url 'ics_upcoming_big' %}"
+               title="Kommende Matches als iCal">iCal</a>
+        </li>
+
+        <li class="meta-sidebar__list-item">
+            <a class="meta-sidebar__link"
+               href="{% url 'api-root' %}"
+               title="API"
+               target="_blank">API</a>
+        </li>
+
+        <li class="meta-sidebar__list-item">
+            <a class="meta-sidebar__link"
+               href="https://github.com/ckarrie/ckw-csgo"
+               title="Code auf GitHub"
+               target="_blank"
+               rel="noopener noreferrer">GitHub</a>
+        </li>
+
+        <li class="meta-sidebar__list-item">
             <a class="meta-sidebar__copyright">© {% now "Y" %} Roaring Bears</a>
         </li>
     </ul>

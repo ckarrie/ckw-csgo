@@ -1,6 +1,9 @@
-from django.test import TestCase
+from django.contrib.sites.models import Site
+from django.test import TestCase, override_settings
+from django.urls import reverse
 from unittest.mock import Mock
 
+from csgomatches.models import StaticPage
 from csgomatches.models.win_conditions import BestOfWinCondition
 
 class TestBestOfWinCondition(TestCase):
@@ -206,3 +209,35 @@ class TestBestOfWinCondition(TestCase):
                         (match_map=Mock(score_participant_1=4, score_participant_2=6)))
         self.assertTrue(TestBestOfWinCondition.no_draw_no_ot_win_condition.has_ended
                         (match_map=Mock(score_participant_1=6, score_participant_2=4)))
+
+
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}},
+    DJANGO_VITE={"default": {"dev_mode": True}},
+)
+class TestPublicPages(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        site = Site.objects.get_current()
+        StaticPage.objects.create(site=site, slug="impressum", template_name="impressum.html")
+        StaticPage.objects.create(site=site, slug="datenschutz")
+
+    def test_index_without_matches(self):
+        # Used to raise Team.DoesNotExist when no Team named "BIG" existed
+        response = self.client.get(reverse("match_upcoming"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Aktuell sind keine Matches geplant.")
+
+    def test_impressum(self):
+        response = self.client.get(reverse("staticpage", kwargs={"slug": "impressum"}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'class="section-title__headline">Impressum</h2>', html=False)
+        self.assertContains(response, "static-page__content")
+
+    def test_default_static_page(self):
+        response = self.client.get(reverse("staticpage", kwargs={"slug": "datenschutz"}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Datenschutz")
+
+    def test_livestreams_page_removed(self):
+        self.assertEqual(self.client.get("/live/").status_code, 404)

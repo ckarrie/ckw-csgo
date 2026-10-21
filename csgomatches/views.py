@@ -1,29 +1,10 @@
-from collections import OrderedDict
-
-import requests
-from django.db.models import Q
-from django.shortcuts import render
-from django.templatetags.static import static
 from django.utils import timezone
 from django.views import generic
 from django.apps import apps
 
-import random
-import asyncio
-
 from . import models
 
-from csgomatches.utils.scrapers import faceit
-
 from datetime import date, timedelta
-
-def get_random_background_image_url():
-    images = [
-        static("csgomatches/backgrounds/IMG_6232.webp"),
-        static("csgomatches/backgrounds/IMG_6239.webp"),
-        static("csgomatches/backgrounds/IMG_6412.webp"),
-    ]
-    return random.choice(images)
 
 
 class IndexView(generic.ListView):
@@ -38,35 +19,11 @@ class IndexView(generic.ListView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super(IndexView, self).get_context_data(*args, **kwargs)
-        big = models.Team.objects.get(name="BIG")
-        statistics = {
-            'last_sixteen_zero': models.MatchMap.objects.filter(
-                match__lineup_a__team=big,
-                rounds_won_team_a=16,
-                rounds_won_team_b=0
-            ).order_by('-starting_at').first(),
-            'last_zero_sixteen': models.MatchMap.objects.filter(
-                match__lineup_a__team=big,
-                rounds_won_team_a=0,
-                rounds_won_team_b=16
-            ).order_by('-starting_at').first(),
-            'last_sixteen_fourteen': models.MatchMap.objects.filter(
-                match__lineup_a__team=big,
-                rounds_won_team_a=16,
-                rounds_won_team_b=14
-            ).order_by('-starting_at').first(),
-            'last_fourteen_sixteen': models.MatchMap.objects.filter(
-                match__lineup_a__team=big,
-                rounds_won_team_a=14,
-                rounds_won_team_b=16
-            ).order_by('-starting_at').first(),
-        }
         ctx.update({
             'date_list': self.model.objects.all().dates('first_map_at', 'year', order='DESC'),
             'current_view': 'index',
             'today': date.today(),
             'tomorrow': date.today() + timedelta(days=1),
-            'statistics': statistics
         })
         return ctx
 
@@ -105,37 +62,6 @@ class MatchDetailView(generic.DetailView):
             'score': self.object.get_overall_score(),
             'update_seconds': update,
             'update_choices': update_choices
-        })
-        return ctx
-
-
-class LiveStreamsView(generic.TemplateView):
-    template_name = 'csgomatches/livestreams.html'
-
-    def get_context_data(self, *args, **kwargs):
-        ctx = super(LiveStreamsView, self).get_context_data(*args, **kwargs)
-        drf_api_url = models.reverse('fpl-list')
-        full_drf_api_url = self.request.build_absolute_uri(drf_api_url)
-        resp = requests.get(full_drf_api_url).json()
-        faceit_nicknames = faceit.get_nicknames()
-        nicknames_with_streams = OrderedDict()
-        for nn in faceit_nicknames:
-            twitch_id = faceit.faceit2twitch_id(nn)
-            if twitch_id:
-                nicknames_with_streams[nn] = {
-                    f'link': 'https://twitch.tv/{twitch_id}',
-                    'live': len(faceit.get_twitch_stream_status(nicknames=[twitch_id])) > 0
-                }
-            else:
-                nicknames_with_streams[nn] = {}
-
-        ctx.update(**{
-            #'url': drf_api_url,
-            'livestreams_list': resp,
-            'nicknames': faceit_nicknames,
-            'hubs': faceit.get_hubs(),
-            'update_seconds': 30,
-            'nicknames_with_streams': nicknames_with_streams
         })
         return ctx
 

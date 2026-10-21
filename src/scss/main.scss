@@ -1,4 +1,3 @@
-// @import 'legacy.scss';
 @layer reset, globals, partials, components, utils;
 
 @import-glob "settings/**/*.scss";

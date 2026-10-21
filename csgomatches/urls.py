@@ -31,11 +31,6 @@ urlpatterns = [
         name="match_upcoming"
     ),
     path(
-        'live/',
-        cache_page(timeout=CACHE_INDEX_TIME)(views.LiveStreamsView.as_view()),
-        name="livestreams"
-    ),
-    path(
         'archive/<int:year>/',
         cache_page(timeout=CACHE_ARCHIVE_TIME)(views.YearArchiveView.as_view()),
         name="match_history"
